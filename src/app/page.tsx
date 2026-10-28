@@ -12,7 +12,9 @@ import { WeightsControl } from "./components/weights-control";
 export default function Home({ searchParams }: PageProps<"/">) {
   return (
     <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-8 sm:py-12">
-      <Nav current="opportunities" />
+      <Suspense fallback={<Nav current="opportunities" />}>
+        <DashboardNav searchParams={searchParams} />
+      </Suspense>
       <header className="mb-8">
         <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
           Radar de oportunidades de software
@@ -26,6 +28,11 @@ export default function Home({ searchParams }: PageProps<"/">) {
       </Suspense>
     </main>
   );
+}
+
+async function DashboardNav({ searchParams }: Pick<PageProps<"/">, "searchParams">) {
+  const { fav } = await searchParams;
+  return <Nav current={fav === "1" ? "favorites" : "opportunities"} />;
 }
 
 async function Dashboard({ searchParams }: Pick<PageProps<"/">, "searchParams">) {

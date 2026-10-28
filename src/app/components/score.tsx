@@ -8,7 +8,7 @@ function scoreColor(score: number) {
 
 export function TotalBadge({ score, size = "sm" }: { score: TotalScore; size?: "sm" | "lg" }) {
   return (
-    <div className="flex items-baseline gap-1.5">
+    <div className="flex items-baseline gap-1.5 whitespace-nowrap">
       <span className={`font-semibold text-zinc-100 ${size === "lg" ? "text-4xl" : "text-2xl"}`}>
         {score.total.toFixed(1)}
       </span>

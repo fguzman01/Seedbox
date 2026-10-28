@@ -17,6 +17,7 @@ export interface Filters {
   minScore: number;
   assessedOnly: boolean;
   payingOnly: boolean;
+  starredOnly: boolean;
   query: string;
   sort: Sort;
   limit: number;
@@ -27,6 +28,7 @@ export const DEFAULT_FILTERS: Filters = {
   minScore: 0,
   assessedOnly: false,
   payingOnly: false,
+  starredOnly: false,
   query: "",
   sort: "score",
   limit: PAGE_SIZE,
@@ -48,6 +50,7 @@ export function parseFilters(params: Params): Filters {
     minScore: Number.isFinite(minScore) ? Math.min(10, Math.max(0, minScore)) : 0,
     assessedOnly: first(params.assessed) === "1",
     payingOnly: first(params.paying) === "1",
+    starredOnly: first(params.fav) === "1",
     query: (first(params.q) ?? "").trim().slice(0, 100),
     sort: (SORTS as readonly string[]).includes(sort ?? "") ? (sort as Sort) : "score",
     limit: Number.isInteger(limit) && limit > 0 ? Math.min(limit, 500) : PAGE_SIZE,
@@ -61,6 +64,7 @@ export function filtersToParams(filters: Filters): Record<string, string> {
   if (filters.minScore > 0) params.min = String(filters.minScore);
   if (filters.assessedOnly) params.assessed = "1";
   if (filters.payingOnly) params.paying = "1";
+  if (filters.starredOnly) params.fav = "1";
   if (filters.query) params.q = filters.query;
   if (filters.sort !== "score") params.sort = filters.sort;
   if (filters.limit !== PAGE_SIZE) params.n = String(filters.limit);
@@ -73,6 +77,7 @@ export function hasActiveFilters(filters: Filters): boolean {
     filters.minScore > 0 ||
     filters.assessedOnly ||
     filters.payingOnly ||
+    filters.starredOnly ||
     filters.query !== ""
   );
 }
@@ -88,6 +93,7 @@ export interface FilterableOpportunity {
   willingnessImplied: number;
   willingnessExplicit: number;
   assessedAt: Date | null;
+  starredAt: Date | null;
   updatedAt: Date;
   score: { total: number };
 }
@@ -103,6 +109,7 @@ function matches(o: FilterableOpportunity, filters: Filters, ignoreVerticals = f
   if (o.score.total < filters.minScore) return false;
   if (filters.assessedOnly && !o.assessedAt) return false;
   if (filters.payingOnly && o.willingnessImplied + o.willingnessExplicit === 0) return false;
+  if (filters.starredOnly && !o.starredAt) return false;
   if (filters.query) {
     // Accent-insensitive, every word must appear ("facturacion agencias").
     const haystack = normalize(`${o.title} ${o.summary}`);

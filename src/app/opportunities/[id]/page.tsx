@@ -8,7 +8,9 @@ import { toQueryString } from "@/lib/filters";
 import { parseWeights } from "@/lib/scoring";
 import { Stat } from "../../components/ui";
 import { Badge, PainCard } from "../../components/pain-card";
+import { Notes } from "../../components/notes";
 import { AxisBars, TotalBadge } from "../../components/score";
+import { StarButton } from "../../components/star-button";
 
 const dateFormat = new Intl.DateTimeFormat("es-CL", { dateStyle: "medium" });
 
@@ -48,7 +50,12 @@ async function Opportunity({ params, searchParams }: PageProps<"/opportunities/[
             </Badge>
           ))}
         </div>
-        <h1 className="mt-3 text-3xl font-semibold tracking-tight">{opportunity.title}</h1>
+        <div className="mt-3 flex items-start gap-3">
+          <h1 className="text-3xl font-semibold tracking-tight">{opportunity.title}</h1>
+          <span className="pt-1">
+            <StarButton opportunityId={opportunity.id} starred={opportunity.starredAt !== null} size="lg" />
+          </span>
+        </div>
         <p className="mt-3 max-w-3xl text-zinc-400">{opportunity.summary}</p>
       </header>
 
@@ -110,6 +117,11 @@ async function Opportunity({ params, searchParams }: PageProps<"/opportunities/[
             </p>
           )}
         </div>
+      </section>
+
+      <h2 className="mb-4 text-lg font-semibold">Mis notas</h2>
+      <section className="mb-10 rounded-xl border border-zinc-800 bg-zinc-900/60 p-5">
+        <Notes opportunityId={opportunity.id} notes={opportunity.notes} />
       </section>
 
       <h2 className="mb-4 text-lg font-semibold">Evidencia</h2>

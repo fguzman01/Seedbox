@@ -59,6 +59,8 @@ export const opportunities = pgTable("opportunities", {
   buildabilityRationale: text("buildability_rationale"),
   assessedAt: timestamp("assessed_at", { withTimezone: true }),
   assessmentModel: text("assessment_model"),
+  /** Set when the user stars the opportunity (H7); null when it is not a favorite. */
+  starredAt: timestamp("starred_at", { withTimezone: true }),
 });
 
 export interface Competitor {
@@ -98,3 +100,19 @@ export const pains = pgTable(
 );
 
 export type Pain = typeof pains.$inferSelect;
+
+/** Free-form notes the user keeps on an opportunity (H7). */
+export const notes = pgTable(
+  "notes",
+  {
+    id: serial("id").primaryKey(),
+    opportunityId: integer("opportunity_id")
+      .notNull()
+      .references(() => opportunities.id, { onDelete: "cascade" }),
+    body: text("body").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+  },
+  (t) => [index("notes_opportunity_id_idx").on(t.opportunityId)],
+);
+
+export type Note = typeof notes.$inferSelect;

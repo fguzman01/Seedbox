@@ -120,6 +120,18 @@ Notas: ver `evals/extraction/README.md`. Listo: formato del dataset, `npm run ev
 página `/labeling` (solo en desarrollo) y `npm run eval` con precisión, recall, vertical y
 costo. Pendiente: etiquetar 30+ posts reales y registrar la primera línea base.
 
-### H7. Guardar y anotar oportunidades · S
+### H7. Guardar y anotar oportunidades · M · ✅ hecha
 **Como** usuario **quiero** marcar oportunidades como favoritas y agregar notas **para**
 llevar seguimiento de las que me interesan.
+
+Criterios de aceptación:
+- Puedo marcar y desmarcar una oportunidad como favorita desde el tablero y desde su detalle;
+  el cambio se ve al instante.
+- El tablero tiene un filtro "Sólo favoritas" y un acceso directo en la navegación.
+- En el detalle puedo agregar notas (con fecha) y borrarlas; se muestran de la más nueva a la
+  más antigua. Las cards indican cuántas notas tiene cada oportunidad.
+- Las notas y favoritas sobreviven a nuevas corridas de agrupamiento y evaluación.
+- Nadie sin credenciales puede modificar datos en un despliegue público (ver ADR-0007).
+
+Notas: pasó de S a M al sumar la protección de acceso, necesaria porque es la primera
+funcionalidad que escribe datos desde la web.

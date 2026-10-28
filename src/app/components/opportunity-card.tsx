@@ -3,6 +3,7 @@ import type { getOpportunities } from "@/lib/queries";
 import { VERTICAL_LABELS } from "@/lib/pains";
 import { Badge } from "./pain-card";
 import { AxisBars, TotalBadge } from "./score";
+import { StarButton } from "./star-button";
 
 type ScoredOpportunity = Awaited<ReturnType<typeof getOpportunities>>[number];
 
@@ -13,11 +14,14 @@ export function OpportunityCard({ opportunity: o, query }: { opportunity: Scored
   return (
     <article className="relative flex h-full flex-col rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 transition hover:border-emerald-500/50 hover:bg-zinc-900">
       <div className="flex items-start justify-between gap-3">
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex min-w-0 flex-wrap gap-1.5">
           <Badge tone="emerald">{VERTICAL_LABELS[o.mainVertical]}</Badge>
           {paying > 0 && <Badge tone="amber">{plural(paying, "señal de pago", "señales de pago")}</Badge>}
         </div>
-        <TotalBadge score={o.score} />
+        <div className="flex shrink-0 items-start gap-2">
+          <TotalBadge score={o.score} />
+          <StarButton opportunityId={o.id} starred={o.starredAt !== null} />
+        </div>
       </div>
 
       <h3 className="mt-2 font-semibold text-zinc-100">
@@ -46,6 +50,7 @@ export function OpportunityCard({ opportunity: o, query }: { opportunity: Scored
       <p className="pt-3 text-xs text-zinc-500">
         {plural(o.authorCount, "autor", "autores")} · {plural(o.signalCount, "post", "posts")} ·{" "}
         {plural(o.painCount, "dolor", "dolores")}
+        {o.noteCount > 0 && ` · ${plural(o.noteCount, "nota", "notas")}`}
       </p>
     </article>
   );

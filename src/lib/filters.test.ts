@@ -21,6 +21,7 @@ function opportunity(overrides: Partial<FilterableOpportunity> & { title: string
     willingnessImplied: 0,
     willingnessExplicit: 0,
     assessedAt: null,
+    starredAt: null,
     updatedAt: new Date("2026-10-01"),
     score: { total: 5 },
     ...overrides,
@@ -38,7 +39,14 @@ const all = [
     willingnessExplicit: 1,
     assessedAt: new Date(),
   }),
-  opportunity({ title: "Agenda de turnos", verticals: ["health"], mainVertical: "health", score: { total: 6 }, authorCount: 5 }),
+  opportunity({
+    title: "Agenda de turnos",
+    verticals: ["health"],
+    mainVertical: "health",
+    score: { total: 6 },
+    authorCount: 5,
+    starredAt: new Date(),
+  }),
   opportunity({ title: "Inventario para tiendas", score: { total: 4 }, updatedAt: new Date("2026-10-20"), willingnessImplied: 2 }),
 ];
 
@@ -72,6 +80,10 @@ describe("applyFilters", () => {
     ]);
   });
 
+  it("filters favorites", () => {
+    expect(titles(applyFilters(all, filters({ starredOnly: true })).items)).toEqual(["Agenda de turnos"]);
+  });
+
   it("searches title and summary, ignoring case and accents, requiring every word", () => {
     expect(titles(applyFilters(all, filters({ query: "FACTURACION caras" })).items)).toEqual(["Facturación para agencias"]);
     expect(applyFilters(all, filters({ query: "facturacion tiendas" })).total).toBe(0);
@@ -96,12 +108,22 @@ describe("filters in the URL", () => {
       minScore: 6,
       assessedOnly: true,
       payingOnly: true,
+      starredOnly: true,
       query: "turnos",
       sort: "evidence",
       limit: 48,
     });
     const params = filtersToParams(custom);
-    expect(params).toEqual({ v: "health,smb", min: "6", assessed: "1", paying: "1", q: "turnos", sort: "evidence", n: "48" });
+    expect(params).toEqual({
+      v: "health,smb",
+      min: "6",
+      assessed: "1",
+      paying: "1",
+      fav: "1",
+      q: "turnos",
+      sort: "evidence",
+      n: "48",
+    });
     expect(parseFilters(params)).toEqual(custom);
     expect(filtersToParams(DEFAULT_FILTERS)).toEqual({});
   });
@@ -118,6 +140,7 @@ describe("filters in the URL", () => {
     expect(hasActiveFilters(DEFAULT_FILTERS)).toBe(false);
     expect(hasActiveFilters(filters({ sort: "recent", limit: 48 }))).toBe(false);
     expect(hasActiveFilters(filters({ query: "x" }))).toBe(true);
+    expect(hasActiveFilters(filters({ starredOnly: true }))).toBe(true);
   });
 
   it("rebuilds the query string from search params", () => {

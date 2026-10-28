@@ -1,6 +1,7 @@
 import { count, countDistinct, desc, eq, getTableColumns, sql } from "drizzle-orm";
 import { getDb, type Database } from "./db/client";
-import { opportunities, pains, signals } from "./db/schema";
+import { notes, opportunities, pains, signals } from "./db/schema";
+import { getNotes } from "./notes";
 import type { Vertical } from "./pains";
 import { axisScores, totalScore, type Weights } from "./scoring";
 
@@ -54,6 +55,8 @@ const evidence = {
   willingnessImplied: countWhere(sql`${pains.willingnessToPay} = 'implied'`),
   willingnessExplicit: countWhere(sql`${pains.willingnessToPay} = 'explicit'`),
   verticals: sql<Vertical[]>`array_agg(distinct ${pains.vertical})`,
+  // A subquery, so joining notes does not multiply the pain rows above.
+  noteCount: sql<number>`(select count(*) from ${notes} where ${notes.opportunityId} = ${opportunities.id})`.mapWith(Number),
 };
 
 /** The most telling pain first: strongest intensity, then explicit willingness to pay. */
@@ -120,5 +123,5 @@ export async function getOpportunity(id: number, weights: Weights, db: Database 
     .where(eq(pains.opportunityId, id))
     .orderBy(desc(signals.publishedAt), pains.id);
 
-  return { ...opportunity, pains: evidencePains };
+  return { ...opportunity, pains: evidencePains, notes: await getNotes(db, id) };
 }

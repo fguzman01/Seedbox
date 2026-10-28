@@ -2,10 +2,11 @@ import Link from "next/link";
 
 const LINKS = [
   { href: "/", label: "Oportunidades", key: "opportunities" },
+  { href: "/?fav=1", label: "★ Favoritas", key: "favorites" },
   { href: "/activity", label: "Actividad", key: "activity" },
 ] as const;
 
-export function Nav({ current }: { current: "opportunities" | "activity" }) {
+export function Nav({ current }: { current: "opportunities" | "favorites" | "activity" }) {
   const links =
     process.env.NODE_ENV === "production"
       ? LINKS

@@ -9,8 +9,8 @@ los agrupa, los puntúa y los muestra como ideas accionables con evidencia traza
 - Metodología y agentes (PO, arquitecto, desarrollador, QA): [`CLAUDE.md`](CLAUDE.md)
 
 Estado: **fase 1 en curso**. Listas: H1 (ingesta de Hacker News), H2 (extracción de dolores con IA),
-H3 (agrupación en oportunidades), H4 (puntaje), H5 (tablero con filtros) y H6 (Reddit como fuente).
-H8 (evaluación de la extracción): herramienta lista, etiquetado pendiente.
+H3 (agrupación en oportunidades), H4 (puntaje), H5 (tablero con filtros), H6 (Reddit como fuente) y
+H7 (favoritas y notas). H8 (evaluación de la extracción): herramienta lista, etiquetado pendiente.
 
 ## Desarrollo local
 
@@ -34,9 +34,15 @@ npm run assess -- --no-web-search  # sin búsqueda web (más barato, sin lista d
 npm run dev                   # http://localhost:3000
 ```
 
-Páginas: `/` tablero de oportunidades (filtros, orden y pesos en la URL), `/opportunities/[id]`
-detalle con puntaje y evidencia, `/activity` dolores y posts recientes, `/labeling` etiquetado
-(sólo en desarrollo).
+Páginas: `/` tablero de oportunidades (filtros, orden y pesos en la URL; `/?fav=1` favoritas),
+`/opportunities/[id]` detalle con puntaje, notas y evidencia, `/activity` dolores y posts
+recientes, `/labeling` etiquetado (sólo en desarrollo).
+
+## Despliegue
+
+Antes de publicar el sitio, define `SEEDBOX_BASIC_AUTH=usuario:clave`: todo el sitio pedirá esas
+credenciales y sólo con ellas se pueden marcar favoritas o escribir notas. Sin la variable, en
+producción el sitio queda en modo sólo lectura (ver [ADR-0007](docs/adr/0007-acceso-y-escritura.md)).
 
 Para medir la calidad de la extracción, ver [`evals/extraction/README.md`](evals/extraction/README.md).
 
@@ -66,6 +72,9 @@ src/
     cluster.ts         # agrupa los dolores pendientes en oportunidades
     scoring.ts         # ejes y puntaje total con pesos ajustables (ADR-0005)
     filters.ts         # filtros, orden y paginación del tablero (H5)
+    notes.ts           # favoritas y notas (H7)
+    auth.ts            # protección de acceso de un solo usuario (ADR-0007)
+  proxy.ts             # autenticación básica opcional para todo el sitio
     assessment.ts      # evaluación de mercado con Claude y búsqueda web
     assess.ts          # evalúa las oportunidades pendientes o desactualizadas
     eval/              # dataset, métricas y costo de la evaluación (H8)

@@ -14,7 +14,7 @@ import {
 import { VERTICAL_LABELS, VERTICALS, type Vertical } from "@/lib/pains";
 
 const MIN_SCORES = [0, 5, 6, 7, 8];
-const FILTER_KEYS = ["v", "min", "assessed", "paying", "q", "sort", "n"];
+const FILTER_KEYS = ["v", "min", "assessed", "paying", "fav", "q", "sort", "n"];
 
 /**
  * Writes the filters into the URL, keeping other params such as the weights (`w`).
@@ -131,6 +131,7 @@ export function DashboardFilters({
           );
         })}
         <span className="mx-1 hidden h-4 w-px bg-zinc-800 sm:inline-block" />
+        <Toggle label="★ Sólo favoritas" checked={filters.starredOnly} onChange={(starredOnly) => update({ starredOnly })} />
         <Toggle label="Sólo evaluadas" checked={filters.assessedOnly} onChange={(assessedOnly) => update({ assessedOnly })} />
         <Toggle label="Con señales de pago" checked={filters.payingOnly} onChange={(payingOnly) => update({ payingOnly })} />
         {hasActiveFilters(filters) && (

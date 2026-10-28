@@ -40,6 +40,8 @@ recientes, `/labeling` etiquetado (sólo en desarrollo).
 
 ## Despliegue
 
+Guía paso a paso para Railway (sitio, base de datos y job diario): [`docs/deploy.md`](docs/deploy.md).
+
 Antes de publicar el sitio, define `SEEDBOX_BASIC_AUTH=usuario:clave`: todo el sitio pedirá esas
 credenciales y sólo con ellas se pueden marcar favoritas o escribir notas. Sin la variable, en
 producción el sitio queda en modo sólo lectura (ver [ADR-0007](docs/adr/0007-acceso-y-escritura.md)).
@@ -55,6 +57,8 @@ Para medir la calidad de la extracción, ver [`evals/extraction/README.md`](eval
 | `npm test` | Vitest (los tests de base de datos usan `TEST_DATABASE_URL`; se omiten si no está) |
 | `npm run db:generate` | Genera una migración SQL a partir de `src/lib/db/schema.ts` |
 | `npm run db:migrate` | Aplica las migraciones pendientes |
+| `npm run db:migrate:deploy` | Igual, sin herramientas de desarrollo (lo usa Railway antes de cada despliegue) |
+| `npm run pipeline` | `ingest → extract → cluster → assess` en una sola corrida (el job diario) |
 
 ## Estructura
 

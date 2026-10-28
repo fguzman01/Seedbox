@@ -1,12 +1,8 @@
-import { sql } from "drizzle-orm";
-import { migrate } from "drizzle-orm/postgres-js/migrator";
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { createDb } from "./db/client";
+import { describe, expect, it, vi } from "vitest";
 import { signals } from "./db/schema";
 import { ingest } from "./ingest";
 import type { RawSignal, SourceAdapter } from "./sources/types";
-
-const url = process.env.TEST_DATABASE_URL;
+import { testDatabaseUrl, useTestDb } from "./test-db";
 
 function signal(id: string, publishedAt: string): RawSignal {
   return {
@@ -33,18 +29,8 @@ function fakeAdapter(batches: RawSignal[][]): SourceAdapter & { calls: unknown[]
   };
 }
 
-describe.skipIf(!url)("ingest (database)", () => {
-  const { db, close } = url ? createDb(url) : ({} as ReturnType<typeof createDb>);
-
-  beforeAll(async () => {
-    await migrate(db, { migrationsFolder: "./drizzle" });
-  });
-  beforeEach(async () => {
-    await db.execute(sql`truncate ${signals} restart identity`);
-  });
-  afterAll(async () => {
-    await close();
-  });
+describe.skipIf(!testDatabaseUrl)("ingest (database)", () => {
+  const db = useTestDb();
 
   it("stores fetched signals with source and domain", async () => {
     const adapter = fakeAdapter([[signal("a", "2026-10-01T00:00:00Z")]]);

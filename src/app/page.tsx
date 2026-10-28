@@ -1,8 +1,12 @@
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { getRecentSignals, getSignalStats } from "@/lib/queries";
+import { VERTICAL_LABELS } from "@/lib/pains";
+import { getRecentPains, getRecentSignals, getSignalStats } from "@/lib/queries";
 
 const dateFormat = new Intl.DateTimeFormat("es-CL", { dateStyle: "medium" });
+
+const INTENSITY_LABELS = { low: "Leve", medium: "Moderado", high: "Fuerte" } as const;
+const WTP_LABELS = { none: null, implied: "Pago implícito", explicit: "Pagaría" } as const;
 
 export default function Home() {
   return (
@@ -35,15 +39,65 @@ async function Signals() {
     );
   }
 
-  const [stats, recent] = await Promise.all([getSignalStats(), getRecentSignals()]);
+  const [stats, recentPains, recent] = await Promise.all([
+    getSignalStats(),
+    getRecentPains(),
+    getRecentSignals(),
+  ]);
 
   return (
     <>
-      <section className="mb-10 grid grid-cols-2 gap-4 sm:grid-cols-3">
+      <section className="mb-10 grid grid-cols-2 gap-4 sm:grid-cols-4">
         <Stat label="Señales recolectadas" value={stats.total} />
         <Stat label="Por analizar" value={stats.pending} />
+        <Stat label="Dolores detectados" value={stats.pains} />
         <Stat label="Oportunidades" value="—" hint="Llega con H3" />
       </section>
+
+      <h2 className="mb-4 text-lg font-semibold">Últimos dolores detectados</h2>
+      {recentPains.length === 0 ? (
+        <div className="mb-10">
+          <EmptyState>
+            Aún no hay dolores. Ejecuta <code className="text-zinc-200">npm run extract</code>.
+          </EmptyState>
+        </div>
+      ) : (
+        <ul className="mb-10 grid gap-3 sm:grid-cols-2">
+          {recentPains.map((p) => (
+            <li
+              key={p.id}
+              className="flex flex-col rounded-xl border border-zinc-800 bg-zinc-900/60 p-4"
+            >
+              <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                <span className="rounded bg-emerald-500/15 px-1.5 py-0.5 text-emerald-300">
+                  {VERTICAL_LABELS[p.vertical]}
+                </span>
+                <span className="rounded bg-zinc-800 px-1.5 py-0.5 text-zinc-300">
+                  {INTENSITY_LABELS[p.intensity]}
+                </span>
+                {WTP_LABELS[p.willingnessToPay] && (
+                  <span className="rounded bg-amber-500/15 px-1.5 py-0.5 text-amber-300">
+                    {WTP_LABELS[p.willingnessToPay]}
+                  </span>
+                )}
+              </div>
+              <p className="mt-2 font-medium text-zinc-100">{p.description}</p>
+              <p className="mt-1 text-sm text-zinc-500">{p.persona}</p>
+              <blockquote className="mt-3 border-l-2 border-zinc-700 pl-3 text-sm text-zinc-400 italic">
+                “{p.quote}”
+              </blockquote>
+              <a
+                href={p.url}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-3 self-start text-xs text-emerald-400 hover:underline"
+              >
+                Ver fuente ({p.source}) →
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
 
       <h2 className="mb-4 text-lg font-semibold">Últimas señales</h2>
       {recent.length === 0 ? (

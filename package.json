@@ -12,7 +12,8 @@
     "test:watch": "vitest",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "ingest": "tsx scripts/ingest.ts"
+    "ingest": "tsx scripts/ingest.ts",
+    "extract": "tsx scripts/extract.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",

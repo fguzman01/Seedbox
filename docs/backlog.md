@@ -23,7 +23,7 @@ Criterios de aceptación:
 Notas: se usan los posts "Ask HN" vía la API de Algolia. Los comentarios quedan para una
 historia futura si los posts no bastan.
 
-### H2. Extraer dolores con IA · M
+### H2. Extraer dolores con IA · M · ✅ hecha
 **Como** usuario **quiero** que cada post se analice para extraer dolores concretos **para**
 no tener que leerlos todos.
 
@@ -31,6 +31,10 @@ Criterios de aceptación:
 - Cada dolor extraído tiene: descripción, quién lo sufre, cita textual, link al post y
   **vertical** (pymes, salud, educación, devtools, etc.; ver ADR-0002).
 - Los posts sin dolor se marcan como descartados y no se reprocesan.
+
+Notas: ver `docs/adr/0003-extraccion-de-dolores.md`. Además de lo pedido, cada dolor guarda
+intensidad y disposición a pagar (insumos para H4), y se descartan los dolores cuya cita no
+aparece en el post.
 
 ### H3. Agrupar dolores en oportunidades · M
 **Como** usuario **quiero** ver dolores similares agrupados **para** medir cuánta gente
@@ -46,6 +50,14 @@ vertical, entre otros) y la evidencia de cada una **para** explorar y decidir r�
 
 ### H6. Ingestar Reddit · M
 Igual que H1, para una lista configurable de subreddits.
+
+### H8. Evaluar la calidad de la extracción · S
+**Como** usuario **quiero** un conjunto de posts reales con los dolores esperados **para**
+medir si un cambio de prompt o de modelo mejora o empeora la extracción.
+
+Criterios de aceptación:
+- Al menos 30 posts reales etiquetados a mano (con y sin dolores).
+- Un comando que corre la extracción sobre ellos y reporta aciertos, falsos positivos y costo.
 
 ### H7. Guardar y anotar oportunidades · S
 **Como** usuario **quiero** marcar oportunidades como favoritas y agregar notas **para**

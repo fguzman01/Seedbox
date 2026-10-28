@@ -8,7 +8,7 @@ los agrupa, los puntúa y los muestra como ideas accionables con evidencia traza
 - Decisiones técnicas: [`docs/adr/`](docs/adr/)
 - Metodología y agentes (PO, arquitecto, desarrollador, QA): [`CLAUDE.md`](CLAUDE.md)
 
-Estado: **fase 1 en curso**. H1 (ingesta de Hacker News) lista.
+Estado: **fase 1 en curso**. H1 (ingesta de Hacker News) y H2 (extracción de dolores con IA) listas.
 
 ## Desarrollo local
 
@@ -20,6 +20,8 @@ cp .env.example .env          # ajusta DATABASE_URL y TEST_DATABASE_URL
 npm run db:migrate            # crea las tablas
 npm run ingest                # recolecta señales de todas las fuentes
 npm run ingest -- hackernews  # o de una fuente específica
+npm run extract               # extrae dolores de las señales pendientes (requiere ANTHROPIC_API_KEY)
+npm run extract -- --limit 10 # procesa solo 10
 npm run dev                   # http://localhost:3000
 ```
 
@@ -42,6 +44,9 @@ src/
     db/                # esquema Drizzle y conexión
     sources/           # adaptadores de fuentes (uno por fuente, ver ADR-0002)
     ingest.ts          # guarda señales nuevas sin duplicar
-scripts/ingest.ts      # CLI de ingesta, pensado para correr por cron
+    pains.ts           # esquema de un dolor (verticales, intensidad, disposición a pagar)
+    extraction.ts      # extracción de dolores con Claude (ADR-0003)
+    process.ts         # procesa las señales pendientes
+scripts/               # CLIs de ingesta y extracción, pensados para correr por cron
 drizzle/               # migraciones SQL versionadas
 ```

@@ -1,5 +1,15 @@
 import { sql } from "drizzle-orm";
-import { index, jsonb, pgTable, serial, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
+import {
+  index,
+  integer,
+  jsonb,
+  pgTable,
+  serial,
+  text,
+  timestamp,
+  uniqueIndex,
+} from "drizzle-orm/pg-core";
+import { INTENSITIES, VERTICALS, WILLINGNESS_TO_PAY } from "../pains";
 
 /** Raw items collected from external sources, before AI extraction. */
 export const signals = pgTable(
@@ -20,6 +30,7 @@ export const signals = pgTable(
       .notNull()
       .default("pending"),
     metadata: jsonb("metadata").$type<Record<string, unknown>>().notNull().default({}),
+    processedAt: timestamp("processed_at", { withTimezone: true }),
   },
   (t) => [
     uniqueIndex("signals_source_external_id_idx").on(t.source, t.externalId),
@@ -28,3 +39,25 @@ export const signals = pgTable(
 );
 
 export type Signal = typeof signals.$inferSelect;
+
+/** A concrete problem extracted from a signal by the AI (H2). */
+export const pains = pgTable(
+  "pains",
+  {
+    id: serial("id").primaryKey(),
+    signalId: integer("signal_id")
+      .notNull()
+      .references(() => signals.id, { onDelete: "cascade" }),
+    description: text("description").notNull(),
+    persona: text("persona").notNull(),
+    quote: text("quote").notNull(),
+    vertical: text("vertical", { enum: VERTICALS }).notNull(),
+    intensity: text("intensity", { enum: INTENSITIES }).notNull(),
+    willingnessToPay: text("willingness_to_pay", { enum: WILLINGNESS_TO_PAY }).notNull(),
+    model: text("model").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
+  },
+  (t) => [index("pains_signal_id_idx").on(t.signalId), index("pains_vertical_idx").on(t.vertical)],
+);
+
+export type Pain = typeof pains.$inferSelect;

@@ -54,9 +54,25 @@ Criterios de aceptación:
 Notas: ver `docs/adr/0004-agrupacion-de-dolores.md`. Medir la calidad del agrupamiento queda
 para una historia posterior, cuando haya datos reales.
 
-### H4. Puntuar oportunidades · S
+### H4. Puntuar oportunidades · M · ✅ hecha
 **Como** usuario **quiero** un puntaje por oportunidad según los ejes de la visión, con
 pesos ajustables, **para** priorizar qué explorar.
+
+Criterios de aceptación:
+- Cada oportunidad tiene un puntaje 0–10 en los cinco ejes de la visión y un puntaje total
+  ponderado.
+- Frecuencia, intensidad y disposición a pagar se calculan de la evidencia (autores distintos y
+  dolores), sin llamar a la IA.
+- Competencia y ajuste al constructor los evalúa la IA con búsqueda web; cada evaluación guarda
+  su justificación y los competidores encontrados con su link.
+- Mientras una oportunidad no está evaluada, su total usa sólo los ejes disponibles y se marca
+  como parcial.
+- Los pesos se pueden ajustar en la interfaz; las oportunidades se reordenan por el total.
+- El detalle de una oportunidad muestra el desglose por eje, las justificaciones y los
+  competidores.
+
+Notas: ver `docs/adr/0005-puntaje-de-oportunidades.md`. Era tamaño S; pasó a M al sumar la
+evaluación con búsqueda web.
 
 ### H5. Tablero de oportunidades · M
 **Como** usuario **quiero** un tablero visual con cards ordenadas por puntaje, filtros (por

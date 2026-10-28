@@ -3,11 +3,14 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { VERTICAL_LABELS } from "@/lib/pains";
 import { getOpportunities, getRecentPains, getRecentSignals, getSignalStats } from "@/lib/queries";
+import { isDefaultWeights, parseWeights, serializeWeights } from "@/lib/scoring";
 import { Badge, PainCard } from "./components/pain-card";
+import { AxisBars, TotalBadge } from "./components/score";
+import { WeightsControl } from "./components/weights-control";
 
 const dateFormat = new Intl.DateTimeFormat("es-CL", { dateStyle: "medium" });
 
-export default function Home() {
+export default function Home({ searchParams }: PageProps<"/">) {
   return (
     <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-12 sm:px-8">
       <header className="mb-10">
@@ -25,14 +28,16 @@ export default function Home() {
         )}
       </header>
       <Suspense fallback={<p className="text-zinc-500">Cargando señales…</p>}>
-        <Signals />
+        <Signals searchParams={searchParams} />
       </Suspense>
     </main>
   );
 }
 
-async function Signals() {
+async function Signals({ searchParams }: Pick<PageProps<"/">, "searchParams">) {
   await connection();
+  const weights = parseWeights((await searchParams).w);
+  const weightsQuery = isDefaultWeights(weights) ? "" : `?w=${serializeWeights(weights)}`;
 
   if (!process.env.DATABASE_URL) {
     return (
@@ -45,7 +50,7 @@ async function Signals() {
 
   const [stats, topOpportunities, recentPains, recent] = await Promise.all([
     getSignalStats(),
-    getOpportunities(),
+    getOpportunities(weights),
     getRecentPains(),
     getRecentSignals(),
   ]);
@@ -60,6 +65,7 @@ async function Signals() {
       </section>
 
       <h2 className="mb-4 text-lg font-semibold">Oportunidades</h2>
+      <WeightsControl weights={weights} />
       {topOpportunities.length === 0 ? (
         <div className="mb-10">
           <EmptyState>
@@ -71,15 +77,19 @@ async function Signals() {
           {topOpportunities.map((o) => (
             <li key={o.id}>
               <Link
-                href={`/opportunities/${o.id}`}
+                href={`/opportunities/${o.id}${weightsQuery}`}
                 className="flex h-full flex-col rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 transition hover:border-emerald-500/50 hover:bg-zinc-900"
               >
-                <div className="flex flex-wrap items-center gap-1.5">
+                <div className="flex items-start justify-between gap-3">
                   <Badge tone="emerald">{VERTICAL_LABELS[o.mainVertical]}</Badge>
+                  <TotalBadge score={o.score} />
                 </div>
                 <p className="mt-2 font-semibold text-zinc-100">{o.title}</p>
                 <p className="mt-1 line-clamp-3 text-sm text-zinc-400">{o.summary}</p>
-                <p className="mt-auto pt-3 text-xs text-zinc-500">
+                <div className="mt-auto pt-4">
+                  <AxisBars axes={o.axes} />
+                </div>
+                <p className="pt-3 text-xs text-zinc-500">
                   {o.signalCount} {o.signalCount === 1 ? "post" : "posts"} · {o.authorCount}{" "}
                   {o.authorCount === 1 ? "autor" : "autores"} · {o.painCount}{" "}
                   {o.painCount === 1 ? "dolor" : "dolores"}

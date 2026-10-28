@@ -16,7 +16,8 @@
     "extract": "tsx scripts/extract.ts",
     "eval": "tsx scripts/eval.ts",
     "eval:sample": "tsx scripts/eval-sample.ts",
-    "cluster": "tsx scripts/cluster.ts"
+    "cluster": "tsx scripts/cluster.ts",
+    "assess": "tsx scripts/assess.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",

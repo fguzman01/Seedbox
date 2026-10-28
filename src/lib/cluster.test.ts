@@ -3,6 +3,7 @@ import { clusterPendingPains } from "./cluster";
 import type { ClusteringInput, ClusteringOutput, PainClusterer } from "./clustering";
 import { opportunities, pains, signals } from "./db/schema";
 import { getOpportunities, getOpportunity } from "./queries";
+import { DEFAULT_WEIGHTS } from "./scoring";
 import { testDatabaseUrl, useTestDb } from "./test-db";
 
 /** Clusterer that groups pains by the first word of their description. */
@@ -78,14 +79,14 @@ describe.skipIf(!testDatabaseUrl)("clusterPendingPains (database)", () => {
     const result = await clusterPendingPains(db, clusterer, { batchSize: 10 });
 
     expect(result).toEqual({ batches: 1, assigned: 4, created: 2, unassigned: 0, failed: 0 });
-    const list = await getOpportunities(20, db);
+    const list = await getOpportunities(DEFAULT_WEIGHTS, 20, db);
     expect(list.map((o) => [o.title, o.signalCount, o.authorCount, o.painCount, o.mainVertical])).toEqual([
       ["facturas", 3, 2, 3, "freelance"],
       ["morosos", 1, 1, 1, "freelance"],
     ]);
     expect(list[0]).toMatchObject({ domain: "software", model: "fake-model", summary: "Resumen facturas" });
 
-    const detail = await getOpportunity(list[0].id, db);
+    const detail = await getOpportunity(list[0].id, DEFAULT_WEIGHTS, db);
     expect(detail?.pains).toHaveLength(3);
     expect(detail?.pains[0]).toMatchObject({ url: expect.stringContaining("https://example.com/"), source: "test" });
   });

@@ -8,8 +8,9 @@ los agrupa, los puntúa y los muestra como ideas accionables con evidencia traza
 - Decisiones técnicas: [`docs/adr/`](docs/adr/)
 - Metodología y agentes (PO, arquitecto, desarrollador, QA): [`CLAUDE.md`](CLAUDE.md)
 
-Estado: **fase 1 en curso**. Listas: H1 (ingesta de Hacker News), H2 (extracción de dolores con IA)
-y H3 (agrupación en oportunidades). H8 (evaluación de la extracción): herramienta lista, etiquetado pendiente.
+Estado: **fase 1 en curso**. Listas: H1 (ingesta de Hacker News), H2 (extracción de dolores con IA),
+H3 (agrupación en oportunidades) y H4 (puntaje). H8 (evaluación de la extracción): herramienta lista,
+etiquetado pendiente.
 
 ## Desarrollo local
 
@@ -24,6 +25,8 @@ npm run ingest -- hackernews  # o de una fuente específica
 npm run extract               # extrae dolores de las señales pendientes (requiere ANTHROPIC_API_KEY)
 npm run extract -- --limit 10 # procesa solo 10
 npm run cluster               # agrupa los dolores nuevos en oportunidades (requiere ANTHROPIC_API_KEY)
+npm run assess                # evalúa competencia y ajuste al constructor con búsqueda web
+npm run assess -- --no-web-search  # sin búsqueda web (más barato, sin lista de competidores)
 npm run dev                   # http://localhost:3000
 ```
 
@@ -53,8 +56,11 @@ src/
     process.ts         # procesa las señales pendientes
     clustering.ts      # agrupación de dolores con Claude (ADR-0004)
     cluster.ts         # agrupa los dolores pendientes en oportunidades
+    scoring.ts         # ejes y puntaje total con pesos ajustables (ADR-0005)
+    assessment.ts      # evaluación de mercado con Claude y búsqueda web
+    assess.ts          # evalúa las oportunidades pendientes o desactualizadas
     eval/              # dataset, métricas y costo de la evaluación (H8)
-scripts/               # CLIs de ingesta, extracción y agrupación, pensados para correr por cron
+scripts/               # CLIs de ingesta, extracción, agrupación y evaluación, pensados para correr por cron
 drizzle/               # migraciones SQL versionadas
 evals/extraction/      # dataset etiquetado y resultados de la evaluación
 ```

@@ -49,7 +49,23 @@ export const opportunities = pgTable("opportunities", {
   model: text("model").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().default(sql`now()`),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().default(sql`now()`),
+  // Market assessment (H4, ADR-0005); null until `npm run assess` evaluates the opportunity.
+  /** 10 = nobody solves it well, 0 = saturated market. */
+  competitionScore: integer("competition_score"),
+  competitionRationale: text("competition_rationale"),
+  competitors: jsonb("competitors").$type<Competitor[]>(),
+  /** 10 = one developer with AI can build it in a few weeks. */
+  buildabilityScore: integer("buildability_score"),
+  buildabilityRationale: text("buildability_rationale"),
+  assessedAt: timestamp("assessed_at", { withTimezone: true }),
+  assessmentModel: text("assessment_model"),
 });
+
+export interface Competitor {
+  name: string;
+  url: string;
+  note: string;
+}
 
 export type Opportunity = typeof opportunities.$inferSelect;
 

@@ -42,8 +42,7 @@ pesos ajustables, **para** priorizar qué explorar.
 
 ### H5. Tablero de oportunidades · M
 **Como** usuario **quiero** un tablero visual con cards ordenadas por puntaje, filtros (por
-vertical, entre otros) y la
-evidencia de cada una **para** explorar y decidir rápido.
+vertical, entre otros) y la evidencia de cada una **para** explorar y decidir rápido.
 
 ### H6. Ingestar Reddit · M
 Igual que H1, para una lista configurable de subreddits.

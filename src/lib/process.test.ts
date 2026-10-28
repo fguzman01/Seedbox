@@ -24,7 +24,7 @@ function fakeExtractor(): PainExtractor & { calls: ExtractionInput[] } {
     extract: vi.fn(async (input: ExtractionInput) => {
       calls.push(input);
       if (input.body === "boom") throw new Error("API down");
-      return input.body === "pain" ? [pain, { ...pain, intensity: "low" as const }] : [];
+      return { pains: input.body === "pain" ? [pain, { ...pain, intensity: "low" as const }] : [] };
     }),
   };
 }

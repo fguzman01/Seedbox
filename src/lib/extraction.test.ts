@@ -27,9 +27,16 @@ interface ParseParams {
   messages: { content: string }[];
 }
 
+const usage = {
+  input_tokens: 900,
+  output_tokens: 150,
+  cache_read_input_tokens: 600,
+  cache_creation_input_tokens: 0,
+};
+
 function fakeClient(response: { stop_reason?: string; parsed_output?: unknown }) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const parse = vi.fn(async (_params: ParseParams) => response);
+  const parse = vi.fn(async (_params: ParseParams) => ({ usage, ...response }));
   return { client: { beta: { messages: { parse } } } as unknown as Anthropic, parse };
 }
 
@@ -58,7 +65,10 @@ describe("createClaudeExtractor", () => {
 
     const result = await extractor.extract(input);
 
-    expect(result).toEqual([pain]);
+    expect(result).toEqual({
+      pains: [pain],
+      usage: { inputTokens: 900, outputTokens: 150, cacheReadTokens: 600, cacheWriteTokens: 0 },
+    });
     const params = parse.mock.calls[0][0];
     expect(params.model).toBe("claude-opus-5-5");
     expect(params.output_config.effort).toBe("low");
@@ -72,12 +82,12 @@ describe("createClaudeExtractor", () => {
   it("filters out pains with quotes not found in the post", async () => {
     const invented = { ...pain, quote: "made up" };
     const { client } = fakeClient({ stop_reason: "end_turn", parsed_output: { pains: [invented] } });
-    expect(await createClaudeExtractor({ client }).extract(input)).toEqual([]);
+    expect((await createClaudeExtractor({ client }).extract(input)).pains).toEqual([]);
   });
 
   it("returns no pains when the model refuses", async () => {
     const { client } = fakeClient({ stop_reason: "refusal", parsed_output: null });
-    expect(await createClaudeExtractor({ client }).extract(input)).toEqual([]);
+    expect((await createClaudeExtractor({ client }).extract(input)).pains).toEqual([]);
   });
 
   it("throws when the output cannot be parsed, so the signal is retried", async () => {

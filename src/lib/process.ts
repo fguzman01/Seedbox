@@ -40,7 +40,7 @@ export async function processPendingSignals(
     for (let signal = queue.shift(); signal; signal = queue.shift()) {
       let extracted;
       try {
-        extracted = await extractor.extract(signal);
+        extracted = (await extractor.extract(signal)).pains;
       } catch (error) {
         result.failed++;
         onError?.(signal, error);

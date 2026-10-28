@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { VERTICAL_LABELS } from "@/lib/pains";
@@ -19,6 +20,11 @@ export default function Home() {
         <p className="mt-3 max-w-2xl text-zinc-400">
           Dolores reales del mercado, agrupados y puntuados, con evidencia trazable.
         </p>
+        {process.env.NODE_ENV !== "production" && (
+          <Link href="/labeling" className="mt-4 inline-block text-sm text-emerald-400 hover:underline">
+            Etiquetar posts para evaluar la IA →
+          </Link>
+        )}
       </header>
       <Suspense fallback={<p className="text-zinc-500">Cargando señales…</p>}>
         <Signals />

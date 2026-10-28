@@ -51,13 +51,17 @@ vertical, entre otros) y la evidencia de cada una **para** explorar y decidir r�
 ### H6. Ingestar Reddit · M
 Igual que H1, para una lista configurable de subreddits.
 
-### H8. Evaluar la calidad de la extracción · S
+### H8. Evaluar la calidad de la extracción · S · 🟡 herramienta lista, falta etiquetar
 **Como** usuario **quiero** un conjunto de posts reales con los dolores esperados **para**
 medir si un cambio de prompt o de modelo mejora o empeora la extracción.
 
 Criterios de aceptación:
 - Al menos 30 posts reales etiquetados a mano (con y sin dolores).
 - Un comando que corre la extracción sobre ellos y reporta aciertos, falsos positivos y costo.
+
+Notas: ver `evals/extraction/README.md`. Listo: formato del dataset, `npm run eval:sample`,
+página `/labeling` (solo en desarrollo) y `npm run eval` con precisión, recall, vertical y
+costo. Pendiente: etiquetar 30+ posts reales y registrar la primera línea base.
 
 ### H7. Guardar y anotar oportunidades · S
 **Como** usuario **quiero** marcar oportunidades como favoritas y agregar notas **para**

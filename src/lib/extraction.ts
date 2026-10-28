@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
 import { extractionSchema, type ExtractedPain } from "./pains";
+import { quoteAppearsIn } from "./text";
 
 export const DEFAULT_EXTRACTION_MODEL = "claude-opus-5-5";
 
@@ -10,9 +11,21 @@ export interface ExtractionInput {
   body: string;
 }
 
+export interface TokenUsage {
+  inputTokens: number;
+  outputTokens: number;
+  cacheReadTokens: number;
+  cacheWriteTokens: number;
+}
+
+export interface ExtractionResult {
+  pains: ExtractedPain[];
+  usage?: TokenUsage;
+}
+
 export interface PainExtractor {
   model: string;
-  extract(input: ExtractionInput): Promise<ExtractedPain[]>;
+  extract(input: ExtractionInput): Promise<ExtractionResult>;
 }
 
 const SYSTEM_PROMPT = `You analyze posts from online communities to find concrete problems that people \
@@ -39,23 +52,9 @@ function buildUserMessage({ source, title, body }: ExtractionInput): string {
   return `<post source="${source}">\n${titleLine}<body>\n${body}\n</body>\n</post>`;
 }
 
-/** Lowercases and collapses whitespace and quote styles so small formatting diffs still match. */
-function normalize(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[‘’]/g, "'")
-    .replace(/[“”]/g, '"')
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
 /** Keeps only pains whose quote actually appears in the post, so every pain is traceable. */
 export function keepVerifiedPains(input: ExtractionInput, extracted: ExtractedPain[]): ExtractedPain[] {
-  const haystack = normalize(`${input.title ?? ""}\n${input.body}`);
-  return extracted.filter((pain) => {
-    const quote = normalize(pain.quote);
-    return quote.length > 0 && haystack.includes(quote);
-  });
+  return extracted.filter((pain) => quoteAppearsIn(pain.quote, input));
 }
 
 export class ExtractionError extends Error {}
@@ -83,14 +82,20 @@ export function createClaudeExtractor({
         messages: [{ role: "user", content: buildUserMessage(input) }],
       });
 
+      const usage: TokenUsage = {
+        inputTokens: response.usage.input_tokens,
+        outputTokens: response.usage.output_tokens,
+        cacheReadTokens: response.usage.cache_read_input_tokens ?? 0,
+        cacheWriteTokens: response.usage.cache_creation_input_tokens ?? 0,
+      };
       if (response.stop_reason === "refusal") {
         // Nothing can be extracted from this post; treat it as having no pains.
-        return [];
+        return { pains: [], usage };
       }
       if (!response.parsed_output) {
         throw new ExtractionError(`Could not parse extraction (stop_reason: ${response.stop_reason})`);
       }
-      return keepVerifiedPains(input, response.parsed_output.pains);
+      return { pains: keepVerifiedPains(input, response.parsed_output.pains), usage };
     },
   };
 }

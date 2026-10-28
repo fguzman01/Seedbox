@@ -16,7 +16,7 @@ export function useTestDb(): Database {
     await migrate(db, { migrationsFolder: "./drizzle" });
   });
   beforeEach(async () => {
-    await db.execute(sql`truncate signals, pains restart identity cascade`);
+    await db.execute(sql`truncate signals, pains, opportunities restart identity cascade`);
   });
   afterAll(async () => {
     await close();

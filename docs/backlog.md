@@ -36,9 +36,23 @@ Notas: ver `docs/adr/0003-extraccion-de-dolores.md`. Además de lo pedido, cada 
 intensidad y disposición a pagar (insumos para H4), y se descartan los dolores cuya cita no
 aparece en el post.
 
-### H3. Agrupar dolores en oportunidades · M
+### H3. Agrupar dolores en oportunidades · M · ✅ hecha
 **Como** usuario **quiero** ver dolores similares agrupados **para** medir cuánta gente
 comparte el mismo problema.
+
+Criterios de aceptación:
+- Dado un conjunto de dolores sin agrupar, cuando corre el agrupamiento, entonces cada dolor
+  queda asignado a exactamente una oportunidad (existente o nueva).
+- Cada oportunidad tiene un título y un resumen en español que describen el problema común.
+- Los dolores ya agrupados no se reprocesan; los nuevos se suman a oportunidades existentes
+  cuando describen el mismo problema.
+- Si la IA devuelve una asignación inválida (dolor desconocido, oportunidad inexistente),
+  ese dolor queda sin agrupar para el siguiente intento, sin romper el resto.
+- Cada oportunidad muestra cuántos dolores, posts y autores distintos la respaldan, y su
+  detalle lista todos los dolores con su cita y link a la fuente.
+
+Notas: ver `docs/adr/0004-agrupacion-de-dolores.md`. Medir la calidad del agrupamiento queda
+para una historia posterior, cuando haya datos reales.
 
 ### H4. Puntuar oportunidades · S
 **Como** usuario **quiero** un puntaje por oportunidad según los ejes de la visión, con

@@ -25,6 +25,9 @@ export const VERTICALS = Object.keys(VERTICAL_LABELS) as [Vertical, ...Vertical[
 export const INTENSITIES = ["low", "medium", "high"] as const;
 export const WILLINGNESS_TO_PAY = ["none", "implied", "explicit"] as const;
 
+export const INTENSITY_LABELS = { low: "Leve", medium: "Moderado", high: "Fuerte" } as const;
+export const WTP_LABELS = { none: null, implied: "Pago implícito", explicit: "Pagaría" } as const;
+
 export const extractedPainSchema = z.object({
   description: z
     .string()

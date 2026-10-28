@@ -8,8 +8,8 @@ los agrupa, los puntúa y los muestra como ideas accionables con evidencia traza
 - Decisiones técnicas: [`docs/adr/`](docs/adr/)
 - Metodología y agentes (PO, arquitecto, desarrollador, QA): [`CLAUDE.md`](CLAUDE.md)
 
-Estado: **fase 1 en curso**. H1 (ingesta de Hacker News) y H2 (extracción de dolores con IA) listas;
-H8 (evaluación de la extracción) con la herramienta lista y el etiquetado pendiente.
+Estado: **fase 1 en curso**. Listas: H1 (ingesta de Hacker News), H2 (extracción de dolores con IA)
+y H3 (agrupación en oportunidades). H8 (evaluación de la extracción): herramienta lista, etiquetado pendiente.
 
 ## Desarrollo local
 
@@ -23,6 +23,7 @@ npm run ingest                # recolecta señales de todas las fuentes
 npm run ingest -- hackernews  # o de una fuente específica
 npm run extract               # extrae dolores de las señales pendientes (requiere ANTHROPIC_API_KEY)
 npm run extract -- --limit 10 # procesa solo 10
+npm run cluster               # agrupa los dolores nuevos en oportunidades (requiere ANTHROPIC_API_KEY)
 npm run dev                   # http://localhost:3000
 ```
 
@@ -50,8 +51,10 @@ src/
     pains.ts           # esquema de un dolor (verticales, intensidad, disposición a pagar)
     extraction.ts      # extracción de dolores con Claude (ADR-0003)
     process.ts         # procesa las señales pendientes
+    clustering.ts      # agrupación de dolores con Claude (ADR-0004)
+    cluster.ts         # agrupa los dolores pendientes en oportunidades
     eval/              # dataset, métricas y costo de la evaluación (H8)
-scripts/               # CLIs de ingesta y extracción, pensados para correr por cron
+scripts/               # CLIs de ingesta, extracción y agrupación, pensados para correr por cron
 drizzle/               # migraciones SQL versionadas
 evals/extraction/      # dataset etiquetado y resultados de la evaluación
 ```

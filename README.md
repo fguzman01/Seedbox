@@ -9,8 +9,8 @@ los agrupa, los puntúa y los muestra como ideas accionables con evidencia traza
 - Metodología y agentes (PO, arquitecto, desarrollador, QA): [`CLAUDE.md`](CLAUDE.md)
 
 Estado: **fase 1 en curso**. Listas: H1 (ingesta de Hacker News), H2 (extracción de dolores con IA),
-H3 (agrupación en oportunidades) y H4 (puntaje). H8 (evaluación de la extracción): herramienta lista,
-etiquetado pendiente.
+H3 (agrupación en oportunidades), H4 (puntaje) y H5 (tablero con filtros). H8 (evaluación de la
+extracción): herramienta lista, etiquetado pendiente.
 
 ## Desarrollo local
 
@@ -29,6 +29,10 @@ npm run assess                # evalúa competencia y ajuste al constructor con 
 npm run assess -- --no-web-search  # sin búsqueda web (más barato, sin lista de competidores)
 npm run dev                   # http://localhost:3000
 ```
+
+Páginas: `/` tablero de oportunidades (filtros, orden y pesos en la URL), `/opportunities/[id]`
+detalle con puntaje y evidencia, `/activity` dolores y posts recientes, `/labeling` etiquetado
+(sólo en desarrollo).
 
 Para medir la calidad de la extracción, ver [`evals/extraction/README.md`](evals/extraction/README.md).
 
@@ -57,6 +61,7 @@ src/
     clustering.ts      # agrupación de dolores con Claude (ADR-0004)
     cluster.ts         # agrupa los dolores pendientes en oportunidades
     scoring.ts         # ejes y puntaje total con pesos ajustables (ADR-0005)
+    filters.ts         # filtros, orden y paginación del tablero (H5)
     assessment.ts      # evaluación de mercado con Claude y búsqueda web
     assess.ts          # evalúa las oportunidades pendientes o desactualizadas
     eval/              # dataset, métricas y costo de la evaluación (H8)

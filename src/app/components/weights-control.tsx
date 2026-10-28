@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import {
   AXES,
@@ -16,6 +16,7 @@ import {
 export function WeightsControl({ weights }: { weights: Weights }) {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [draft, setDraft] = useState(weights);
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -28,8 +29,12 @@ export function WeightsControl({ weights }: { weights: Weights }) {
     clearTimeout(timer.current);
     // Wait until the slider stops moving before re-rendering the server list.
     timer.current = setTimeout(() => {
-      const query = isDefaultWeights(next) ? "" : `?w=${serializeWeights(next)}`;
-      startTransition(() => router.replace(`${pathname}${query}`, { scroll: false }));
+      // Keep the other params (dashboard filters) untouched.
+      const params = new URLSearchParams(searchParams.toString());
+      if (isDefaultWeights(next)) params.delete("w");
+      else params.set("w", serializeWeights(next));
+      const query = params.toString();
+      startTransition(() => router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false }));
     }, 250);
   }
 

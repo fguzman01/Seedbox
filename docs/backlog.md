@@ -74,9 +74,22 @@ Criterios de aceptación:
 Notas: ver `docs/adr/0005-puntaje-de-oportunidades.md`. Era tamaño S; pasó a M al sumar la
 evaluación con búsqueda web.
 
-### H5. Tablero de oportunidades · M
+### H5. Tablero de oportunidades · M · ✅ hecha
 **Como** usuario **quiero** un tablero visual con cards ordenadas por puntaje, filtros (por
 vertical, entre otros) y la evidencia de cada una **para** explorar y decidir rápido.
+
+Criterios de aceptación:
+- La página inicial es el tablero: todas las oportunidades en cards, ordenadas por puntaje
+  total, con "ver más" cuando hay muchas.
+- Filtros combinables: vertical (varias a la vez, con la cantidad de oportunidades de cada
+  una), puntaje mínimo, sólo evaluadas, sólo con señales de pago y búsqueda por texto.
+- Orden alternativo: más evidencia (autores distintos) o actividad más reciente.
+- Filtros, orden y pesos viven en la URL: se pueden guardar y compartir, y se mantienen al
+  entrar y volver del detalle.
+- Cada card muestra puntaje, ejes (con nombre al pasar el mouse), conteos de evidencia y una
+  cita representativa con link a su fuente.
+- Si ningún resultado cumple los filtros, se indica y se ofrece limpiarlos.
+- La actividad reciente (dolores y señales) pasa a su propia página.
 
 ### H6. Ingestar Reddit · M
 Igual que H1, para una lista configurable de subreddits.

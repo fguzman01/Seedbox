@@ -79,7 +79,7 @@ describe.skipIf(!testDatabaseUrl)("clusterPendingPains (database)", () => {
     const result = await clusterPendingPains(db, clusterer, { batchSize: 10 });
 
     expect(result).toEqual({ batches: 1, assigned: 4, created: 2, unassigned: 0, failed: 0 });
-    const list = await getOpportunities(DEFAULT_WEIGHTS, 20, db);
+    const list = await getOpportunities(DEFAULT_WEIGHTS, db);
     expect(list.map((o) => [o.title, o.signalCount, o.authorCount, o.painCount, o.mainVertical])).toEqual([
       ["facturas", 3, 2, 3, "freelance"],
       ["morosos", 1, 1, 1, "freelance"],

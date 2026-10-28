@@ -4,7 +4,9 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { VERTICAL_LABELS } from "@/lib/pains";
 import { getOpportunity } from "@/lib/queries";
-import { isDefaultWeights, parseWeights, serializeWeights } from "@/lib/scoring";
+import { toQueryString } from "@/lib/filters";
+import { parseWeights } from "@/lib/scoring";
+import { Stat } from "../../components/ui";
 import { Badge, PainCard } from "../../components/pain-card";
 import { AxisBars, TotalBadge } from "../../components/score";
 
@@ -23,10 +25,12 @@ export default function OpportunityPage({ params, searchParams }: PageProps<"/op
 async function Opportunity({ params, searchParams }: PageProps<"/opportunities/[id]">) {
   await connection();
   const { id } = await params;
-  const weights = parseWeights((await searchParams).w);
+  const query = await searchParams;
+  const weights = parseWeights(query.w);
   const opportunity = /^\d+$/.test(id) ? await getOpportunity(Number(id), weights) : null;
   if (!opportunity) notFound();
-  const backHref = isDefaultWeights(weights) ? "/" : `/?w=${serializeWeights(weights)}`;
+  // Back to the dashboard with the same filters, sort and weights.
+  const backHref = `/${toQueryString(query)}`;
 
   const verticals = [...new Set(opportunity.pains.map((p) => p.vertical))];
   const payingPains = opportunity.pains.filter((p) => p.willingnessToPay !== "none").length;
@@ -117,14 +121,5 @@ async function Opportunity({ params, searchParams }: PageProps<"/opportunities/[
         ))}
       </ul>
     </>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4">
-      <p className="text-xs text-zinc-500">{label}</p>
-      <p className="mt-1 text-2xl font-semibold text-zinc-100">{value}</p>
-    </div>
   );
 }

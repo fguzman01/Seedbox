@@ -121,10 +121,9 @@ describe.skipIf(!testDatabaseUrl)("assessPendingOpportunities (database)", () =>
     await seedOpportunity("popular", 3);
     await seedOpportunity("pagada", 1, { assessedAt: new Date(), competitionScore: 10, buildabilityScore: 10 });
 
-    const byDefault = await getOpportunities(DEFAULT_WEIGHTS, 20, db);
+    const byDefault = await getOpportunities(DEFAULT_WEIGHTS, db);
     const marketFirst = await getOpportunities(
       { frequency: 5, intensity: 5, willingness: 5, competition: 50, buildability: 50 },
-      20,
       db,
     );
 

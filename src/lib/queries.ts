@@ -48,6 +48,18 @@ const evidence = {
   willingnessNone: countWhere(sql`${pains.willingnessToPay} = 'none'`),
   willingnessImplied: countWhere(sql`${pains.willingnessToPay} = 'implied'`),
   willingnessExplicit: countWhere(sql`${pains.willingnessToPay} = 'explicit'`),
+  verticals: sql<Vertical[]>`array_agg(distinct ${pains.vertical})`,
+};
+
+/** The most telling pain first: strongest intensity, then explicit willingness to pay. */
+const strongestFirst = sql`
+  case ${pains.intensity} when 'high' then 0 when 'medium' then 1 else 2 end,
+  case ${pains.willingnessToPay} when 'explicit' then 0 when 'implied' then 1 else 2 end,
+  ${pains.id}`;
+
+const representative = {
+  topQuote: sql<string>`(array_agg(${pains.quote} order by ${strongestFirst}))[1]`,
+  topQuoteUrl: sql<string>`(array_agg(${signals.url} order by ${strongestFirst}))[1]`,
 };
 
 function withScores<T extends Parameters<typeof axisScores>[0] & Parameters<typeof axisScores>[1]>(
@@ -59,9 +71,9 @@ function withScores<T extends Parameters<typeof axisScores>[0] & Parameters<type
 }
 
 /** All opportunities, best total score first for the given weights (ADR-0005). */
-export async function getOpportunities(weights: Weights, limit = 20, db: Database = getDb()) {
+export async function getOpportunities(weights: Weights, db: Database = getDb()) {
   const rows = await db
-    .select({ ...getTableColumns(opportunities), ...evidence })
+    .select({ ...getTableColumns(opportunities), ...evidence, ...representative })
     .from(opportunities)
     .innerJoin(pains, eq(pains.opportunityId, opportunities.id))
     .innerJoin(signals, eq(pains.signalId, signals.id))
@@ -74,8 +86,7 @@ export async function getOpportunities(weights: Weights, limit = 20, db: Databas
         b.score.total - a.score.total ||
         b.signalCount - a.signalCount ||
         b.updatedAt.getTime() - a.updatedAt.getTime(),
-    )
-    .slice(0, limit);
+    );
 }
 
 export async function getOpportunity(id: number, weights: Weights, db: Database = getDb()) {

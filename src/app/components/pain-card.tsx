@@ -1,10 +1,16 @@
 import { INTENSITY_LABELS, VERTICAL_LABELS, WTP_LABELS } from "@/lib/pains";
 import type { Pain } from "@/lib/db/schema";
+import { sourceLabel } from "@/lib/sources/types";
 
 type PainWithSource = Pick<
   Pain,
   "description" | "persona" | "quote" | "vertical" | "intensity" | "willingnessToPay"
-> & { url: string; source: string; author?: string | null };
+> & {
+  url: string;
+  source: string;
+  sourceMetadata?: Record<string, unknown> | null;
+  author?: string | null;
+};
 
 export function Badge({ children, tone = "zinc" }: { children: React.ReactNode; tone?: "zinc" | "emerald" | "amber" }) {
   const tones = {
@@ -35,7 +41,7 @@ export function PainCard({ pain }: { pain: PainWithSource }) {
         rel="noreferrer"
         className="mt-3 self-start text-xs text-emerald-400 hover:underline"
       >
-        Ver fuente ({pain.source}
+        Ver fuente ({sourceLabel(pain.source, pain.sourceMetadata)}
         {pain.author ? ` · ${pain.author}` : ""}) →
       </a>
     </div>

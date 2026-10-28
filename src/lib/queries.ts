@@ -26,7 +26,12 @@ export async function getRecentSignals(limit = 20) {
 
 export async function getRecentPains(limit = 20) {
   return getDb()
-    .select({ ...getTableColumns(pains), url: signals.url, source: signals.source })
+    .select({
+      ...getTableColumns(pains),
+      url: signals.url,
+      source: signals.source,
+      sourceMetadata: signals.metadata,
+    })
     .from(pains)
     .innerJoin(signals, eq(pains.signalId, signals.id))
     .orderBy(desc(signals.publishedAt), pains.id)
@@ -105,6 +110,7 @@ export async function getOpportunity(id: number, weights: Weights, db: Database 
       ...getTableColumns(pains),
       url: signals.url,
       source: signals.source,
+      sourceMetadata: signals.metadata,
       author: signals.author,
       postTitle: signals.title,
       publishedAt: signals.publishedAt,

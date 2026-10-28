@@ -91,8 +91,22 @@ Criterios de aceptación:
 - Si ningún resultado cumple los filtros, se indica y se ofrece limpiarlos.
 - La actividad reciente (dolores y señales) pasa a su propia página.
 
-### H6. Ingestar Reddit · M
-Igual que H1, para una lista configurable de subreddits.
+### H6. Ingestar Reddit · M · ✅ hecha
+**Como** usuario **quiero** que el sistema recolecte posts de una lista configurable de
+subreddits **para** tener más gente contando sus problemas, no sólo la audiencia de Hacker News.
+
+Criterios de aceptación:
+- Usa la API oficial de Reddit con OAuth (credenciales en variables de entorno, nunca en el código).
+- Dado un job programado, cuando se ejecuta, entonces guarda los posts nuevos de cada subreddit
+  configurado sin duplicar los existentes, igual que H1.
+- Descarta lo que no sirve como señal: posts fijados, eliminados, sólo con link, para adultos o
+  del bot moderador.
+- Cada señal guarda el subreddit, el puntaje y la cantidad de comentarios.
+- Si Reddit no está configurado o falla, las demás fuentes se ingieren igual y el error se
+  informa claramente.
+
+Notas: ver `docs/adr/0006-fuente-reddit.md`, en especial las condiciones de uso antes de
+monetizar.
 
 ### H8. Evaluar la calidad de la extracción · S · 🟡 herramienta lista, falta etiquetar
 **Como** usuario **quiero** un conjunto de posts reales con los dolores esperados **para**

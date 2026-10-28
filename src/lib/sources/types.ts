@@ -22,3 +22,9 @@ export interface SourceAdapter {
   domain: Domain;
   fetchSignals(options?: FetchOptions): Promise<RawSignal[]>;
 }
+
+/** Human-readable source, e.g. "r/smallbusiness" for Reddit, "hackernews" otherwise. */
+export function sourceLabel(source: string, metadata?: Record<string, unknown> | null): string {
+  if (source === "reddit" && typeof metadata?.subreddit === "string") return `r/${metadata.subreddit}`;
+  return source;
+}

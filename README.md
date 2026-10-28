@@ -9,19 +9,23 @@ los agrupa, los puntúa y los muestra como ideas accionables con evidencia traza
 - Metodología y agentes (PO, arquitecto, desarrollador, QA): [`CLAUDE.md`](CLAUDE.md)
 
 Estado: **fase 1 en curso**. Listas: H1 (ingesta de Hacker News), H2 (extracción de dolores con IA),
-H3 (agrupación en oportunidades), H4 (puntaje) y H5 (tablero con filtros). H8 (evaluación de la
-extracción): herramienta lista, etiquetado pendiente.
+H3 (agrupación en oportunidades), H4 (puntaje), H5 (tablero con filtros) y H6 (Reddit como fuente).
+H8 (evaluación de la extracción): herramienta lista, etiquetado pendiente.
 
 ## Desarrollo local
 
 Requisitos: Node 22 y PostgreSQL 16.
+
+Fuentes: Hacker News funciona sin configuración. Reddit necesita una app gratuita de tipo
+*script* en <https://www.reddit.com/prefs/apps> y las variables `REDDIT_*` de `.env.example`
+(ver [ADR-0006](docs/adr/0006-fuente-reddit.md), incluidas las condiciones de uso comercial).
 
 ```bash
 npm install
 cp .env.example .env          # ajusta DATABASE_URL y TEST_DATABASE_URL
 npm run db:migrate            # crea las tablas
 npm run ingest                # recolecta señales de todas las fuentes
-npm run ingest -- hackernews  # o de una fuente específica
+npm run ingest -- hackernews  # o de una fuente específica (hackernews, reddit)
 npm run extract               # extrae dolores de las señales pendientes (requiere ANTHROPIC_API_KEY)
 npm run extract -- --limit 10 # procesa solo 10
 npm run cluster               # agrupa los dolores nuevos en oportunidades (requiere ANTHROPIC_API_KEY)
@@ -53,7 +57,7 @@ src/
   app/                 # interfaz web (Next.js App Router)
   lib/
     db/                # esquema Drizzle y conexión
-    sources/           # adaptadores de fuentes (uno por fuente, ver ADR-0002)
+    sources/           # adaptadores de fuentes: Hacker News y Reddit (ADR-0002, ADR-0006)
     ingest.ts          # guarda señales nuevas sin duplicar
     pains.ts           # esquema de un dolor (verticales, intensidad, disposición a pagar)
     extraction.ts      # extracción de dolores con Claude (ADR-0003)

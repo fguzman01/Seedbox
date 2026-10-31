@@ -135,3 +135,22 @@ Criterios de aceptación:
 
 Notas: pasó de S a M al sumar la protección de acceso, necesaria porque es la primera
 funcionalidad que escribe datos desde la web.
+
+## Fase 1b: operar sin costos extra de IA
+
+### H9. Analista con Claude Code · M · ✅ hecha
+**Como** usuario **quiero** que el análisis con IA lo haga Claude Code con mi suscripción
+**para** no pagar saldo de la API además de lo que ya pago cada mes.
+
+Criterios de aceptación:
+- El sitio expone una API privada (con token) que entrega trabajo pendiente de extracción,
+  agrupamiento y evaluación, y recibe los resultados.
+- Los resultados pasan por exactamente la misma validación que el modo API (citas verificadas,
+  referencias válidas, competidores con link); reenviar resultados no duplica datos.
+- Un skill del repo describe el procedimiento diario y los formatos, usando las mismas reglas de
+  análisis que el modo API.
+- Railway sólo recolecta posts; el análisis no requiere `ANTHROPIC_API_KEY`.
+- El modo API sigue disponible como alternativa.
+
+Notas: ver `docs/adr/0008-analista-claude-code.md` y `docs/deploy.md`.
+

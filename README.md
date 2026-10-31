@@ -10,7 +10,8 @@ los agrupa, los puntúa y los muestra como ideas accionables con evidencia traza
 
 Estado: **fase 1 en curso**. Listas: H1 (ingesta de Hacker News), H2 (extracción de dolores con IA),
 H3 (agrupación en oportunidades), H4 (puntaje), H5 (tablero con filtros), H6 (Reddit como fuente) y
-H7 (favoritas y notas). H8 (evaluación de la extracción): herramienta lista, etiquetado pendiente.
+H7 (favoritas y notas) y H9 (análisis con Claude Code, sin costos de API). H8 (evaluación de la
+extracción): herramienta lista, etiquetado pendiente.
 
 ## Desarrollo local
 
@@ -40,7 +41,9 @@ recientes, `/labeling` etiquetado (sólo en desarrollo).
 
 ## Despliegue
 
-Guía paso a paso para Railway (sitio, base de datos y job diario): [`docs/deploy.md`](docs/deploy.md).
+Guía paso a paso: [`docs/deploy.md`](docs/deploy.md). Railway aloja el sitio, la base de datos y
+la recolección diaria de posts; el análisis con IA lo hace una tarea programada de Claude Code con
+el skill `seedbox-analyst`, usando la suscripción de Claude en vez de la API (ADR-0008).
 
 Antes de publicar el sitio, define `SEEDBOX_BASIC_AUTH=usuario:clave`: todo el sitio pedirá esas
 credenciales y sólo con ellas se pueden marcar favoritas o escribir notas. Sin la variable, en
@@ -58,7 +61,8 @@ Para medir la calidad de la extracción, ver [`evals/extraction/README.md`](eval
 | `npm run db:generate` | Genera una migración SQL a partir de `src/lib/db/schema.ts` |
 | `npm run db:migrate` | Aplica las migraciones pendientes |
 | `npm run db:migrate:deploy` | Igual, sin herramientas de desarrollo (lo usa Railway antes de cada despliegue) |
-| `npm run pipeline` | `ingest → extract → cluster → assess` en una sola corrida (el job diario) |
+| `npm run pipeline` | `ingest → extract → cluster → assess` con la API de Claude (modo de pago por uso) |
+| `npm run agent -- status` | Trabajo pendiente para el analista de Claude Code (`work` y `submit`: ver el skill) |
 
 ## Estructura
 
@@ -77,7 +81,8 @@ src/
     scoring.ts         # ejes y puntaje total con pesos ajustables (ADR-0005)
     filters.ts         # filtros, orden y paginación del tablero (H5)
     notes.ts           # favoritas y notas (H7)
-    auth.ts            # protección de acceso de un solo usuario (ADR-0007)
+    auth.ts            # protección de acceso de un solo usuario (ADR-0007) y token del analista
+    agent.ts           # intercambio de trabajo con el analista de Claude Code (ADR-0008)
   proxy.ts             # autenticación básica opcional para todo el sitio
     assessment.ts      # evaluación de mercado con Claude y búsqueda web
     assess.ts          # evalúa las oportunidades pendientes o desactualizadas

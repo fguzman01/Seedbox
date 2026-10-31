@@ -1,0 +1,11 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "build": {
+    "buildCommand": "echo 'no build needed for the pipeline'"
+  },
+  "deploy": {
+    "startCommand": "npm run pipeline",
+    "cronSchedule": "17 10 * * *",
+    "restartPolicyType": "NEVER"
+  }
+}

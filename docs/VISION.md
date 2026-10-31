@@ -28,6 +28,17 @@ ordena lo que el mercado ya está diciendo.
    inicial en el mercado hispanohablante (poco atendido por las herramientas existentes,
    que están casi todas en inglés).
 
+### Alcance: software en general
+
+El radar cubre **cualquier oportunidad cuya solución sea un producto de software**, sin
+restringirse a una vertical. La IA etiqueta cada dolor con una vertical (pymes, salud,
+educación, herramientas para desarrolladores, etc.) y el usuario filtra en el tablero.
+
+A futuro, si la plataforma funciona, se pueden sumar **otros dominios**, por ejemplo
+negocios físicos ("¿en qué zona de una ciudad conviene abrir un restaurante?"). El modelo
+de datos ya distingue el dominio de cada señal (ver `docs/adr/0002-fuentes-y-dominios.md`),
+pero no se construye nada de eso hasta terminar la fase 1.
+
 ## 4. Flujo del MVP
 
 ```
@@ -78,7 +89,7 @@ Los pesos se exponen en la interfaz para que el usuario los ajuste a su perfil.
 | 1. Radar personal | Ingesta HN + Reddit, extracción, clustering, scoring, tablero | Herramienta usable por el autor |
 | 2. Profundizar | Más fuentes, "deep dive" por oportunidad (competidores, tamaño, MVP sugerido), alertas semanales | Reporte semanal útil |
 | 3. Producto público | Auth, planes, landing, nichos en español | Primeros usuarios pagos |
-| 4. Expansión | Oportunidades fuera del software | — |
+| 4. Expansión | Otros dominios (p. ej. negocios físicos por ubicación) | Nuevos adaptadores y perfiles de scoring |
 
 ## 7. Monetización (hipótesis, a validar en fase 3)
 

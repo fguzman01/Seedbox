@@ -3,6 +3,13 @@
 Seedbox es un radar de oportunidades de software impulsado por IA. Lee `docs/VISION.md`
 antes de proponer o implementar cualquier funcionalidad.
 
+Antes de escribir código de Next.js, lee `AGENTS.md`: esta versión de Next.js tiene cambios
+respecto de lo que conocen los modelos, y la documentación está en `node_modules/next/dist/docs/`.
+
+## Comandos
+
+`npm run lint`, `npm run typecheck`, `npm test`, `npm run build`. Ver `README.md`.
+
 ## Idioma
 
 - Documentación, historias de usuario y comunicación: **español**.

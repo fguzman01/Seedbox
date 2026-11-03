@@ -28,9 +28,10 @@ Haz merge del pull request en GitHub para que todo el código quede en `main`.
 
 1. En Railway, **New Project → Deploy from GitHub repo** → `fguzman01/Seedbox`. Ese primer
    servicio será el sitio: en **Settings** renómbralo a `web` y confirma que la rama es `main`.
-   Railway lee `railway.json` del repo: compila, **aplica las migraciones cada vez que el sitio
-   arranca** (crean las tablas la primera vez y no hacen nada si ya están al día), arranca el sitio
-   y usa `/api/health` como health check.
+   Railway lee `railway.json` del repo: compila y arranca con `scripts/railway-start.mjs`, que
+   **aplica las migraciones** (crean las tablas la primera vez y no hacen nada si ya están al día)
+   y luego levanta el sitio. Ese mismo archivo lo usan todos los servicios del repo; cada uno elige
+   su rol con la variable `SEEDBOX_SERVICE` (sin ella, es el sitio).
 2. En el proyecto, **+ Create → Database → PostgreSQL**.
 3. En `web` → **Variables**:
 
@@ -43,24 +44,26 @@ Haz merge del pull request en GitHub para que todo el código quede en `main`.
 4. `web` → **Settings → Networking → Generate Domain**. Anota la URL, por ejemplo
    `https://seedbox-production.up.railway.app`.
 5. Abre la URL: el navegador te pedirá usuario y clave. El tablero aparecerá vacío.
+6. Opcional: `web` → **Settings → Deploy → Healthcheck Path** = `/api/health`, para que Railway no
+   publique un despliegue que no llega a la base de datos.
 
 ## 3. Railway: recolección diaria de posts
 
 1. **+ Create → GitHub Repo** → `fguzman01/Seedbox` otra vez. Renómbralo a `ingest`.
-2. En **Settings**, en la opción del archivo de configuración (*Config as code / Railway config
-   file*), indica `/railway.cron.json`. Con eso el servicio corre `npm run ingest` todos los días a
-   las **10:17 UTC** (07:17 en Chile en horario de verano) y termina.
-3. **Variables**:
+2. **Variables**:
 
    | Variable | Valor |
    |---|---|
+   | `SEEDBOX_SERVICE` | `ingest` (sin esto, el servicio levantaría otra copia del sitio) |
    | `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` |
    | `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET`, `REDDIT_USER_AGENT` | Opcional (ver ADR-0006); sin ellas sólo se usa Hacker News |
    | `SEEDBOX_SUBREDDITS` | Opcional |
 
-4. Ejecútalo una vez a mano desde el panel y revisa los logs: deberías ver
-   `[hackernews] fetched=… inserted=…`. Si no configuraste Reddit, verás un aviso de que falta;
-   es normal.
+3. **Settings → Deploy → Cron Schedule** = `17 10 * * *`: corre todos los días a las **10:17 UTC**
+   (07:17 en Chile en horario de verano), recolecta y termina.
+4. Despliega y revisa el log: deberías ver `[seedbox] starting as "ingest"`, `Migrations applied` y
+   `[hackernews] fetched=… inserted=…`. Si no configuraste Reddit verás
+   `[reddit] skipped: Reddit is not configured`; es normal.
 
 ## 4. Claude Code: permitir el acceso al sitio
 
@@ -122,10 +125,11 @@ más chicos (por ejemplo `--limit 15`) o córrelo día por medio.
 | El analista recibe `404` | Falta `SEEDBOX_AGENT_TOKEN` en `web` |
 | El analista recibe `401` | El token del entorno de Claude Code no coincide con el de `web` |
 | El analista no llega al sitio (error de red) | El dominio no está en *Allowed domains* del entorno, o falta `SEEDBOX_URL` |
-| `[reddit] failed: Reddit is not configured` | Faltan las variables `REDDIT_*` en `ingest` (Hacker News sigue funcionando) |
+| `[reddit] skipped: Reddit is not configured` | Faltan las variables `REDDIT_*` en `ingest` (Hacker News sigue funcionando) |
+| El log de `ingest` dice `next start` o `Ready in …` | Falta `SEEDBOX_SERVICE=ingest` en ese servicio: está levantando otra copia del sitio |
 
 ## Alternativa: análisis con la API de Claude (pago por uso)
 
 Si algún día prefieres no depender de la suscripción, el pipeline completo con la API sigue
-disponible: cambia el `startCommand` de `railway.cron.json` a `npm run pipeline` y agrega
-`ANTHROPIC_API_KEY` al servicio. Costos y detalles en ADR-0003, ADR-0004 y ADR-0005.
+disponible: en el servicio `ingest` cambia `SEEDBOX_SERVICE` a `pipeline` y agrega
+`ANTHROPIC_API_KEY`. Costos y detalles en ADR-0003, ADR-0004 y ADR-0005.

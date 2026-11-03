@@ -14,7 +14,8 @@ if (!url) {
   process.exit(1);
 }
 
-const client = postgres(url, { max: 1 });
+// onnotice: silence Postgres "already exists, skipping" notices on every start.
+const client = postgres(url, { max: 1, onnotice: () => {} });
 try {
   await migrate(drizzle(client), { migrationsFolder: "./drizzle" });
   console.log("Migrations applied");

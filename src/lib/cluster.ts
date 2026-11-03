@@ -1,9 +1,67 @@
 import { and, asc, eq, inArray, isNull, notInArray, sql } from "drizzle-orm";
-import type { PainClusterer } from "./clustering";
+import type { PainClusterer, ResolvedClustering } from "./clustering";
 import { resolveClustering } from "./clustering";
 import type { Database } from "./db/client";
 import { opportunities, pains, signals } from "./db/schema";
-import { DOMAINS } from "./sources/types";
+import { DOMAINS, type Domain } from "./sources/types";
+
+/** Unclustered pains of a domain, oldest first. Shared with the Claude Code analyst (H9). */
+export async function getUnclusteredPains(db: Database, domain: Domain, limit: number, skip: number[] = []) {
+  return db
+    .select({
+      id: pains.id,
+      description: pains.description,
+      persona: pains.persona,
+      quote: pains.quote,
+      vertical: pains.vertical,
+    })
+    .from(pains)
+    .innerJoin(signals, eq(pains.signalId, signals.id))
+    .where(
+      and(
+        isNull(pains.opportunityId),
+        eq(signals.domain, domain),
+        skip.length ? notInArray(pains.id, skip) : undefined,
+      ),
+    )
+    .orderBy(asc(pains.id))
+    .limit(limit);
+}
+
+/** Every opportunity of a domain, as shown to whoever clusters new pains. */
+export async function getCatalog(db: Database, domain: Domain) {
+  return db
+    .select({ id: opportunities.id, title: opportunities.title, summary: opportunities.summary })
+    .from(opportunities)
+    .where(eq(opportunities.domain, domain))
+    .orderBy(asc(opportunities.id));
+}
+
+/** Writes a validated clustering answer: creates new opportunities and assigns the pains. */
+export async function applyClustering(db: Database, domain: Domain, resolved: ResolvedClustering, model: string) {
+  await db.transaction(async (tx) => {
+    const created = resolved.create.length
+      ? await tx
+          .insert(opportunities)
+          .values(resolved.create.map((o) => ({ domain, title: o.title, summary: o.summary, model })))
+          .returning({ id: opportunities.id })
+      : [];
+    const newIds = new Map(resolved.create.map((o, i) => [o.ref, created[i].id]));
+
+    const touched = new Set<number>();
+    for (const [painId, target] of resolved.assign) {
+      const opportunityId = typeof target === "number" ? target : newIds.get(target)!;
+      touched.add(opportunityId);
+      await tx.update(pains).set({ opportunityId }).where(eq(pains.id, painId));
+    }
+    if (touched.size) {
+      await tx
+        .update(opportunities)
+        .set({ updatedAt: sql`now()` })
+        .where(inArray(opportunities.id, [...touched]));
+    }
+  });
+}
 
 export interface ClusterRunResult {
   batches: number;
@@ -35,34 +93,11 @@ export async function clusterPendingPains(
 
   for (const domain of DOMAINS) {
     while (result.batches < maxBatches) {
-      const batch = await db
-        .select({
-          id: pains.id,
-          description: pains.description,
-          persona: pains.persona,
-          quote: pains.quote,
-          vertical: pains.vertical,
-        })
-        .from(pains)
-        .innerJoin(signals, eq(pains.signalId, signals.id))
-        .where(
-          and(
-            isNull(pains.opportunityId),
-            eq(signals.domain, domain),
-            skip.length ? notInArray(pains.id, skip) : undefined,
-          ),
-        )
-        .orderBy(asc(pains.id))
-        .limit(batchSize);
+      const batch = await getUnclusteredPains(db, domain, batchSize, skip);
       if (batch.length === 0) break;
       result.batches++;
 
-      const catalog = await db
-        .select({ id: opportunities.id, title: opportunities.title, summary: opportunities.summary })
-        .from(opportunities)
-        .where(eq(opportunities.domain, domain))
-        .orderBy(asc(opportunities.id));
-      const input = { opportunities: catalog, pains: batch };
+      const input = { opportunities: await getCatalog(db, domain), pains: batch };
 
       let resolved;
       try {
@@ -75,35 +110,7 @@ export async function clusterPendingPains(
         continue;
       }
 
-      await db.transaction(async (tx) => {
-        const created = resolved.create.length
-          ? await tx
-              .insert(opportunities)
-              .values(
-                resolved.create.map((o) => ({
-                  domain,
-                  title: o.title,
-                  summary: o.summary,
-                  model: clusterer.model,
-                })),
-              )
-              .returning({ id: opportunities.id })
-          : [];
-        const newIds = new Map(resolved.create.map((o, i) => [o.ref, created[i].id]));
-
-        const touched = new Set<number>();
-        for (const [painId, target] of resolved.assign) {
-          const opportunityId = typeof target === "number" ? target : newIds.get(target)!;
-          touched.add(opportunityId);
-          await tx.update(pains).set({ opportunityId }).where(eq(pains.id, painId));
-        }
-        if (touched.size) {
-          await tx
-            .update(opportunities)
-            .set({ updatedAt: sql`now()` })
-            .where(inArray(opportunities.id, [...touched]));
-        }
-      });
+      await applyClustering(db, domain, resolved, clusterer.model);
 
       skip.push(...resolved.unassigned);
       result.assigned += resolved.assign.size;

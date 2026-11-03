@@ -46,3 +46,19 @@ export function checkWriteAccess(
     ? { allowed: true }
     : { allowed: false, reason: "Credenciales inválidas." };
 }
+
+/**
+ * Token for the Claude Code analyst API (ADR-0008). Accepts `Authorization: Bearer <token>` or
+ * `X-Seedbox-Agent-Token: <token>`, so it can coexist with Basic Auth on the same client.
+ * Without SEEDBOX_AGENT_TOKEN the API is disabled.
+ */
+export function checkAgentToken(
+  headers: { authorization?: string | null; agentToken?: string | null },
+  env: Record<string, string | undefined> = process.env,
+): { ok: true } | { ok: false; status: 401 | 404 } {
+  const expected = env.SEEDBOX_AGENT_TOKEN;
+  if (!expected) return { ok: false, status: 404 };
+  const bearer = /^Bearer\s+(\S+)$/i.exec(headers.authorization?.trim() ?? "")?.[1];
+  const provided = headers.agentToken?.trim() || bearer;
+  return provided && safeEqual(provided, expected) ? { ok: true } : { ok: false, status: 401 };
+}

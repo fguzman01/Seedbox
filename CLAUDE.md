@@ -27,6 +27,9 @@ Trabajamos con un flujo ágil liviano, ejecutado por agentes con roles definidos
 | Desarrollador | `developer` | Implementa una historia a la vez, con tests |
 | Tester / QA | `qa-tester` | Verifica criterios de aceptación, escribe tests de integración/e2e |
 
+Además, el skill `seedbox-analyst` (`.claude/skills/seedbox-analyst/`) hace el análisis diario
+con Claude Code a través de la API del sitio (ADR-0008).
+
 Ciclo de una historia:
 
 1. **PO** toma una necesidad y la escribe en `docs/backlog.md` con formato

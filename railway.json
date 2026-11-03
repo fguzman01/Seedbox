@@ -4,8 +4,7 @@
     "buildCommand": "npm run build"
   },
   "deploy": {
-    "startCommand": "npm run start",
-    "preDeployCommand": ["npm run db:migrate:deploy"],
+    "startCommand": "npm run db:migrate:deploy && npm run start",
     "healthcheckPath": "/api/health",
     "healthcheckTimeout": 120,
     "restartPolicyType": "ON_FAILURE",

@@ -28,8 +28,9 @@ Haz merge del pull request en GitHub para que todo el código quede en `main`.
 
 1. En Railway, **New Project → Deploy from GitHub repo** → `fguzman01/Seedbox`. Ese primer
    servicio será el sitio: en **Settings** renómbralo a `web` y confirma que la rama es `main`.
-   Railway lee `railway.json` del repo: compila, **corre las migraciones antes de cada
-   despliegue**, arranca el sitio y usa `/api/health` como health check.
+   Railway lee `railway.json` del repo: compila, **aplica las migraciones cada vez que el sitio
+   arranca** (crean las tablas la primera vez y no hacen nada si ya están al día), arranca el sitio
+   y usa `/api/health` como health check.
 2. En el proyecto, **+ Create → Database → PostgreSQL**.
 3. En `web` → **Variables**:
 
@@ -114,8 +115,9 @@ más chicos (por ejemplo `--limit 15`) o córrelo día por medio.
 
 | Síntoma | Causa probable |
 |---|---|
-| El despliegue de `web` falla en el pre-deploy | `DATABASE_URL` no está definida o no apunta a la base del proyecto |
-| El health check falla (503) | El sitio no llega a la base de datos |
+| El sitio no arranca y el log dice `DATABASE_URL is not set` o `Migration failed` | `DATABASE_URL` no está definida o no apunta a la base del proyecto |
+| El health check falla (503) | El sitio no llega a la base de datos o las tablas no existen |
+| La página dice "This page couldn't load" y el log `relation … does not exist` | Las migraciones no corrieron: revisa que el despliegue use el `railway.json` actual |
 | No puedo marcar favoritas ni escribir notas | Falta `SEEDBOX_BASIC_AUTH` en `web` |
 | El analista recibe `404` | Falta `SEEDBOX_AGENT_TOKEN` en `web` |
 | El analista recibe `401` | El token del entorno de Claude Code no coincide con el de `web` |

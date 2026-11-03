@@ -8,6 +8,7 @@ import { createClaudeExtractor } from "../src/lib/extraction";
 import { ingest } from "../src/lib/ingest";
 import { processPendingSignals } from "../src/lib/process";
 import { getSource, SOURCE_IDS } from "../src/lib/sources";
+import { SourceNotConfiguredError } from "../src/lib/sources/types";
 
 // Load .env when present; in production the variables come from the environment.
 try {
@@ -41,7 +42,8 @@ async function main() {
         const result = await ingest(db, getSource(id));
         log("ingest", `${id}: fetched=${result.fetched} inserted=${result.inserted}`);
       } catch (error) {
-        fail(`ingest ${id}`, error);
+        if (error instanceof SourceNotConfiguredError) log("ingest", `${id}: skipped (${error.message})`);
+        else fail(`ingest ${id}`, error);
       }
     }
 

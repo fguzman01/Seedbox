@@ -1,6 +1,7 @@
 import { createDb } from "../src/lib/db/client";
 import { ingest } from "../src/lib/ingest";
 import { getSource, SOURCE_IDS } from "../src/lib/sources";
+import { SourceNotConfiguredError } from "../src/lib/sources/types";
 
 // Load .env when present; in production the variables come from the environment.
 try {
@@ -12,12 +13,17 @@ async function main() {
   const targets = ids.length > 0 ? ids : SOURCE_IDS;
   const { db, close } = createDb();
   try {
-    // One failing source (missing credentials, API down) must not stop the others.
+    // One failing source (API down) must not stop the others. When ingesting every source, an
+    // optional one without credentials is skipped rather than counted as a failure.
     for (const id of targets) {
       try {
         const result = await ingest(db, getSource(id));
         console.log(`[${result.source}] fetched=${result.fetched} inserted=${result.inserted}`);
       } catch (error) {
+        if (error instanceof SourceNotConfiguredError && ids.length === 0) {
+          console.warn(`[${id}] skipped: ${error.message}`);
+          continue;
+        }
         console.error(`[${id}] failed: ${error instanceof Error ? error.message : error}`);
         process.exitCode = 1;
       }

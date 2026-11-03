@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { createRedditAdapter, createRedditAdapterFromEnv, DEFAULT_SUBREDDITS, isUsefulPost } from "./reddit";
+import { SourceNotConfiguredError } from "./types";
 
 const T = (iso: string) => Date.parse(iso) / 1000;
 
@@ -166,8 +167,9 @@ describe("reddit adapter", () => {
 });
 
 describe("createRedditAdapterFromEnv", () => {
-  it("requires credentials", () => {
+  it("requires credentials, reporting it as a source that is not configured", () => {
     expect(() => createRedditAdapterFromEnv({})).toThrow("REDDIT_CLIENT_ID");
+    expect(() => createRedditAdapterFromEnv({})).toThrow(SourceNotConfiguredError);
   });
 
   it("builds the adapter with configured or default subreddits", () => {

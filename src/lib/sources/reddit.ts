@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { FetchOptions, RawSignal, SourceAdapter } from "./types";
+import { SourceNotConfiguredError, type FetchOptions, type RawSignal, type SourceAdapter } from "./types";
 
 const TOKEN_URL = "https://www.reddit.com/api/v1/access_token";
 const API_URL = "https://oauth.reddit.com";
@@ -147,7 +147,7 @@ export function createRedditAdapterFromEnv(
 ): SourceAdapter {
   const { REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, REDDIT_USER_AGENT, SEEDBOX_SUBREDDITS } = env;
   if (!REDDIT_CLIENT_ID || !REDDIT_CLIENT_SECRET) {
-    throw new Error(
+    throw new SourceNotConfiguredError(
       "Reddit is not configured: set REDDIT_CLIENT_ID and REDDIT_CLIENT_SECRET (create a script app at https://www.reddit.com/prefs/apps)",
     );
   }

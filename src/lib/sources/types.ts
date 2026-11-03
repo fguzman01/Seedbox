@@ -17,6 +17,9 @@ export interface FetchOptions {
   since?: Date;
 }
 
+/** An optional source without credentials: skipped when ingesting all sources, not a failure. */
+export class SourceNotConfiguredError extends Error {}
+
 export interface SourceAdapter {
   id: string;
   domain: Domain;

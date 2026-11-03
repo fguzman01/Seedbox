@@ -4,10 +4,6 @@
     "buildCommand": "npm run build"
   },
   "deploy": {
-    "startCommand": "npm run db:migrate:deploy && npm run start",
-    "healthcheckPath": "/api/health",
-    "healthcheckTimeout": 120,
-    "restartPolicyType": "ON_FAILURE",
-    "restartPolicyMaxRetries": 5
+    "startCommand": "node scripts/railway-start.mjs"
   }
 }

@@ -354,18 +354,34 @@ Exchange, en especial las de quienes buscan software para una tarea concreta **p
 fuente de público amplio que no dependa de la aprobación de Reddit.
 
 Criterios de aceptación:
-- Dado un job programado, cuando se ejecuta, entonces guarda las preguntas nuevas de una lista
-  configurable de sitios (por ejemplo Software Recommendations, Personal Finance & Money,
-  Parenting, The Workplace, Freelancing) sin duplicar las existentes, igual que H1.
-- Cada señal guarda el sitio, el link a la pregunta, el puntaje y la cantidad de respuestas.
-- Cada cita mostrada enlaza a la pregunta original y la atribución cumple la licencia CC BY-SA.
-- Si la fuente falla o no está configurada, las demás se ingieren igual y el error se informa,
-  igual que H6.
+- Precondición para activarla en producción (el desarrollo puede empezar antes): las condiciones
+  C1–C3 de ADR-0010 están cumplidas (términos oficiales leídos por Felipe, "Help improve Claude"
+  apagado, actividad mínima por sitio medida).
+- La fuente se activa con `STACKEXCHANGE_KEY`; sin ella `ingest` registra
+  `[stackexchange] skipped` y H14 la muestra como "no configurada", igual que Reddit.
+  `SEEDBOX_SE_SITES` es opcional y trae por defecto la lista de ADR-0010 (softwarerecs, webapps,
+  money, workplace, academia, freelancing, expatriates, parenting).
+- Dado un job programado, cuando se ejecuta, entonces guarda las preguntas nuevas de cada sitio
+  sin duplicar las existentes (`externalId` = `sitio:question_id`), igual que H1.
+- Cada señal guarda el sitio, el link a la pregunta, el puntaje, la cantidad de respuestas, las
+  tags, el autor con link a su perfil, la licencia y las marcas de cerrada y de respuesta aceptada.
+- Cada cita mostrada lleva atribución verificable: autor con link a su perfil, link a la pregunta,
+  sitio de origen y licencia CC BY-SA con link.
+- Se aplican las reglas de ADR-0009: sólo preguntas con al menos 24 h, tope de 25 por sitio y
+  corrida, y log por sitio con traídas, descartadas por tope e insertadas. La primera corrida trae
+  como máximo 8 días.
+- El título y el cuerpo se guardan como texto plano sin entidades HTML, y una cita copiada de una
+  pregunta con formato (listas, enlaces, código) pasa la verificación de citas textuales.
+- Se excluyen las preguntas con puntaje negativo; las cerradas y las respondidas se guardan.
+- Una pregunta guardada hace menos de 30 días que falta en dos revisiones seguidas se borra junto
+  con sus dolores, y el log lo informa.
+- Se respetan `backoff` y `quota_remaining`; un throttle corta sólo esta fuente y las demás siguen.
 - Dados 7 días activa, cuando miro H14, entonces aparece como fuente propia con sus conteos y
-  verticales.
+  verticales, desglosados por sitio. Si aporta menos de ~10 dolores por semana, el PO reconsidera
+  mantenerla.
 
 Notas: salió de espera el 2026-11-04 por el posible cierre del acceso nuevo a Reddit (ADR-0009).
-Requiere al `architect` y un ADR nuevo: revisar los términos de la API
-de Stack Exchange (restringen la recolección automatizada para IA generativa; confirmar si
-alcanza a analizar con Claude sin entrenar), la cuota (10.000 consultas diarias con clave
-gratuita) y el uso comercial antes de la fase 3.
+Decisión técnica en ADR-0010 (aprobada con condiciones), que incluye el borrador de la sección
+para `docs/deploy.md`. El desglose por sitio requiere generalizar `subredditOf` en
+`src/lib/source-mix.ts` (hoy lee `metadata.subreddit`). Antes de la fase 3 (comercial), revisar
+los términos o consultar por escrito a Stack Overflow; plan B en ADR-0010.

@@ -308,7 +308,7 @@ a verificar (actividad y reglas de cada comunidad): smallbusiness, freelance, En
 SomebodyMakeThis, software, Bookkeeping, Accounting, propertymanagement, Teachers, nursing,
 Parenting, personalfinance, Etsy, y alguna comunidad en español para el foco de la fase 2.
 
-### H12. Distinguir la evidencia débil en el tablero · S · ⬜ pendiente
+### H12. Distinguir la evidencia débil en el tablero · S · ✅ hecha
 **Como** usuario **quiero** ver de inmediato qué oportunidades se apoyan en una sola persona
 **para** no confundir una anécdota con un dolor compartido.
 
@@ -321,6 +321,18 @@ Criterios de aceptación:
   entonces deja de marcarse como débil sin intervención manual.
 - El puntaje no cambia por esta historia: la marca y el filtro sólo hacen visible lo que la
   frecuencia ya mide.
+
+Implementación: "autor distinto" es un par (fuente, autor): el mismo nombre en dos fuentes cuenta
+como dos personas, porque los nombres de usuario no son comunes entre fuentes; las señales sin
+autor no suman (no prueban una segunda persona). Es el mismo conteo `scoringEvidence.authorCount`
+(`src/lib/queries.ts`) que usan la frecuencia, el orden de evaluación de H11 y esta historia, así
+que la marca refleja exactamente lo que mide la frecuencia; antes contaba nombres sin mirar la
+fuente, y sólo cambia el puntaje de una oportunidad con el mismo nombre en dos fuentes (en la base
+de desarrollo no había ninguna). La marca "evidencia débil" (0 o 1 autor) se calcula al leer
+(`src/lib/evidence.ts`), sin migración, y explica el motivo al pasar el mouse o al enfocarla con
+teclado (tooltip con `aria-describedby`). Filtro en la URL: `?authors=2` o `?authors=3` (3 o más);
+el valor por defecto, 1, no filtra, así que las oportunidades sin autor identificable siguen
+visibles. Captura: `docs/screenshot-h12.png`.
 
 ### H8. Evaluar la calidad de la extracción · S · 🟡 herramienta lista, falta etiquetar
 **Como** usuario **quiero** un conjunto de posts reales con los dolores esperados **para**

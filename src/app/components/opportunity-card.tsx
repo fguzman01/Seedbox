@@ -6,6 +6,7 @@ import { AttributionLine } from "./attribution";
 import { Badge } from "./pain-card";
 import { AxisBars, TotalBadge } from "./score";
 import { StarButton } from "./star-button";
+import { WeakEvidenceBadge } from "./weak-evidence";
 
 type ScoredOpportunity = Awaited<ReturnType<typeof getOpportunities>>[number];
 
@@ -25,6 +26,7 @@ export function OpportunityCard({ opportunity: o, query }: { opportunity: Scored
         <div className="flex min-w-0 flex-wrap gap-1.5">
           <Badge tone="emerald">{VERTICAL_LABELS[o.mainVertical]}</Badge>
           {paying > 0 && <Badge tone="amber">{plural(paying, "señal de pago", "señales de pago")}</Badge>}
+          <WeakEvidenceBadge authorCount={o.authorCount} id={`weak-evidence-${o.id}`} />
         </div>
         <div className="flex shrink-0 items-start gap-2">
           <TotalBadge score={o.score} />

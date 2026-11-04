@@ -44,11 +44,19 @@ const countWhere = (condition: ReturnType<typeof sql>) =>
   sql<number>`count(*) filter (where ${condition})`.mapWith(Number);
 
 /**
+ * Distinct authors, the one count behind the frequency axis, the assessment order (H11) and the
+ * weak evidence mark and filter (H12). An author is a (source, author) pair: usernames are not
+ * shared across sources, so the same name on two sources counts as two people. Signals without
+ * an author are not counted (see `evidence.ts`).
+ */
+const distinctAuthors = sql<number>`count(distinct (${signals.source}, ${signals.author})) filter (where ${signals.author} is not null)`.mapWith(Number);
+
+/**
  * The evidence counts the score is computed from (EvidenceCounts), aggregated over an
  * opportunity's pains joined with their signals. Also used to order the assessment batch (H11).
  */
 export const scoringEvidence = {
-  authorCount: countDistinct(signals.author),
+  authorCount: distinctAuthors,
   intensityLow: countWhere(sql`${pains.intensity} = 'low'`),
   intensityMedium: countWhere(sql`${pains.intensity} = 'medium'`),
   intensityHigh: countWhere(sql`${pains.intensity} = 'high'`),

@@ -1,3 +1,4 @@
+import { meetsMinAuthors, MIN_AUTHOR_OPTIONS, type MinAuthors } from "./evidence";
 import { VERTICALS, type Vertical } from "./pains";
 
 /** Dashboard filters (H5). They live in the URL next to the weights (`w`). */
@@ -15,6 +16,8 @@ export const PAGE_SIZE = 24;
 export interface Filters {
   verticals: Vertical[];
   minScore: number;
+  /** Minimum distinct authors (H12); 1 filters nothing. */
+  minAuthors: MinAuthors;
   assessedOnly: boolean;
   payingOnly: boolean;
   starredOnly: boolean;
@@ -26,6 +29,7 @@ export interface Filters {
 export const DEFAULT_FILTERS: Filters = {
   verticals: [],
   minScore: 0,
+  minAuthors: 1,
   assessedOnly: false,
   payingOnly: false,
   starredOnly: false,
@@ -43,11 +47,13 @@ export function parseFilters(params: Params): Filters {
     .split(",")
     .filter((v): v is Vertical => (VERTICALS as string[]).includes(v));
   const minScore = Number(first(params.min));
+  const minAuthors = Number(first(params.authors));
   const limit = Number(first(params.n));
   const sort = first(params.sort);
   return {
     verticals: [...new Set(verticals)],
     minScore: Number.isFinite(minScore) ? Math.min(10, Math.max(0, minScore)) : 0,
+    minAuthors: (MIN_AUTHOR_OPTIONS as readonly number[]).includes(minAuthors) ? (minAuthors as MinAuthors) : 1,
     assessedOnly: first(params.assessed) === "1",
     payingOnly: first(params.paying) === "1",
     starredOnly: first(params.fav) === "1",
@@ -62,6 +68,7 @@ export function filtersToParams(filters: Filters): Record<string, string> {
   const params: Record<string, string> = {};
   if (filters.verticals.length) params.v = filters.verticals.join(",");
   if (filters.minScore > 0) params.min = String(filters.minScore);
+  if (filters.minAuthors > 1) params.authors = String(filters.minAuthors);
   if (filters.assessedOnly) params.assessed = "1";
   if (filters.payingOnly) params.paying = "1";
   if (filters.starredOnly) params.fav = "1";
@@ -75,6 +82,7 @@ export function hasActiveFilters(filters: Filters): boolean {
   return (
     filters.verticals.length > 0 ||
     filters.minScore > 0 ||
+    filters.minAuthors > 1 ||
     filters.assessedOnly ||
     filters.payingOnly ||
     filters.starredOnly ||
@@ -107,6 +115,7 @@ function matches(o: FilterableOpportunity, filters: Filters, ignoreVerticals = f
     if (!o.verticals.some((v) => filters.verticals.includes(v))) return false;
   }
   if (o.score.total < filters.minScore) return false;
+  if (!meetsMinAuthors(o.authorCount, filters.minAuthors)) return false;
   if (filters.assessedOnly && !o.assessedAt) return false;
   if (filters.payingOnly && o.willingnessImplied + o.willingnessExplicit === 0) return false;
   if (filters.starredOnly && !o.starredAt) return false;

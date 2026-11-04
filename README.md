@@ -40,7 +40,8 @@ npm run assess -- --no-web-search  # sin búsqueda web (más barato, sin lista d
 npm run dev                   # http://localhost:3000
 ```
 
-Páginas: `/` tablero de oportunidades (filtros, orden y pesos en la URL; `/?fav=1` favoritas),
+Páginas: `/` tablero de oportunidades (filtros, orden y pesos en la URL; `/?fav=1` favoritas,
+`/?authors=2` mínimo de autores distintos; las de un solo autor se marcan "evidencia débil"),
 `/opportunities/[id]` detalle con puntaje, notas y evidencia, `/activity` estado del analista
 (pendientes, última entrega, balance de 7 días), de dónde viene el radar (conteos y verticales por
 fuente y subreddit o sitio de Stack Exchange en 30 días, cada número enlaza a su lista filtrada) y dolores y posts recientes, `/labeling`
@@ -88,6 +89,7 @@ src/
     cluster.ts         # agrupa los dolores pendientes en oportunidades
     scoring.ts         # ejes y puntaje total con pesos ajustables (ADR-0005)
     filters.ts         # filtros, orden y paginación del tablero (H5)
+    evidence.ts        # marca de evidencia débil y filtro de autores distintos (H12)
     notes.ts           # favoritas y notas (H7)
     auth.ts            # protección de acceso de un solo usuario (ADR-0007) y token del analista
     agent.ts           # intercambio de trabajo con el analista de Claude Code (ADR-0008)

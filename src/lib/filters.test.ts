@@ -80,6 +80,24 @@ describe("applyFilters", () => {
     ]);
   });
 
+  it("filters by minimum distinct authors, combined with the other filters", () => {
+    expect(applyFilters(all, filters({ minAuthors: 1 })).total).toBe(3);
+    expect(titles(applyFilters(all, filters({ minAuthors: 2 })).items)).toEqual(["Facturación para agencias", "Agenda de turnos"]);
+    expect(titles(applyFilters(all, filters({ minAuthors: 3 })).items)).toEqual(["Agenda de turnos"]);
+    expect(titles(applyFilters(all, filters({ minAuthors: 2, payingOnly: true })).items)).toEqual(["Facturación para agencias"]);
+    expect(applyFilters(all, filters({ minAuthors: 2, verticals: ["health"] })).verticalCounts).toEqual({
+      freelance: 1,
+      finance: 1,
+      health: 1,
+    });
+  });
+
+  it("keeps opportunities without identifiable authors when no minimum is set", () => {
+    const anonymous = opportunity({ title: "Sin autor", authorCount: 0 });
+    expect(applyFilters([anonymous], DEFAULT_FILTERS).total).toBe(1);
+    expect(applyFilters([anonymous], filters({ minAuthors: 2 })).total).toBe(0);
+  });
+
   it("filters favorites", () => {
     expect(titles(applyFilters(all, filters({ starredOnly: true })).items)).toEqual(["Agenda de turnos"]);
   });
@@ -106,6 +124,7 @@ describe("filters in the URL", () => {
     const custom = filters({
       verticals: ["health", "smb"],
       minScore: 6,
+      minAuthors: 3,
       assessedOnly: true,
       payingOnly: true,
       starredOnly: true,
@@ -117,6 +136,7 @@ describe("filters in the URL", () => {
     expect(params).toEqual({
       v: "health,smb",
       min: "6",
+      authors: "3",
       assessed: "1",
       paying: "1",
       fav: "1",
@@ -134,6 +154,8 @@ describe("filters in the URL", () => {
     );
     expect(parseFilters({ min: "42", n: "9999" })).toMatchObject({ minScore: 10, limit: 500 });
     expect(parseFilters({}).limit).toBe(PAGE_SIZE);
+    for (const authors of ["0", "4", "2.5", "abc"]) expect(parseFilters({ authors }).minAuthors).toBe(1);
+    expect(parseFilters({ authors: "2" }).minAuthors).toBe(2);
   });
 
   it("detects active filters (sort and page size do not count)", () => {
@@ -141,6 +163,7 @@ describe("filters in the URL", () => {
     expect(hasActiveFilters(filters({ sort: "recent", limit: 48 }))).toBe(false);
     expect(hasActiveFilters(filters({ query: "x" }))).toBe(true);
     expect(hasActiveFilters(filters({ starredOnly: true }))).toBe(true);
+    expect(hasActiveFilters(filters({ minAuthors: 2 }))).toBe(true);
   });
 
   it("rebuilds the query string from search params", () => {

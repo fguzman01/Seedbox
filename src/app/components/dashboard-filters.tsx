@@ -11,10 +11,11 @@ import {
   type Filters,
   type Sort,
 } from "@/lib/filters";
+import { MIN_AUTHOR_LABELS, MIN_AUTHOR_OPTIONS, type MinAuthors } from "@/lib/evidence";
 import { VERTICAL_LABELS, VERTICALS, type Vertical } from "@/lib/pains";
 
 const MIN_SCORES = [0, 5, 6, 7, 8];
-const FILTER_KEYS = ["v", "min", "assessed", "paying", "fav", "q", "sort", "n"];
+const FILTER_KEYS = ["v", "min", "authors", "assessed", "paying", "fav", "q", "sort", "n"];
 
 /**
  * Writes the filters into the URL, keeping other params such as the weights (`w`).
@@ -83,7 +84,7 @@ export function DashboardFilters({
           aria-label="Buscar oportunidades"
           className="min-w-0 flex-1 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm placeholder:text-zinc-600 focus:border-emerald-500/60 focus:outline-none"
         />
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <select
             value={filters.minScore}
             onChange={(e) => update({ minScore: Number(e.target.value) })}
@@ -93,6 +94,19 @@ export function DashboardFilters({
             {MIN_SCORES.map((min) => (
               <option key={min} value={min}>
                 {min === 0 ? "Cualquier puntaje" : `Puntaje ≥ ${min}`}
+              </option>
+            ))}
+          </select>
+          <select
+            value={filters.minAuthors}
+            onChange={(e) => update({ minAuthors: Number(e.target.value) as MinAuthors })}
+            aria-label="Mínimo de autores distintos"
+            title="Autores distintos que cuentan el dolor; el mismo nombre en dos fuentes cuenta como dos."
+            className="flex-1 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm sm:flex-none"
+          >
+            {MIN_AUTHOR_OPTIONS.map((min) => (
+              <option key={min} value={min}>
+                {MIN_AUTHOR_LABELS[min]}
               </option>
             ))}
           </select>

@@ -11,6 +11,7 @@ import { Badge, PainCard } from "../../components/pain-card";
 import { Notes } from "../../components/notes";
 import { AxisBars, TotalBadge } from "../../components/score";
 import { StarButton } from "../../components/star-button";
+import { WeakEvidenceBadge } from "../../components/weak-evidence";
 
 const dateFormat = new Intl.DateTimeFormat("es-CL", { dateStyle: "medium" });
 
@@ -49,6 +50,7 @@ async function Opportunity({ params, searchParams }: PageProps<"/opportunities/[
               {VERTICAL_LABELS[v]}
             </Badge>
           ))}
+          <WeakEvidenceBadge authorCount={opportunity.authorCount} id="weak-evidence" />
         </div>
         <div className="mt-3 flex items-start gap-3">
           <h1 className="text-3xl font-semibold tracking-tight">{opportunity.title}</h1>

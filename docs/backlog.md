@@ -257,7 +257,7 @@ actividad no son comparables entre fuentes (puntos de HN contra puntaje de Reddi
 se lee de `/new`, al ingerir casi todo vale cero; el `architect` decide cómo normalizar o
 refrescar.
 
-### H15. Reddit activo con comunidades de público amplio · S · ⬜ pendiente
+### H15. Reddit activo con comunidades de público amplio · S · ⏸ en espera (Felipe revisa el acceso a Reddit)
 **Como** usuario **quiero** que el radar lea a diario subreddits donde escriben dueños de pymes,
 profesionales y personas comunes **para** encontrar dolores de un público más amplio que los
 desarrolladores.

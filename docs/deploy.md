@@ -99,6 +99,15 @@ Para probarlo antes de programarlo, abre una sesión nueva en el entorno y pide 
 resumen final dice cuántos posts procesó, cuántos dolores se descartaron por validación y cuántas
 oportunidades se crearon y evaluaron.
 
+### Dónde ver si el analista está corriendo
+
+En el sitio, **Actividad** (`/activity`) → **Estado del analista** muestra, por tipo de trabajo
+(extraer, agrupar, evaluar), cuántos ítems quedan pendientes y cuándo llegó la última entrega,
+más el balance de los últimos 7 días: posts ingresados contra posts procesados y si a ese ritmo
+la cola crece o baja. Si pasan más de 36 horas sin entregas, el tablero y esa página muestran
+el aviso **"El análisis está detenido"**: revisa la tarea programada. La vista sólo muestra
+conteos y fechas.
+
 ## Checklist
 
 - [ ] `GET https://<tu-sitio>/api/health` responde `{"status":"ok"}`.
@@ -107,12 +116,15 @@ oportunidades se crearon y evaluaron.
 - [ ] Una sesión de Claude Code puede correr `npm run agent -- status` y ve trabajo pendiente.
 - [ ] Después de la primera corrida del analista aparecen oportunidades en el tablero, con
       "Evaluado … con claude-code".
+- [ ] En `/activity`, "Estado del analista" muestra la fecha de la última entrega de cada tipo.
 
 ## Uso de la suscripción
 
 Cada corrida procesa por defecto hasta 2 lotes de 30 posts, agrupa los dolores nuevos y evalúa 5
 oportunidades con búsqueda web. Si notas que consume demasiado de tu plan, pide al analista lotes
-más chicos (por ejemplo `--limit 15`) o córrelo día por medio.
+más chicos (por ejemplo `--limit 15`) o córrelo día por medio. El balance de 7 días en `/activity`
+dice si con ese ritmo la cola crece o baja. Si lo corres día por medio, verás el aviso de
+análisis detenido entre corridas (umbral de 36 horas).
 
 ## Problemas comunes
 
@@ -125,6 +137,7 @@ más chicos (por ejemplo `--limit 15`) o córrelo día por medio.
 | El analista recibe `404` | Falta `SEEDBOX_AGENT_TOKEN` en `web` |
 | El analista recibe `401` | El token del entorno de Claude Code no coincide con el de `web` |
 | El analista no llega al sitio (error de red) | El dominio no está en *Allowed domains* del entorno, o falta `SEEDBOX_URL` |
+| Aviso "El análisis está detenido" | La tarea programada no corrió o falló en las últimas 36 horas: revisa sus ejecuciones en claude.ai/code |
 | `[reddit] skipped: Reddit is not configured` | Faltan las variables `REDDIT_*` en `ingest` (Hacker News sigue funcionando) |
 | El log de `ingest` dice `next start` o `Ready in …` | Falta `SEEDBOX_SERVICE=ingest` en ese servicio: está levantando otra copia del sitio |
 

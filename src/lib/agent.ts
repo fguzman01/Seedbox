@@ -5,7 +5,7 @@ import { ASSESSMENT_RULES, assessmentSchema, normalizeAssessment } from "./asses
 import { applyClustering, getCatalog, getUnclusteredPains } from "./cluster";
 import { CLUSTERING_RULES, clusteringSchema, resolveClustering } from "./clustering";
 import type { Database } from "./db/client";
-import { opportunities, pains, signals } from "./db/schema";
+import { agentDeliveries, opportunities, pains, signals } from "./db/schema";
 import { EXTRACTION_RULES, keepVerifiedPains } from "./extraction";
 import { extractedPainSchema } from "./pains";
 import { getPendingSignals, saveExtraction } from "./process";
@@ -110,7 +110,32 @@ export const agentResultsSchema = z.discriminatedUnion("kind", [
 
 export type AgentResults = z.infer<typeof agentResultsSchema>;
 
+/**
+ * Validates and stores a submission, then records the delivery (H10) so the site can show when
+ * the analyst last delivered each kind of work. Only counts and the time are recorded.
+ */
 export async function submitAgentResults(db: Database, payload: AgentResults) {
+  const summary = await storeAgentResults(db, payload);
+  await db.insert(agentDeliveries).values({ kind: payload.kind, ...deliveryCounts(summary) });
+  return summary;
+}
+
+type SubmitSummary = Awaited<ReturnType<typeof storeAgentResults>>;
+
+/** Entries submitted and entries that passed validation and were stored, for the delivery record. */
+export function deliveryCounts(summary: SubmitSummary): { items: number; accepted: number } {
+  if (summary.kind === "extract") {
+    const accepted = summary.processed + summary.discarded;
+    return { items: accepted + summary.skipped.length, accepted };
+  }
+  if (summary.kind === "cluster") {
+    // Every submitted pain id ends up assigned, invalid (left for the next run) or ignored.
+    return { items: summary.assigned + summary.invalid.length + summary.ignored.length, accepted: summary.assigned };
+  }
+  return { items: summary.assessed + summary.skipped.length, accepted: summary.assessed };
+}
+
+async function storeAgentResults(db: Database, payload: AgentResults) {
   const model = payload.model ?? DEFAULT_AGENT_MODEL;
 
   if (payload.kind === "extract") {

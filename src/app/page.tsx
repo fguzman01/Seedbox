@@ -1,8 +1,11 @@
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { analystState, getLastDeliveryAt } from "@/lib/analyst-status";
+import { getDb } from "@/lib/db/client";
 import { applyFilters, hasActiveFilters, parseFilters, toQueryString } from "@/lib/filters";
 import { getOpportunities, getSignalStats } from "@/lib/queries";
 import { parseWeights } from "@/lib/scoring";
+import { AnalystStoppedBanner } from "./components/analyst-status";
 import { DashboardFilters, ShowMore } from "./components/dashboard-filters";
 import { EmptyState, Stat } from "./components/ui";
 import { Nav } from "./components/nav";
@@ -50,13 +53,21 @@ async function Dashboard({ searchParams }: Pick<PageProps<"/">, "searchParams">)
   const params = await searchParams;
   const weights = parseWeights(params.w);
   const filters = parseFilters(params);
-  const [stats, all] = await Promise.all([getSignalStats(), getOpportunities(weights)]);
+  const now = new Date();
+  const [stats, all, lastDeliveryAt] = await Promise.all([
+    getSignalStats(),
+    getOpportunities(weights),
+    getLastDeliveryAt(getDb()),
+  ]);
   const { items, total, verticalCounts } = applyFilters(all, filters);
   // Detail pages get the whole dashboard state, so "back" returns to the same view.
   const query = toQueryString(params);
 
   return (
     <>
+      {lastDeliveryAt && analystState(lastDeliveryAt, now) === "stopped" && (
+        <AnalystStoppedBanner lastDeliveryAt={lastDeliveryAt} now={now} link />
+      )}
       <section className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
         <Stat label="Señales recolectadas" value={stats.total} />
         <Stat label="Por analizar" value={stats.pending} />

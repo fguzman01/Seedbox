@@ -1,7 +1,10 @@
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { getAnalystStatus } from "@/lib/analyst-status";
+import { getDb } from "@/lib/db/client";
 import { getRecentPains, getRecentSignals } from "@/lib/queries";
 import { sourceLabel } from "@/lib/sources/types";
+import { AnalystStatusSection } from "../components/analyst-status";
 import { EmptyState } from "../components/ui";
 import { Nav } from "../components/nav";
 import { PainCard } from "../components/pain-card";
@@ -14,7 +17,9 @@ export default function ActivityPage() {
       <Nav current="activity" />
       <header className="mb-8">
         <h1 className="text-3xl font-semibold tracking-tight">Actividad reciente</h1>
-        <p className="mt-2 text-zinc-400">Lo último que entró al radar: dolores extraídos y posts recolectados.</p>
+        <p className="mt-2 text-zinc-400">
+          Cómo va el analista diario y lo último que entró al radar: dolores extraídos y posts recolectados.
+        </p>
       </header>
       <Suspense fallback={<p className="text-zinc-500">Cargando…</p>}>
         <Activity />
@@ -28,10 +33,17 @@ async function Activity() {
   if (!process.env.DATABASE_URL) {
     return <EmptyState>Configura DATABASE_URL en .env para empezar.</EmptyState>;
   }
-  const [recentPains, recent] = await Promise.all([getRecentPains(), getRecentSignals()]);
+  const now = new Date();
+  const [analyst, recentPains, recent] = await Promise.all([
+    getAnalystStatus(getDb(), now),
+    getRecentPains(),
+    getRecentSignals(),
+  ]);
 
   return (
     <>
+      <AnalystStatusSection status={analyst} now={now} />
+
       <h2 className="mb-4 text-lg font-semibold">Últimos dolores detectados</h2>
       {recentPains.length === 0 ? (
         <div className="mb-10">

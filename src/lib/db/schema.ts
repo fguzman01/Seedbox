@@ -116,3 +116,23 @@ export const notes = pgTable(
 );
 
 export type Note = typeof notes.$inferSelect;
+
+/**
+ * One row per results submission from the Claude Code analyst (H10): when it arrived and how
+ * many items it carried, so the site can tell whether the daily analysis is still running.
+ */
+export const agentDeliveries = pgTable(
+  "agent_deliveries",
+  {
+    id: serial("id").primaryKey(),
+    kind: text("kind", { enum: ["extract", "cluster", "assess"] }).notNull(),
+    /** Entries in the submission (posts, pains or opportunities). */
+    items: integer("items").notNull(),
+    /** Entries that passed validation and were stored. */
+    accepted: integer("accepted").notNull(),
+    receivedAt: timestamp("received_at", { withTimezone: true }).notNull().default(sql`now()`),
+  },
+  (t) => [index("agent_deliveries_kind_received_at_idx").on(t.kind, t.receivedAt)],
+);
+
+export type AgentDelivery = typeof agentDeliveries.$inferSelect;

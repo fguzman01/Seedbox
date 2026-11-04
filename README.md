@@ -9,8 +9,9 @@ los agrupa, los puntúa y los muestra como ideas accionables con evidencia traza
 - Metodología y agentes (PO, arquitecto, desarrollador, QA): [`CLAUDE.md`](CLAUDE.md)
 
 Estado: **fase 1 en curso**. Listas: H1 (ingesta de Hacker News), H2 (extracción de dolores con IA),
-H3 (agrupación en oportunidades), H4 (puntaje), H5 (tablero con filtros), H6 (Reddit como fuente) y
-H7 (favoritas y notas) y H9 (análisis con Claude Code, sin costos de API). H8 (evaluación de la
+H3 (agrupación en oportunidades), H4 (puntaje), H5 (tablero con filtros), H6 (Reddit como fuente),
+H7 (favoritas y notas), H9 (análisis con Claude Code, sin costos de API) y H10 (estado del
+analista diario). H8 (evaluación de la
 extracción): herramienta lista, etiquetado pendiente.
 
 ## Desarrollo local
@@ -36,8 +37,9 @@ npm run dev                   # http://localhost:3000
 ```
 
 Páginas: `/` tablero de oportunidades (filtros, orden y pesos en la URL; `/?fav=1` favoritas),
-`/opportunities/[id]` detalle con puntaje, notas y evidencia, `/activity` dolores y posts
-recientes, `/labeling` etiquetado (sólo en desarrollo).
+`/opportunities/[id]` detalle con puntaje, notas y evidencia, `/activity` estado del analista
+(pendientes, última entrega, balance de 7 días) y dolores y posts recientes, `/labeling`
+etiquetado (sólo en desarrollo).
 
 ## Despliegue
 

@@ -175,7 +175,7 @@ En espera, a propósito: ingestar comentarios de HN (más evidencia por oportuni
 volumen a una cola que ya no damos abasto) y fusionar oportunidades duplicadas (esperar a que el
 catálogo crezca y ver si el agrupamiento consolida solo). Se revisan después de H13.
 
-### H10. Analista diario automático y su estado a la vista · S · ⬜ pendiente
+### H10. Analista diario automático y su estado a la vista · S · ✅ hecha
 **Como** usuario **quiero** que el analista corra solo cada día y que el sitio me muestre cómo
 va la cola **para** no tener que acordarme de dispararlo y saber si el radar da abasto.
 
@@ -193,6 +193,12 @@ Criterios de aceptación:
 Notas: crear la rutina es configuración (paso 5 de `docs/deploy.md`); el desarrollo es sólo la
 vista de estado. Con el balance a la vista, el usuario decide si sube las rondas del skill o la
 frecuencia; esa decisión depende de los límites de la suscripción y no la toma el sistema.
+
+Implementación: cada entrega a `POST /api/agent/results` queda registrada (tipo, hora y conteos)
+en la tabla `agent_deliveries`. El estado se ve en `/activity` ("Estado del analista") y el aviso
+de análisis detenido también aparece en el tablero. "Procesado" = post con la extracción
+terminada (con dolores o descartado) dentro de los últimos 7 días. El criterio de las dos
+corridas se verifica en operación, después de desplegar la migración `0005_agent_deliveries`.
 
 ### H11. Repartir primero el trabajo más prometedor · S · ⬜ pendiente
 **Como** usuario **quiero** que el analista reciba primero los posts y oportunidades con más

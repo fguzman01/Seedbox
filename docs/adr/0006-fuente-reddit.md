@@ -1,6 +1,6 @@
 # ADR-0006: Reddit como fuente
 
-- Estado: aceptada
+- Estado: aceptada; modificada por [ADR-0009](0009-acceso-a-reddit-y-reparto-entre-fuentes.md)
 - Fecha: 2026-10-28
 
 ## Contexto
@@ -19,6 +19,8 @@ de la Data API.
    una app de tipo *script* en <https://www.reddit.com/prefs/apps> y se configuran
    `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET` y `REDDIT_USER_AGENT`. El token se pide una vez por
    corrida y se reutiliza.
+   *Modificado por ADR-0009:* desde noviembre de 2025 crear la app ya no basta; hace falta
+   aprobación previa de Reddit, y se informa que dejaron de recibir pedidos nuevos el 31-10-2026.
 2. **Subreddits configurables** con `SEEDBOX_SUBREDDITS` (separados por coma). Por defecto:
    `SaaS, smallbusiness, Entrepreneur, freelance, startups, sysadmin`.
 3. **Sólo posts de texto nuevos** (`/r/{sub}/new`), paginando hasta llegar a posts ya

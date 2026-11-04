@@ -59,6 +59,11 @@ Haz merge del pull request en GitHub para que todo el código quede en `main`.
    | `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET`, `REDDIT_USER_AGENT` | Opcional (ver ADR-0006); sin ellas sólo se usa Hacker News |
    | `SEEDBOX_SUBREDDITS` | Opcional |
 
+   > **Reddit requiere aprobación previa.** Crear la app en `reddit.com/prefs/apps` ya no basta:
+   > Reddit tiene que aprobar el acceso antes de que funcionen las credenciales, y se informa que
+   > dejó de recibir pedidos nuevos el 31-10-2026. Antes de pedirlo, revisa
+   > [ADR-0009](adr/0009-acceso-a-reddit-y-reparto-entre-fuentes.md).
+
 3. **Settings → Deploy → Cron Schedule** = `17 10 * * *`: corre todos los días a las **10:17 UTC**
    (07:17 en Chile en horario de verano), recolecta y termina.
 4. Despliega y revisa el log: deberías ver `[seedbox] starting as "ingest"`, `Migrations applied` y

@@ -1,6 +1,8 @@
 import { INTENSITY_LABELS, VERTICAL_LABELS, WTP_LABELS } from "@/lib/pains";
 import type { Pain } from "@/lib/db/schema";
+import { attributionFor } from "@/lib/sources/attribution";
 import { sourceLabel } from "@/lib/sources/types";
+import { AttributionLine } from "./attribution";
 
 type PainWithSource = Pick<
   Pain,
@@ -23,6 +25,7 @@ export function Badge({ children, tone = "zinc" }: { children: React.ReactNode; 
 
 export function PainCard({ pain }: { pain: PainWithSource }) {
   const wtp = WTP_LABELS[pain.willingnessToPay];
+  const attribution = attributionFor(pain);
   return (
     <div className="flex h-full flex-col rounded-xl border border-zinc-800 bg-zinc-900/60 p-4">
       <div className="flex flex-wrap items-center gap-1.5">
@@ -35,13 +38,14 @@ export function PainCard({ pain }: { pain: PainWithSource }) {
       <blockquote className="mt-3 border-l-2 border-zinc-700 pl-3 text-sm text-zinc-400 italic">
         “{pain.quote}”
       </blockquote>
+      {attribution && <AttributionLine attribution={attribution} className="mt-2" />}
       <a
         href={pain.url}
         target="_blank"
         rel="noreferrer"
         className="mt-3 self-start text-xs text-emerald-400 hover:underline"
       >
-        Ver fuente ({sourceLabel(pain.source, pain.sourceMetadata)}
+        Ver fuente ({sourceLabel(pain.source, pain.sourceMetadata, pain.url)}
         {pain.author ? ` · ${pain.author}` : ""}) →
       </a>
     </div>

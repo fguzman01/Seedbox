@@ -11,8 +11,9 @@ los agrupa, los puntúa y los muestra como ideas accionables con evidencia traza
 Estado: **fase 1 en curso**. Listas: H1 (ingesta de Hacker News), H2 (extracción de dolores con IA),
 H3 (agrupación en oportunidades), H4 (puntaje), H5 (tablero con filtros), H6 (Reddit como fuente),
 H7 (favoritas y notas), H9 (análisis con Claude Code, sin costos de API), H10 (estado del
-analista diario) y H14 (de qué fuente y de qué público viene el radar). H8 (evaluación de la
-extracción): herramienta lista, etiquetado pendiente.
+analista diario), H14 (de qué fuente y de qué público viene el radar) y H16 (Stack Exchange como
+fuente; activación pendiente de las condiciones de ADR-0010). H8 (evaluación de la extracción):
+herramienta lista, etiquetado pendiente.
 
 ## Desarrollo local
 
@@ -21,13 +22,16 @@ Requisitos: Node 22 y PostgreSQL 16.
 Fuentes: Hacker News funciona sin configuración. Reddit necesita una app gratuita de tipo
 *script* en <https://www.reddit.com/prefs/apps> y las variables `REDDIT_*` de `.env.example`
 (ver [ADR-0006](docs/adr/0006-fuente-reddit.md), incluidas las condiciones de uso comercial).
+Stack Exchange necesita la *Key* de una app registrada en <https://stackapps.com/apps/oauth/register>
+en `STACKEXCHANGE_KEY` (ver [ADR-0010](docs/adr/0010-fuente-stack-exchange.md): no se activa en
+producción hasta cumplir sus condiciones).
 
 ```bash
 npm install
 cp .env.example .env          # ajusta DATABASE_URL y TEST_DATABASE_URL
 npm run db:migrate            # crea las tablas
 npm run ingest                # recolecta señales de todas las fuentes
-npm run ingest -- hackernews  # o de una fuente específica (hackernews, reddit)
+npm run ingest -- hackernews  # o de una fuente específica (hackernews, reddit, stackexchange)
 npm run extract               # extrae dolores de las señales pendientes (requiere ANTHROPIC_API_KEY)
 npm run extract -- --limit 10 # procesa solo 10
 npm run cluster               # agrupa los dolores nuevos en oportunidades (requiere ANTHROPIC_API_KEY)
@@ -39,7 +43,7 @@ npm run dev                   # http://localhost:3000
 Páginas: `/` tablero de oportunidades (filtros, orden y pesos en la URL; `/?fav=1` favoritas),
 `/opportunities/[id]` detalle con puntaje, notas y evidencia, `/activity` estado del analista
 (pendientes, última entrega, balance de 7 días), de dónde viene el radar (conteos y verticales por
-fuente y subreddit en 30 días, cada número enlaza a su lista filtrada) y dolores y posts recientes, `/labeling`
+fuente y subreddit o sitio de Stack Exchange en 30 días, cada número enlaza a su lista filtrada) y dolores y posts recientes, `/labeling`
 etiquetado (sólo en desarrollo).
 
 ## Despliegue
@@ -74,9 +78,9 @@ src/
   app/                 # interfaz web (Next.js App Router)
   lib/
     db/                # esquema Drizzle y conexión
-    sources/           # adaptadores de fuentes: Hacker News y Reddit (ADR-0002, ADR-0006)
-    ingest.ts          # guarda señales nuevas sin duplicar y registra cada corrida por fuente
-    source-mix.ts      # conteos y verticales por fuente y subreddit (H14)
+    sources/           # adaptadores de fuentes: Hacker News, Reddit y Stack Exchange (ADR-0002, 0006, 0010)
+    ingest.ts          # guarda señales nuevas sin duplicar, revisa borrados y registra cada corrida por fuente
+    source-mix.ts      # conteos y verticales por fuente y feed: subreddit o sitio (H14)
     pains.ts           # esquema de un dolor (verticales, intensidad, disposición a pagar)
     extraction.ts      # extracción de dolores con Claude (ADR-0003)
     process.ts         # procesa las señales pendientes

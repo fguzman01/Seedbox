@@ -1,5 +1,5 @@
 import { createDb } from "../src/lib/db/client";
-import { errorMessage, ingestAndRecord } from "../src/lib/ingest";
+import { describeIngest, errorMessage, ingestAndRecord } from "../src/lib/ingest";
 import { SOURCE_IDS } from "../src/lib/sources";
 
 // Load .env when present; in production the variables come from the environment.
@@ -26,7 +26,7 @@ async function main() {
         continue;
       }
       if (result.status === "ok") {
-        console.log(`[${result.source}] fetched=${result.fetched} inserted=${result.inserted}`);
+        for (const line of describeIngest(result)) console.log(`[${result.source}] ${line}`);
       } else if (result.status === "skipped" && ids.length === 0) {
         console.warn(`[${id}] skipped: ${errorMessage(result.error)}`);
       } else {

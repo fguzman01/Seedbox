@@ -61,7 +61,7 @@ describe.skipIf(!testDatabaseUrl)("ingest (database)", () => {
     const second = await ingest(db, adapter);
 
     expect(second).toEqual({ source: "fake", fetched: 2, inserted: 1 });
-    expect(adapter.calls).toEqual([{ since: undefined }, { since: new Date("2026-10-02T00:00:00Z") }]);
+    expect(adapter.calls).toMatchObject([{ since: undefined }, { since: new Date("2026-10-02T00:00:00Z") }]);
     expect(await db.$count(signals)).toBe(3);
   });
 

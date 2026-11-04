@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { getOpportunities } from "@/lib/queries";
 import { VERTICAL_LABELS } from "@/lib/pains";
+import { attributionFor } from "@/lib/sources/attribution";
+import { AttributionLine } from "./attribution";
 import { Badge } from "./pain-card";
 import { AxisBars, TotalBadge } from "./score";
 import { StarButton } from "./star-button";
@@ -11,6 +13,12 @@ const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one :
 
 export function OpportunityCard({ opportunity: o, query }: { opportunity: ScoredOpportunity; query: string }) {
   const paying = o.willingnessImplied + o.willingnessExplicit;
+  const attribution = attributionFor({
+    source: o.topQuoteSource,
+    url: o.topQuoteUrl,
+    author: o.topQuoteAuthor,
+    sourceMetadata: o.topQuoteMetadata,
+  });
   return (
     <article className="relative flex h-full flex-col rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 transition hover:border-emerald-500/50 hover:bg-zinc-900">
       <div className="flex items-start justify-between gap-3">
@@ -42,6 +50,7 @@ export function OpportunityCard({ opportunity: o, query }: { opportunity: Scored
         >
           Ver fuente →
         </a>
+        {attribution && <AttributionLine attribution={attribution} className="relative z-10 mt-1" />}
       </blockquote>
 
       <div className="mt-auto pt-4">

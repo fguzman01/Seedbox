@@ -152,7 +152,7 @@ function SignalList({ signals }: { signals: Signal[] }) {
             className="block rounded-xl border border-zinc-800 bg-zinc-900/60 p-4 transition hover:border-emerald-500/50 hover:bg-zinc-900"
           >
             <div className="flex items-center gap-2 text-xs text-zinc-500">
-              <span className="rounded bg-zinc-800 px-1.5 py-0.5 text-zinc-300">{sourceLabel(s.source, s.metadata)}</span>
+              <span className="rounded bg-zinc-800 px-1.5 py-0.5 text-zinc-300">{sourceLabel(s.source, s.metadata, s.url)}</span>
               <span>{dateFormat.format(s.publishedAt)}</span>
               {s.author && <span>· {s.author}</span>}
               <span>· {s.status === "processed" ? "con dolores" : s.status === "discarded" ? "sin dolores" : "por analizar"}</span>

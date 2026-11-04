@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { htmlToText } from "../text";
 import type { FetchOptions, RawSignal, SourceAdapter } from "./types";
 
 const API_URL = "https://hn.algolia.com/api/v1/search_by_date";
@@ -21,28 +22,6 @@ const responseSchema = z.object({
 });
 
 type Hit = z.infer<typeof hitSchema>;
-
-const ENTITIES: Record<string, string> = {
-  amp: "&",
-  lt: "<",
-  gt: ">",
-  quot: '"',
-  apos: "'",
-  nbsp: " ",
-};
-
-/** Converts the small HTML subset HN uses (<p>, <a>, <i>, <pre>) into plain text. */
-export function htmlToText(html: string): string {
-  return html
-    .replace(/<p>/gi, "\n\n")
-    .replace(/<br\s*\/?>/gi, "\n")
-    .replace(/<[^>]+>/g, "")
-    .replace(/&#x([0-9a-f]+);/gi, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
-    .replace(/&#(\d+);/g, (_, dec) => String.fromCodePoint(parseInt(dec, 10)))
-    .replace(/&([a-z]+);/gi, (match, name) => ENTITIES[name.toLowerCase()] ?? match)
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
-}
 
 function toSignal(hit: Hit): RawSignal {
   const title = hit.title ?? null;

@@ -32,6 +32,7 @@ export async function getRecentPains(limit = 20) {
       url: signals.url,
       source: signals.source,
       sourceMetadata: signals.metadata,
+      author: signals.author,
     })
     .from(pains)
     .innerJoin(signals, eq(pains.signalId, signals.id))
@@ -68,6 +69,10 @@ const strongestFirst = sql`
 const representative = {
   topQuote: sql<string>`(array_agg(${pains.quote} order by ${strongestFirst}))[1]`,
   topQuoteUrl: sql<string>`(array_agg(${signals.url} order by ${strongestFirst}))[1]`,
+  // What the quote's attribution needs (ADR-0010).
+  topQuoteSource: sql<string>`(array_agg(${signals.source} order by ${strongestFirst}))[1]`,
+  topQuoteAuthor: sql<string | null>`(array_agg(${signals.author} order by ${strongestFirst}))[1]`,
+  topQuoteMetadata: sql<Record<string, unknown> | null>`(array_agg(${signals.metadata} order by ${strongestFirst}))[1]`,
 };
 
 function withScores<T extends Parameters<typeof axisScores>[0] & Parameters<typeof axisScores>[1]>(

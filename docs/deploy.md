@@ -6,7 +6,7 @@ Seedbox queda repartido en dos lugares (ver [ADR-0008](adr/0008-analista-claude-
 |---|---|---|---|
 | Railway | **web** | El sitio: tablero, detalle, favoritas y notas | Tu plan de Railway |
 | Railway | **Postgres** | La base de datos | Tu plan de Railway |
-| Railway | **ingest** (cron diario) | Trae los posts nuevos de Hacker News y Reddit | Tu plan de Railway |
+| Railway | **ingest** (cron diario) | Trae los posts nuevos de Hacker News, Reddit y Stack Exchange | Tu plan de Railway |
 | Claude Code | **Analista** (tarea programada diaria) | Pide al sitio el trabajo pendiente, lo analiza y devuelve los resultados | Tu suscripción de Claude |
 
 No se usa la API de Claude ni hace falta `ANTHROPIC_API_KEY`.
@@ -58,6 +58,7 @@ Haz merge del pull request en GitHub para que todo el código quede en `main`.
    | `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` |
    | `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET`, `REDDIT_USER_AGENT` | Opcional (ver ADR-0006); sin ellas sólo se usa Hacker News |
    | `SEEDBOX_SUBREDDITS` | Opcional |
+   | `STACKEXCHANGE_KEY`, `SEEDBOX_SE_SITES` | Opcional; ver "Stack Exchange (opcional)" más abajo |
 
    > **Reddit requiere aprobación previa.** Crear la app en `reddit.com/prefs/apps` ya no basta:
    > Reddit tiene que aprobar el acceso antes de que funcionen las credenciales, y se informa que
@@ -68,7 +69,39 @@ Haz merge del pull request en GitHub para que todo el código quede en `main`.
    (07:17 en Chile en horario de verano), recolecta y termina.
 4. Despliega y revisa el log: deberías ver `[seedbox] starting as "ingest"`, `Migrations applied` y
    `[hackernews] fetched=… inserted=…`. Si no configuraste Reddit verás
-   `[reddit] skipped: Reddit is not configured`; es normal.
+   `[reddit] skipped: Reddit is not configured`; es normal. Lo mismo con
+   `[stackexchange] skipped: Stack Exchange is not configured` mientras no la actives.
+
+### Stack Exchange (opcional)
+
+Lee preguntas de sitios no técnicos (Software Recommendations, Personal Finance & Money, etc.).
+No necesita aprobación previa, sólo una clave gratuita.
+
+1. Antes de activarla, cumple las condiciones de
+   [ADR-0010](adr/0010-fuente-stack-exchange.md): términos leídos y "Help improve Claude"
+   desactivado en la cuenta del analista.
+2. Entra con tu cuenta de Stack Exchange a <https://stackapps.com/apps/oauth/register> y
+   registra una app: nombre `Seedbox`, descripción "Radar personal de sólo lectura", dominio
+   OAuth = el dominio de tu sitio en Railway, sitio web = la URL del repo. Copia la **Key** (no
+   hace falta el *client secret*).
+3. En `ingest` → **Variables**:
+
+   | Variable | Valor |
+   |---|---|
+   | `STACKEXCHANGE_KEY` | La *Key* de tu app en Stack Apps. Sin ella, Stack Exchange no se usa |
+   | `SEEDBOX_SE_SITES` | Opcional. Sitios separados por coma, con el nombre que usa la API (`softwarerecs,webapps,money,workplace,academia,freelancing,expatriates,parenting` por defecto) |
+
+4. En el próximo log de `ingest` deberías ver, por sitio,
+   `[stackexchange] money fetched=… filtered=… capped=… inserted=…` y, al final,
+   `[stackexchange] deletion check: checked=… missing=… deleted=…`: cuántas preguntas se
+   quitaron por haber sido borradas en Stack Exchange (`missing` son las que faltaron por
+   primera vez; se borran si vuelven a faltar en la corrida siguiente).
+
+Reglas que aplica (ADR-0009 y ADR-0010): sólo preguntas con al menos
+`SEEDBOX_INGEST_MIN_AGE_HOURS` horas (24 por defecto), como mucho `SEEDBOX_MAX_NEW_PER_FEED`
+por sitio y corrida (25 por defecto, las de más respuestas primero), la primera corrida trae
+como máximo 8 días y se descartan las preguntas con puntaje negativo. Las citas de Stack
+Exchange muestran autor, pregunta, sitio y licencia CC BY-SA, como pide la licencia.
 
 ## 4. Claude Code: permitir el acceso al sitio
 
@@ -113,7 +146,8 @@ la cola crece o baja. Si pasan más de 36 horas sin entregas, el tablero y esa p
 el aviso **"El análisis está detenido"**: revisa la tarea programada. La vista sólo muestra
 conteos y fechas.
 
-Más abajo, **De dónde viene el radar** muestra por fuente (y por subreddit en Reddit) los posts
+Más abajo, **De dónde viene el radar** muestra por fuente (y por subreddit en Reddit o por sitio en
+Stack Exchange) los posts
 ingresados, procesados y descartados y los dolores de los últimos 30 días, con su reparto por
 vertical. Cada `ingest` deja registrada su corrida por fuente: una fuente que el último `ingest`
 omitió por falta de variables aparece como **"no configurada"**.
@@ -149,6 +183,10 @@ análisis detenido entre corridas (umbral de 36 horas).
 | El analista no llega al sitio (error de red) | El dominio no está en *Allowed domains* del entorno, o falta `SEEDBOX_URL` |
 | Aviso "El análisis está detenido" | La tarea programada no corrió o falló en las últimas 36 horas: revisa sus ejecuciones en claude.ai/code |
 | `[reddit] skipped: Reddit is not configured` (en `/activity`, Reddit "no configurada") | Faltan las variables `REDDIT_*` en `ingest` (Hacker News sigue funcionando) |
+| `[stackexchange] skipped: Stack Exchange is not configured` | Falta `STACKEXCHANGE_KEY` en `ingest` (las demás fuentes siguen) |
+| `no site found for name …` | Un nombre de `SEEDBOX_SE_SITES` no existe; usa el parámetro `site` de la API (p. ej. `money`, no `personalfinance`) |
+| `throttle_violation` o `backoff too long` | Stack Exchange pidió frenar; la corrida de mañana sigue sola. Si se repite, revisa que no haya otra app usando la misma clave |
+| `key is not valid` | La clave está mal copiada o la app se borró en Stack Apps |
 | El log de `ingest` dice `next start` o `Ready in …` | Falta `SEEDBOX_SERVICE=ingest` en ese servicio: está levantando otra copia del sitio |
 
 ## Alternativa: análisis con la API de Claude (pago por uso)

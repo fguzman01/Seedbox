@@ -21,16 +21,16 @@ import { testDatabaseUrl, useTestDb } from "./test-db";
 const now = new Date("2026-11-04T12:00:00Z");
 const daysAgo = (d: number) => new Date(now.getTime() - d * 24 * 60 * 60 * 1000);
 
-const signalRow = (source: string, subreddit: string | null, ingested: number, processed = 0, discarded = 0): SignalCountRow => ({
+const signalRow = (source: string, feed: string | null, ingested: number, processed = 0, discarded = 0): SignalCountRow => ({
   source,
-  subreddit,
+  feed,
   ingested,
   processed,
   discarded,
 });
-const painRow = (source: string, subreddit: string | null, vertical: Vertical, n: number): PainCountRow => ({
+const painRow = (source: string, feed: string | null, vertical: Vertical, n: number): PainCountRow => ({
   source,
-  subreddit,
+  feed,
   vertical,
   pains: n,
 });
@@ -76,7 +76,7 @@ describe("buildSourceMix", () => {
       pains: 18,
       ingestedPercent: 100,
       devPercent: 61,
-      subreddits: [],
+      feeds: [],
     });
     expect(hn.verticals).toEqual([
       { vertical: "devtools", pains: 11, percent: 61 },
@@ -138,7 +138,7 @@ describe("buildSourceMix", () => {
       ["freelance", 2],
       ["devtools", 1],
     ]);
-    expect(reddit.subreddits.map((s) => [s.subreddit, s.ingested, s.processed, s.discarded, s.pains, s.devPercent])).toEqual([
+    expect(reddit.feeds.map((s) => [s.feed, s.ingested, s.processed, s.discarded, s.pains, s.devPercent])).toEqual([
       ["smallbusiness", 15, 6, 3, 3, 0],
       ["SaaS", 5, 4, 2, 2, 50],
       ["freelance", 0, 0, 0, 2, 0],
@@ -166,7 +166,7 @@ describe("activity filter", () => {
     expect(parseActivityFilter({ ver: "posts", source: "reddit", sub: "SaaS", estado: "discarded", days: "30" })).toEqual({
       list: "posts",
       source: "reddit",
-      subreddit: "SaaS",
+      feed: "SaaS",
       stage: "discarded",
       days: 30,
     });
@@ -190,7 +190,8 @@ describe("activity filter", () => {
 
   it("round-trips through the link", () => {
     const filters = [
-      { list: "posts", source: "reddit", subreddit: "SaaS", stage: "processed", days: 30 },
+      { list: "posts", source: "reddit", feed: "SaaS", stage: "processed", days: 30 },
+      { list: "pains", source: "stackexchange", feed: "money", vertical: "finance", days: 30 },
       { list: "pains", source: "hackernews", vertical: "devtools", days: 30 },
       { list: "posts", source: "hackernews", days: 30 },
     ] as const;
@@ -207,11 +208,14 @@ describe("activity filter", () => {
 
   it("describes the list in Spanish", () => {
     const label = (v: Vertical) => VERTICAL_LABELS[v];
-    expect(describeActivityFilter({ list: "posts", source: "reddit", subreddit: "SaaS", stage: "discarded", days: 30 }, label)).toBe(
+    expect(describeActivityFilter({ list: "posts", source: "reddit", feed: "SaaS", stage: "discarded", days: 30 }, label)).toBe(
       "Posts de r/SaaS descartados (sin dolores) en los últimos 30 días",
     );
     expect(describeActivityFilter({ list: "pains", source: "hackernews", vertical: "devtools", days: 30 }, label)).toBe(
       "Dolores de Hacker News en Herramientas para devs extraídos en los últimos 30 días",
+    );
+    expect(describeActivityFilter({ list: "pains", source: "stackexchange", feed: "money" }, label)).toBe(
+      "Dolores de money (Stack Exchange) extraídos",
     );
     expect(describeActivityFilter({ list: "posts" }, label)).toBe("Posts ingresados");
   });
@@ -225,12 +229,14 @@ describe.skipIf(!testDatabaseUrl)("source mix (database)", () => {
     {
       source = "hackernews",
       subreddit,
+      site,
       fetchedAt,
       status = "pending",
       processedAt,
     }: {
       source?: string;
       subreddit?: string;
+      site?: string;
       fetchedAt: Date;
       status?: "pending" | "processed" | "discarded";
       processedAt?: Date;
@@ -247,7 +253,7 @@ describe.skipIf(!testDatabaseUrl)("source mix (database)", () => {
         fetchedAt,
         status,
         processedAt,
-        metadata: subreddit ? { subreddit } : {},
+        metadata: subreddit ? { subreddit } : site ? { site } : {},
       })
       .returning({ id: signals.id });
     return row.id;
@@ -299,10 +305,30 @@ describe.skipIf(!testDatabaseUrl)("source mix (database)", () => {
     expect(hn).toMatchObject({ state: "ok", ingested: 3, processed: 3, discarded: 1, pains: 3, devPercent: 67, ingestedPercent: 60 });
     expect(hn.lastRun).toMatchObject({ status: "ok", inserted: 3 });
     expect(reddit).toMatchObject({ state: "not_configured", ingested: 2, processed: 2, discarded: 1, pains: 1, devPercent: 0 });
-    expect(reddit.subreddits.map((s) => [s.subreddit, s.ingested, s.processed, s.discarded, s.pains])).toEqual([
+    expect(reddit.feeds.map((s) => [s.feed, s.ingested, s.processed, s.discarded, s.pains])).toEqual([
       ["SaaS", 1, 1, 0, 1],
       ["smallbusiness", 1, 1, 1, 0],
     ]);
+  });
+
+  it("breaks Stack Exchange down by site, and lists the posts and pains of one site", async () => {
+    const money = await seedSignal("money:1", { source: "stackexchange", site: "money", fetchedAt: daysAgo(2), status: "processed", processedAt: daysAgo(1) });
+    await seedSignal("money:2", { source: "stackexchange", site: "money", fetchedAt: daysAgo(2) });
+    await seedSignal("softwarerecs:1", { source: "stackexchange", site: "softwarerecs", fetchedAt: daysAgo(3), status: "discarded", processedAt: daysAgo(1) });
+    await seedPain(money, "finance", daysAgo(1));
+
+    const mix = await getSourceMix(db, ["hackernews", "reddit", "stackexchange"], now);
+    const se = mix.sources[2];
+    expect(se).toMatchObject({ source: "stackexchange", name: "Stack Exchange", ingested: 3, processed: 2, discarded: 1, pains: 1 });
+    expect(se.feeds.map((f) => [f.feed, f.ingested, f.processed, f.discarded, f.pains])).toEqual([
+      ["money", 2, 1, 0, 1],
+      ["softwarerecs", 1, 1, 1, 0],
+    ]);
+
+    const posts = await getFilteredSignals(db, { list: "posts", source: "stackexchange", feed: "money", days: 30 }, now);
+    expect(posts.map((p) => p.externalId).sort()).toEqual(["money:1", "money:2"]);
+    const sitePains = await getFilteredPains(db, { list: "pains", source: "stackexchange", feed: "money", days: 30 }, now);
+    expect(sitePains.map((p) => p.signalId)).toEqual([money]);
   });
 
   it("returns the latest run of each source", async () => {
@@ -326,7 +352,7 @@ describe.skipIf(!testDatabaseUrl)("source mix (database)", () => {
     expect(await ids({ list: "posts", source: "hackernews", days: 30 })).toEqual(["hn-1", "hn-2", "hn-3"]);
     expect(await ids({ list: "posts", source: "hackernews", stage: "processed", days: 30 })).toEqual(["hn-1", "hn-2", "hn-old"]);
     expect(await ids({ list: "posts", source: "hackernews", stage: "discarded", days: 30 })).toEqual(["hn-2"]);
-    expect(await ids({ list: "posts", source: "reddit", subreddit: "SaaS", days: 30 })).toEqual(["rd-1"]);
+    expect(await ids({ list: "posts", source: "reddit", feed: "SaaS", days: 30 })).toEqual(["rd-1"]);
     expect(await ids({ list: "posts", source: "hackernews" })).toHaveLength(5);
   });
 
@@ -336,7 +362,7 @@ describe.skipIf(!testDatabaseUrl)("source mix (database)", () => {
     expect(devtools.map((p) => p.signalId)).toEqual([hn1, hn1]);
     expect(devtools[0].url).toBe("https://example.com/hn-1");
 
-    const sub = await getFilteredPains(db, { list: "pains", source: "reddit", subreddit: "SaaS", days: 30 }, now);
+    const sub = await getFilteredPains(db, { list: "pains", source: "reddit", feed: "SaaS", days: 30 }, now);
     expect(sub.map((p) => [p.signalId, p.vertical, p.source])).toEqual([[saas, "smb", "reddit"]]);
     expect(await getFilteredPains(db, { list: "pains", source: "hackernews", days: 30 }, now)).toHaveLength(3);
   });

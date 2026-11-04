@@ -2,11 +2,12 @@ import { and, count, desc, eq, getTableColumns, gte, ne, or, sql, type SQL } fro
 import type { Database } from "./db/client";
 import { ingestRuns, pains, signals, type IngestRunStatus } from "./db/schema";
 import { VERTICALS, type Vertical } from "./pains";
+import { feedLabel } from "./sources/types";
 
 /**
- * Where the radar's input comes from (H14): per source, and per subreddit for Reddit, how many
- * posts came in, got processed or discarded and how many pains they produced over the last 30
- * days, plus the pains' vertical mix. Only counts, percentages and dates.
+ * Where the radar's input comes from (H14): per source, and per feed (subreddit in Reddit, site in
+ * Stack Exchange), how many posts came in, got processed or discarded and how many pains they
+ * produced over the last 30 days, plus the pains' vertical mix. Only counts, percentages and dates.
  */
 
 export const MIX_DAYS = 30;
@@ -15,7 +16,11 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 /** The vertical whose share tells whether the radar is biased towards developers. */
 export const DEV_VERTICAL: Vertical = "devtools";
 
-const SOURCE_NAMES: Record<string, string> = { hackernews: "Hacker News", reddit: "Reddit" };
+const SOURCE_NAMES: Record<string, string> = {
+  hackernews: "Hacker News",
+  reddit: "Reddit",
+  stackexchange: "Stack Exchange",
+};
 
 export function sourceName(source: string): string {
   return SOURCE_NAMES[source] ?? source;
@@ -34,10 +39,10 @@ export function percent(part: number, total: number): number | null {
 // ---------------------------------------------------------------------------------------------
 // Aggregation (pure)
 
-/** Signal counts for one source and subreddit (null outside Reddit). */
+/** Signal counts for one source and feed (null for single-feed sources such as Hacker News). */
 export interface SignalCountRow {
   source: string;
-  subreddit: string | null;
+  feed: string | null;
   ingested: number;
   processed: number;
   discarded: number;
@@ -45,7 +50,7 @@ export interface SignalCountRow {
 
 export interface PainCountRow {
   source: string;
-  subreddit: string | null;
+  feed: string | null;
   vertical: Vertical;
   pains: number;
 }
@@ -91,8 +96,8 @@ export interface MixCounts {
   devPercent: number | null;
 }
 
-export interface SubredditMix extends MixCounts {
-  subreddit: string;
+export interface FeedMix extends MixCounts {
+  feed: string;
 }
 
 export interface SourceMix extends MixCounts {
@@ -102,7 +107,7 @@ export interface SourceMix extends MixCounts {
   lastRun: LastIngestRun | null;
   /** Share of all posts ingested in the window that came from this source. */
   ingestedPercent: number | null;
-  subreddits: SubredditMix[];
+  feeds: FeedMix[];
 }
 
 export interface SourceMixSummary {
@@ -159,18 +164,18 @@ export function buildSourceMix({
     const ownSignals = signalRows.filter((r) => r.source === source);
     const ownPains = painRows.filter((r) => r.source === source);
     const lastRun = lastRuns.find((r) => r.source === source) ?? null;
-    const subredditNames = [
-      ...new Set([...ownSignals, ...ownPains].map((r) => r.subreddit).filter((s): s is string => s !== null)),
+    const feedNames = [
+      ...new Set([...ownSignals, ...ownPains].map((r) => r.feed).filter((s): s is string => s !== null)),
     ];
-    const subreddits = subredditNames
-      .map((subreddit) => ({
-        subreddit,
+    const feeds = feedNames
+      .map((feed) => ({
+        feed,
         ...summarize(
-          ownSignals.filter((r) => r.subreddit === subreddit),
-          ownPains.filter((r) => r.subreddit === subreddit),
+          ownSignals.filter((r) => r.feed === feed),
+          ownPains.filter((r) => r.feed === feed),
         ),
       }))
-      .sort((a, b) => b.ingested - a.ingested || b.pains - a.pains || a.subreddit.localeCompare(b.subreddit));
+      .sort((a, b) => b.ingested - a.ingested || b.pains - a.pains || a.feed.localeCompare(b.feed));
     const counts = summarize(ownSignals, ownPains);
     return {
       source,
@@ -179,7 +184,7 @@ export function buildSourceMix({
       lastRun,
       ...counts,
       ingestedPercent: percent(counts.ingested, totalIngested),
-      subreddits,
+      feeds,
     };
   });
 
@@ -192,11 +197,11 @@ export function buildSourceMix({
 export const POST_STAGES = ["ingested", "processed", "discarded"] as const;
 export type PostStage = (typeof POST_STAGES)[number];
 
-/** The list behind a number: posts or pains, narrowed by source, subreddit, vertical and stage. */
+/** The list behind a number: posts or pains, narrowed by source, feed, vertical and stage. */
 export interface ActivityFilter {
   list: "posts" | "pains";
   source?: string;
-  subreddit?: string;
+  feed?: string;
   /** Pains only. */
   vertical?: Vertical;
   /** Posts only; "ingested" when absent. */
@@ -209,7 +214,7 @@ type Params = Record<string, string | string[] | undefined>;
 const first = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value);
 
 const SOURCE_PATTERN = /^[a-z0-9_-]{1,40}$/;
-const SUBREDDIT_PATTERN = /^[A-Za-z0-9_]{1,40}$/;
+const FEED_PATTERN = /^[A-Za-z0-9_.-]{1,60}$/;
 
 /** Reads the list filter from the query string; null when no list is requested. Invalid values are ignored. */
 export function parseActivityFilter(params: Params): ActivityFilter | null {
@@ -218,8 +223,8 @@ export function parseActivityFilter(params: Params): ActivityFilter | null {
   const filter: ActivityFilter = { list: list === "posts" ? "posts" : "pains" };
   const source = first(params.source);
   if (source && SOURCE_PATTERN.test(source)) filter.source = source;
-  const subreddit = first(params.sub);
-  if (subreddit && SUBREDDIT_PATTERN.test(subreddit)) filter.subreddit = subreddit;
+  const feed = first(params.sub);
+  if (feed && FEED_PATTERN.test(feed)) filter.feed = feed;
   const days = Number(first(params.days));
   if (Number.isInteger(days) && days > 0 && days <= 365) filter.days = days;
   if (filter.list === "pains") {
@@ -237,7 +242,7 @@ export const ACTIVITY_LIST_ID = "lista";
 export function activityHref(filter: ActivityFilter): string {
   const params = new URLSearchParams({ ver: filter.list === "posts" ? "posts" : "dolores" });
   if (filter.source) params.set("source", filter.source);
-  if (filter.subreddit) params.set("sub", filter.subreddit);
+  if (filter.feed) params.set("sub", filter.feed);
   if (filter.list === "pains" && filter.vertical) params.set("vertical", filter.vertical);
   if (filter.list === "posts" && filter.stage && filter.stage !== "ingested") params.set("estado", filter.stage);
   if (filter.days) params.set("days", String(filter.days));
@@ -253,7 +258,9 @@ const STAGE_TEXT: Record<PostStage, string> = {
 /** "Posts de r/SaaS descartados (sin dolores) en los últimos 30 días", for the list heading. */
 export function describeActivityFilter(filter: ActivityFilter, verticalLabel: (v: Vertical) => string): string {
   const parts = [filter.list === "posts" ? "Posts" : "Dolores"];
-  if (filter.subreddit) parts.push(`de r/${filter.subreddit}`);
+  if (filter.feed && filter.source && filter.source !== "reddit") {
+    parts.push(`de ${feedLabel(filter.source, filter.feed)} (${sourceName(filter.source)})`);
+  } else if (filter.feed) parts.push(`de ${feedLabel("reddit", filter.feed)}`);
   else if (filter.source) parts.push(`de ${sourceName(filter.source)}`);
   if (filter.list === "posts") parts.push(STAGE_TEXT[filter.stage ?? "ingested"]);
   if (filter.list === "pains" && filter.vertical) parts.push(`en ${verticalLabel(filter.vertical)}`);
@@ -265,11 +272,12 @@ export function describeActivityFilter(filter: ActivityFilter, verticalLabel: (v
 // ---------------------------------------------------------------------------------------------
 // Queries
 
-const subredditOf = sql<string | null>`${signals.metadata}->>'subreddit'`;
+/** The feed of a signal (subreddit or Stack Exchange site), like `feedOf` in sources/types.ts. */
+const feedSql = sql<string | null>`coalesce(${signals.metadata}->>'subreddit', ${signals.metadata}->>'site')`;
 const countWhere = (condition: SQL | undefined) => sql<number>`count(*) filter (where ${condition})`.mapWith(Number);
 
 /**
- * Per source and subreddit, within the window: posts in (by `fetched_at`), and posts whose
+ * Per source and feed, within the window: posts in (by `fetched_at`), and posts whose
  * extraction finished (by `processed_at`): processed = with pains or discarded, discarded = no pains.
  */
 export async function getSignalCounts(db: Database, since: Date): Promise<SignalCountRow[]> {
@@ -277,24 +285,24 @@ export async function getSignalCounts(db: Database, since: Date): Promise<Signal
   return db
     .select({
       source: signals.source,
-      subreddit: subredditOf,
+      feed: feedSql,
       ingested: countWhere(gte(signals.fetchedAt, since)),
       processed: countWhere(finished),
       discarded: countWhere(and(eq(signals.status, "discarded"), gte(signals.processedAt, since))),
     })
     .from(signals)
     .where(or(gte(signals.fetchedAt, since), finished))
-    .groupBy(signals.source, subredditOf);
+    .groupBy(signals.source, feedSql);
 }
 
-/** Pains extracted within the window (by the pain's `created_at`), per source, subreddit and vertical. */
+/** Pains extracted within the window (by the pain's `created_at`), per source, feed and vertical. */
 export async function getPainCounts(db: Database, since: Date): Promise<PainCountRow[]> {
   return db
-    .select({ source: signals.source, subreddit: subredditOf, vertical: pains.vertical, pains: count() })
+    .select({ source: signals.source, feed: feedSql, vertical: pains.vertical, pains: count() })
     .from(pains)
     .innerJoin(signals, eq(pains.signalId, signals.id))
     .where(gte(pains.createdAt, since))
-    .groupBy(signals.source, subredditOf, pains.vertical);
+    .groupBy(signals.source, feedSql, pains.vertical);
 }
 
 /** The most recent recorded `ingest` run of each source. */
@@ -331,7 +339,7 @@ export const ACTIVITY_LIST_LIMIT = 200;
 function sourceConditions(filter: ActivityFilter): SQL[] {
   const conditions: SQL[] = [];
   if (filter.source) conditions.push(eq(signals.source, filter.source));
-  if (filter.subreddit) conditions.push(sql`${subredditOf} = ${filter.subreddit}`);
+  if (filter.feed) conditions.push(sql`${feedSql} = ${filter.feed}`);
   return conditions;
 }
 

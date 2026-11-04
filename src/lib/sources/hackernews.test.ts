@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import page0 from "./__fixtures__/hn-ask-page0.json";
 import page1 from "./__fixtures__/hn-ask-page1.json";
-import { createHackerNewsAdapter, htmlToText } from "./hackernews";
+import { createHackerNewsAdapter } from "./hackernews";
 
 function mockFetch(pages: unknown[]) {
   return vi.fn(async (input: string | URL | Request) => {
@@ -9,14 +9,6 @@ function mockFetch(pages: unknown[]) {
     return new Response(JSON.stringify(pages[page]), { status: 200 });
   });
 }
-
-describe("htmlToText", () => {
-  it("converts paragraphs, tags and entities", () => {
-    expect(htmlToText("We&#x27;re <i>4</i> people.<p>$20&#x2F;month &amp; more")).toBe(
-      "We're 4 people.\n\n$20/month & more",
-    );
-  });
-});
 
 describe("hackernews adapter", () => {
   it("fetches every page and normalizes hits", async () => {

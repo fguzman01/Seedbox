@@ -1,10 +1,12 @@
 import { createHackerNewsAdapter } from "./hackernews";
 import { createRedditAdapterFromEnv } from "./reddit";
+import { createStackExchangeAdapterFromEnv } from "./stackexchange";
 import type { SourceAdapter } from "./types";
 
 const factories: Record<string, () => SourceAdapter> = {
   hackernews: () => createHackerNewsAdapter(),
   reddit: () => createRedditAdapterFromEnv(),
+  stackexchange: () => createStackExchangeAdapterFromEnv(),
 };
 
 export const SOURCE_IDS = Object.keys(factories);

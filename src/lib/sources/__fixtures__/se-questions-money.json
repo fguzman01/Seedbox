@@ -1,0 +1,70 @@
+{
+  "items": [
+    {
+      "tags": ["budgeting", "software", "spreadsheet"],
+      "owner": {
+        "account_id": 1111,
+        "reputation": 523,
+        "user_id": 4242,
+        "user_type": "registered",
+        "profile_image": "https://www.gravatar.com/avatar/x?s=256&d=identicon&r=PG",
+        "display_name": "Ana &quot;budget&quot; L&#243;pez",
+        "link": "https://money.stackexchange.com/users/4242/ana-budget-lopez"
+      },
+      "is_answered": true,
+      "view_count": 812,
+      "accepted_answer_id": 170002,
+      "answer_count": 3,
+      "score": 7,
+      "last_activity_date": 1793000000,
+      "creation_date": 1792540800,
+      "question_id": 170001,
+      "content_license": "CC BY-SA 4.0",
+      "link": "https://money.stackexchange.com/questions/170001/how-can-i-split-shared-household-bills-without-a-spreadsheet",
+      "title": "How can I split shared household bills &amp; keep track of who&#39;s paid without a &quot;spreadsheet&quot;?",
+      "body": "<p>My partner and I split rent, utilities and groceries. Right now I keep a <a href=\"https://docs.google.com\" rel=\"nofollow noreferrer\">Google Sheet</a> but it&#39;s a mess every month.</p>\n\n<p>What I need:</p>\n\n<ul>\n<li>Import transactions from <strong>two different banks</strong></li>\n<li>Split each bill by a <em>custom percentage</em> (60/40)</li>\n<li>See who owes what at the end of the month</li>\n</ul>\n\n<blockquote>\n<p>I tried Splitwise but it can&#39;t import from my bank.</p>\n</blockquote>\n\n<p>My current formula is:</p>\n\n<pre><code>=SUMIF(B:B, &quot;rent&quot;, C:C) * 0.6 &lt; 1000\n</code></pre>\n\n<p><img src=\"https://i.sstatic.net/abc.png\" alt=\"screenshot\" /></p>\n\n<p>I&#39;d happily pay $5/month for something that just works.</p>\n"
+    },
+    {
+      "tags": ["taxes", "freelance"],
+      "owner": {
+        "user_type": "does_not_exist",
+        "display_name": "user98765"
+      },
+      "is_answered": false,
+      "view_count": 40,
+      "answer_count": 0,
+      "score": 1,
+      "last_activity_date": 1792700000,
+      "creation_date": 1792627200,
+      "question_id": 170010,
+      "closed_date": 1792700000,
+      "closed_reason": "Duplicate",
+      "content_license": "CC BY-SA 4.0",
+      "link": "https://money.stackexchange.com/questions/170010/tracking-quarterly-estimated-taxes",
+      "title": "Tracking quarterly estimated taxes",
+      "body": "<p>Every quarter I forget to pay estimated taxes.</p>\n"
+    },
+    {
+      "tags": ["spam"],
+      "owner": {
+        "user_type": "registered",
+        "display_name": "cheap-loans",
+        "link": "https://money.stackexchange.com/users/1/cheap-loans"
+      },
+      "is_answered": false,
+      "view_count": 3,
+      "answer_count": 0,
+      "score": -4,
+      "last_activity_date": 1792713600,
+      "creation_date": 1792713600,
+      "question_id": 170020,
+      "content_license": "CC BY-SA 4.0",
+      "link": "https://money.stackexchange.com/questions/170020/best-loans",
+      "title": "Best loans",
+      "body": "<p>Buy now</p>\n"
+    }
+  ],
+  "has_more": false,
+  "quota_max": 10000,
+  "quota_remaining": 9876
+}

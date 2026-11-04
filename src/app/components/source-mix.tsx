@@ -10,6 +10,7 @@ import {
   type SourceMixSummary,
   type SourceState,
 } from "@/lib/source-mix";
+import { feedLabel } from "@/lib/sources/types";
 
 const dateTimeFormat = new Intl.DateTimeFormat("es-CL", {
   dateStyle: "medium",
@@ -32,8 +33,8 @@ function NumberLink({ href, children, className = "" }: { href: string; children
   );
 }
 
-/** Filters shared by every number of a source or subreddit card. */
-type Scope = Pick<ActivityFilter, "source" | "subreddit" | "days">;
+/** Filters shared by every number of a source or feed (subreddit, site) card. */
+type Scope = Pick<ActivityFilter, "source" | "feed" | "days">;
 
 function CountStats({ counts, scope }: { counts: MixCounts; scope: Scope }) {
   const stats = [
@@ -126,15 +127,22 @@ function LastRun({ source, now }: { source: SourceMix; now: Date }) {
   );
 }
 
-function SubredditTable({ source, days }: { source: SourceMix; days: number }) {
-  if (source.subreddits.length === 0) return null;
+/** What a feed is called in each source; subreddits by default. */
+const FEED_NAMES: Record<string, { caption: string; column: string }> = {
+  stackexchange: { caption: "Por sitio", column: "Sitio" },
+};
+const DEFAULT_FEED_NAME = { caption: "Por subreddit", column: "Subreddit" };
+
+function FeedTable({ source, days }: { source: SourceMix; days: number }) {
+  if (source.feeds.length === 0) return null;
+  const names = FEED_NAMES[source.source] ?? DEFAULT_FEED_NAME;
   return (
     <div className="mt-4 overflow-x-auto">
       <table className="w-full text-sm">
-        <caption className="mb-2 text-left text-xs text-zinc-500">Por subreddit</caption>
+        <caption className="mb-2 text-left text-xs text-zinc-500">{names.caption}</caption>
         <thead className="text-xs text-zinc-500">
           <tr>
-            <th className="py-1 text-left font-normal">Subreddit</th>
+            <th className="py-1 text-left font-normal">{names.column}</th>
             <th className="py-1 text-right font-normal">Ingresados</th>
             <th className="py-1 text-right font-normal">Procesados</th>
             <th className="py-1 text-right font-normal">Descartados</th>
@@ -143,11 +151,11 @@ function SubredditTable({ source, days }: { source: SourceMix; days: number }) {
           </tr>
         </thead>
         <tbody className="tabular-nums">
-          {source.subreddits.map((sub) => {
-            const scope: Scope = { source: source.source, subreddit: sub.subreddit, days };
+          {source.feeds.map((sub) => {
+            const scope: Scope = { source: source.source, feed: sub.feed, days };
             return (
-              <tr key={sub.subreddit} className="border-t border-zinc-800">
-                <td className="py-1.5 text-zinc-300">r/{sub.subreddit}</td>
+              <tr key={sub.feed} className="border-t border-zinc-800">
+                <td className="py-1.5 text-zinc-300">{feedLabel(source.source, sub.feed)}</td>
                 <td className="py-1.5 text-right">
                   <NumberLink href={activityHref({ list: "posts", stage: "ingested", ...scope })}>{sub.ingested}</NumberLink>
                 </td>
@@ -217,7 +225,7 @@ function SourceCard({ source, days, now }: { source: SourceMix; days: number; no
           <div className="mt-3">
             <VerticalMix counts={source} scope={scope} />
           </div>
-          <SubredditTable source={source} days={days} />
+          <FeedTable source={source} days={days} />
         </>
       )}
     </li>

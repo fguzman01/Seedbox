@@ -5,7 +5,7 @@ import { clusterPendingPains } from "../src/lib/cluster";
 import { createClaudeClusterer } from "../src/lib/clustering";
 import { createDb } from "../src/lib/db/client";
 import { createClaudeExtractor } from "../src/lib/extraction";
-import { errorMessage, ingestAndRecord } from "../src/lib/ingest";
+import { describeIngest, errorMessage, ingestAndRecord } from "../src/lib/ingest";
 import { processPendingSignals } from "../src/lib/process";
 import { SOURCE_IDS } from "../src/lib/sources";
 
@@ -39,8 +39,9 @@ async function main() {
     for (const id of SOURCE_IDS) {
       try {
         const result = await ingestAndRecord(db, id);
-        if (result.status === "ok") log("ingest", `${id}: fetched=${result.fetched} inserted=${result.inserted}`);
-        else if (result.status === "skipped") log("ingest", `${id}: skipped (${errorMessage(result.error)})`);
+        if (result.status === "ok") {
+          for (const line of describeIngest(result)) log("ingest", `${id}: ${line}`);
+        } else if (result.status === "skipped") log("ingest", `${id}: skipped (${errorMessage(result.error)})`);
         else fail(`ingest ${id}`, result.error);
       } catch (error) {
         // Recording the run failed (database down): report it like any other ingest failure.

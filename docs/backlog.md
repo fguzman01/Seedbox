@@ -359,7 +359,7 @@ al repartir trabajo) y si conviene un ADR. Si una regla resulta discutible, se q
 preferimos analizar ruido a perder evidencia.
 
 
-### H16. Ingestar preguntas de sitios no técnicos de Stack Exchange · M · ⬜ pendiente
+### H16. Ingestar preguntas de sitios no técnicos de Stack Exchange · M · ✅ hecha (activación pendiente de C1–C3 de ADR-0010)
 **Como** usuario **quiero** que el radar lea preguntas de comunidades no técnicas de Stack
 Exchange, en especial las de quienes buscan software para una tarea concreta **para** tener una
 fuente de público amplio que no dependa de la aprobación de Reddit.
@@ -396,3 +396,19 @@ Decisión técnica en ADR-0010 (aprobada con condiciones), que incluye el borrad
 para `docs/deploy.md`. El desglose por sitio requiere generalizar `subredditOf` en
 `src/lib/source-mix.ts` (hoy lee `metadata.subreddit`). Antes de la fase 3 (comercial), revisar
 los términos o consultar por escrito a Stack Overflow; plan B en ADR-0010.
+
+Implementación: adaptador `src/lib/sources/stackexchange.ts` (fuente `stackexchange`, un feed por
+sitio en `metadata.site`), registrado junto a Hacker News y Reddit. Sin `STACKEXCHANGE_KEY` lanza
+`SourceNotConfiguredError` (`[stackexchange] skipped`, "no configurada" en H14). Dentro del
+adaptador aplica `todate = ahora − SEEDBOX_INGEST_MIN_AGE_HOURS`, la primera corrida de 8 días, el
+descarte de puntaje negativo y el tope `SEEDBOX_MAX_NEW_PER_FEED` por sitio (más respuestas, más
+puntaje, más reciente); guarda `metadata.answerCount` para la métrica de H11. `htmlToText` pasó a
+`src/lib/text.ts` (listas, bloques, enlaces sin URL, código, entidades). La revisión de borrados es
+el método opcional `reconcile` del adaptador: la primera ausencia marca `metadata.missingSince`, la
+segunda seguida borra la señal con sus dolores (sin migración). El log de `ingest` informa por sitio
+traídas, filtradas, recortadas por tope e insertadas, y el resultado de la revisión. Las citas de
+Stack Exchange en tablero, detalle y `/activity` muestran sitio, link a la pregunta, autor con link
+a su perfil y licencia con link. H14 desglosa por sitio (`feedOf`: `subreddit` o `site`). No se
+probó contra la API real (bloqueada desde la sesión): tests con respuestas simuladas. Falta, en
+operación: C1–C3, el criterio de 7 días activa y, si hace falta, el filtro propio mínimo para la
+revisión de borrados (hoy usa el filtro `default`).

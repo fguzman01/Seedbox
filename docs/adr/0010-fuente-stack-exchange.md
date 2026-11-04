@@ -261,7 +261,35 @@ se activa en Railway** (no se configura `STACKEXCHANGE_KEY`) hasta cumplir:
   lista es nulo, pero no aporta y ensucia H14. Si en total quedan menos de 3 sitios, se revisa el
   valor de H16 con el PO antes de seguir.
 
-## Alternativas consideradas
+### Actualización 2026-11-04: términos leídos y decisión de activar (C1)
+
+Felipe leyó en su navegador los **API Terms of Use** y la **Acceptable Use Policy** vigentes:
+
+- **Atribución (API Terms of Use):** la app debe indicar visualmente que el contenido viene de la
+  red Stack Exchange; las reglas del Terms of Service se exigen a las apps que indexan los
+  buscadores. Lo cubre la atribución de H16 (sitio, link, autor y licencia), y el sitio es privado.
+- **Guardado y borrados:** el texto leído no impone límites de guardado ni obligación de borrar.
+  La revisión diaria de borrados de H16 se mantiene como buena práctica.
+- **Content Scraping/Bot Policy (AUP):** prohíbe recolectar contenido con sistemas automatizados
+  para (1) construir un producto similar o competidor, (2) "developing, building, training,
+  testing, indexing, benchmarking, or improving any generative AI, chatbot, large language, or
+  machine learning tool, model, or platform, or any similar technology", o (3) con un volumen
+  que afecte la red. Se puede pedir una excepción por escrito a legal@stackoverflow.com.
+
+**Decisión de Felipe:** activar la fuente sin pedir la excepción por escrito, con esta lectura:
+Seedbox no compite con Stack Exchange (1), no entrena, ajusta, prueba ni mejora ningún modelo,
+sólo usa un modelo existente para resumir preguntas (2), y hace unas 100 consultas diarias por
+la API oficial con clave registrada (3). La cláusula (2) es amplia y admite otra lectura (que
+Seedbox sea una "herramienta de machine learning"), así que el riesgo aceptado es que Stack
+Exchange corte el acceso a la clave sin aviso. Para mantener esa lectura:
+
+- "Help improve Claude" debe seguir apagado en la cuenta del analista (C2).
+- El contenido de Stack Exchange no se usa para evaluar ni comparar prompts o modelos: queda
+  fuera del dataset de H8.
+- **Antes de la fase 3 (comercial)**, o si Stack Exchange objeta el uso, se pide la excepción por
+  escrito a legal@stackoverflow.com (hay un borrador del correo en el historial de la sesión
+  del 2026-11-04) o se apaga la fuente quitando `STACKEXCHANGE_KEY`.
+
 
 - **Rechazar Stack Exchange hasta leer los términos oficiales.** Frena una historia que no depende
   de aprobación de nadie, por un riesgo que se controla con no configurar la clave. El código se

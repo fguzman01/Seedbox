@@ -335,7 +335,9 @@ página `/labeling` (solo en desarrollo) y `npm run eval` con precisión, recall
 costo. Pendiente: etiquetar 30+ posts reales y registrar la primera línea base. Reubicada desde
 la fase 1 porque ahora bloquea a H13. Conviene que el dataset incluya posts de los tipos que hoy
 se descartan (anuncios, opiniones, preguntas generales) para medir el prefiltro. La línea base
-debe correrse también con `model = "claude-code"` (ADR-0008), que es el modo en producción.
+debe correrse también con `model = "claude-code"` (ADR-0008), que es el modo en producción. No incluir
+preguntas de Stack Exchange en el dataset: su política prohíbe usar su contenido para probar o
+comparar herramientas de IA (ADR-0010).
 
 ### H13. Descartar el ruido evidente antes del análisis · S · ⬜ pendiente
 **Como** usuario **quiero** que los posts que claramente no cuentan un problema se descarten

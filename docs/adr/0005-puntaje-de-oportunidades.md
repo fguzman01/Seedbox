@@ -18,7 +18,7 @@ Sin IA y sin costo, para que nunca queden desactualizados (igual que en ADR-0004
 
 | Eje | Cálculo |
 |---|---|
-| Frecuencia | Autores distintos en escala logarítmica: 1 → 2,9 · 3 → 5,8 · 5 → 7,5 · 10 o más → 10. Cada persona nueva suma menos que la anterior. |
+| Frecuencia | Autores distintos en escala logarítmica: 1 → 2,9 · 3 → 5,8 · 5 → 7,5 · 10 o más → 10. Cada persona nueva suma menos que la anterior. Un autor distinto es un par (fuente, autor): el mismo nombre en dos fuentes cuenta como dos personas, y las señales sin autor no suman (precisado en H12, 2026-11-04). |
 | Intensidad | Promedio de los dolores con leve = 3, moderado = 6, fuerte = 10. |
 | Disposición a pagar | Promedio de los dolores con ninguna = 0, implícita = 6, explícita = 10. |
 

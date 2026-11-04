@@ -113,6 +113,11 @@ la cola crece o baja. Si pasan más de 36 horas sin entregas, el tablero y esa p
 el aviso **"El análisis está detenido"**: revisa la tarea programada. La vista sólo muestra
 conteos y fechas.
 
+Más abajo, **De dónde viene el radar** muestra por fuente (y por subreddit en Reddit) los posts
+ingresados, procesados y descartados y los dolores de los últimos 30 días, con su reparto por
+vertical. Cada `ingest` deja registrada su corrida por fuente: una fuente que el último `ingest`
+omitió por falta de variables aparece como **"no configurada"**.
+
 ## Checklist
 
 - [ ] `GET https://<tu-sitio>/api/health` responde `{"status":"ok"}`.
@@ -143,7 +148,7 @@ análisis detenido entre corridas (umbral de 36 horas).
 | El analista recibe `401` | El token del entorno de Claude Code no coincide con el de `web` |
 | El analista no llega al sitio (error de red) | El dominio no está en *Allowed domains* del entorno, o falta `SEEDBOX_URL` |
 | Aviso "El análisis está detenido" | La tarea programada no corrió o falló en las últimas 36 horas: revisa sus ejecuciones en claude.ai/code |
-| `[reddit] skipped: Reddit is not configured` | Faltan las variables `REDDIT_*` en `ingest` (Hacker News sigue funcionando) |
+| `[reddit] skipped: Reddit is not configured` (en `/activity`, Reddit "no configurada") | Faltan las variables `REDDIT_*` en `ingest` (Hacker News sigue funcionando) |
 | El log de `ingest` dice `next start` o `Ready in …` | Falta `SEEDBOX_SERVICE=ingest` en ese servicio: está levantando otra copia del sitio |
 
 ## Alternativa: análisis con la API de Claude (pago por uso)

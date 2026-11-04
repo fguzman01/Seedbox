@@ -136,3 +136,30 @@ export const agentDeliveries = pgTable(
 );
 
 export type AgentDelivery = typeof agentDeliveries.$inferSelect;
+
+export const INGEST_RUN_STATUSES = ["ok", "skipped", "error"] as const;
+export type IngestRunStatus = (typeof INGEST_RUN_STATUSES)[number];
+
+/**
+ * One row per source and `ingest` run (H14): whether the source ran ("ok"), was left out because
+ * it has no configuration ("skipped") or failed ("error"), with its counts. Keyed by source id
+ * only, so any future source (e.g. Stack Exchange, H16) is recorded without schema changes.
+ */
+export const ingestRuns = pgTable(
+  "ingest_runs",
+  {
+    id: serial("id").primaryKey(),
+    source: text("source").notNull(),
+    status: text("status", { enum: INGEST_RUN_STATUSES }).notNull(),
+    /** Items returned by the source (0 when skipped or failed). */
+    fetched: integer("fetched").notNull().default(0),
+    /** New items stored (duplicates are not counted). */
+    inserted: integer("inserted").notNull().default(0),
+    /** Why the source was skipped or failed; for the logs, not shown on the site. */
+    message: text("message"),
+    ranAt: timestamp("ran_at", { withTimezone: true }).notNull().default(sql`now()`),
+  },
+  (t) => [index("ingest_runs_source_ran_at_idx").on(t.source, t.ranAt)],
+);
+
+export type IngestRun = typeof ingestRuns.$inferSelect;

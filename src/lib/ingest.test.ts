@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
-import { signals } from "./db/schema";
-import { ingest } from "./ingest";
-import type { RawSignal, SourceAdapter } from "./sources/types";
+import { ingestRuns, signals } from "./db/schema";
+import { ingest, ingestAndRecord } from "./ingest";
+import { SourceNotConfiguredError, type RawSignal, type SourceAdapter } from "./sources/types";
 import { testDatabaseUrl, useTestDb } from "./test-db";
 
 function signal(id: string, publishedAt: string): RawSignal {
@@ -68,5 +68,60 @@ describe.skipIf(!testDatabaseUrl)("ingest (database)", () => {
   it("handles an empty fetch", async () => {
     const result = await ingest(db, fakeAdapter([[]]));
     expect(result).toEqual({ source: "fake", fetched: 0, inserted: 0 });
+  });
+
+  describe("ingestAndRecord", () => {
+    const runs = () => db.select().from(ingestRuns).orderBy(ingestRuns.id);
+
+    it("records a successful run with its counts", async () => {
+      const adapter = fakeAdapter([[signal("a", "2026-10-01T00:00:00Z"), signal("b", "2026-10-02T00:00:00Z")]]);
+
+      const result = await ingestAndRecord(db, "fake", () => adapter);
+
+      expect(result).toEqual({ source: "fake", fetched: 2, inserted: 2, status: "ok" });
+      const [run] = await runs();
+      expect(run).toMatchObject({ source: "fake", status: "ok", fetched: 2, inserted: 2, message: null });
+      expect(run.ranAt).toBeInstanceOf(Date);
+    });
+
+    it("records a source without configuration as skipped, not as a run with no posts", async () => {
+      const result = await ingestAndRecord(db, "reddit", () => {
+        throw new SourceNotConfiguredError("Reddit is not configured");
+      });
+
+      expect(result).toMatchObject({ source: "reddit", status: "skipped", fetched: 0, inserted: 0 });
+      expect(await runs()).toMatchObject([
+        { source: "reddit", status: "skipped", fetched: 0, inserted: 0, message: "Reddit is not configured" },
+      ]);
+    });
+
+    it("records a failing source as an error without throwing", async () => {
+      const adapter: SourceAdapter = {
+        id: "fake",
+        domain: "software",
+        fetchSignals: async () => {
+          throw new Error("API responded 503");
+        },
+      };
+
+      const result = await ingestAndRecord(db, "fake", () => adapter);
+
+      expect(result.status).toBe("error");
+      expect(result.error).toBeInstanceOf(Error);
+      expect(await runs()).toMatchObject([{ source: "fake", status: "error", message: "API responded 503" }]);
+      expect(await db.$count(signals)).toBe(0);
+    });
+
+    it("records Reddit as skipped with the real adapters when its variables are missing", async () => {
+      const saved = { id: process.env.REDDIT_CLIENT_ID, secret: process.env.REDDIT_CLIENT_SECRET };
+      delete process.env.REDDIT_CLIENT_ID;
+      delete process.env.REDDIT_CLIENT_SECRET;
+      try {
+        expect((await ingestAndRecord(db, "reddit")).status).toBe("skipped");
+      } finally {
+        if (saved.id !== undefined) process.env.REDDIT_CLIENT_ID = saved.id;
+        if (saved.secret !== undefined) process.env.REDDIT_CLIENT_SECRET = saved.secret;
+      }
+    });
   });
 });

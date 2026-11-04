@@ -1,7 +1,8 @@
 import { eq, max } from "drizzle-orm";
 import type { Database } from "./db/client";
-import { signals } from "./db/schema";
-import type { SourceAdapter } from "./sources/types";
+import { ingestRuns, signals, type IngestRunStatus } from "./db/schema";
+import { getSource } from "./sources";
+import { SourceNotConfiguredError, type SourceAdapter } from "./sources/types";
 
 export interface IngestResult {
   source: string;
@@ -32,4 +33,42 @@ export async function ingest(db: Database, adapter: SourceAdapter): Promise<Inge
     .returning({ id: signals.id });
 
   return { source: adapter.id, fetched: fetched.length, inserted: inserted.length };
+}
+
+export interface IngestRunOutcome extends IngestResult {
+  status: IngestRunStatus;
+  /** Set when the source was skipped or failed. */
+  error?: unknown;
+}
+
+/**
+ * Ingests one source by id and records the run in `ingest_runs` (H14), so the site can tell a
+ * source without configuration ("skipped") from one that simply brought no posts. It never
+ * throws for the source itself: a missing configuration or a failing API come back as the
+ * outcome's status, and the caller decides how to log them and the exit code.
+ */
+export async function ingestAndRecord(
+  db: Database,
+  sourceId: string,
+  resolve: (id: string) => SourceAdapter = getSource,
+): Promise<IngestRunOutcome> {
+  let outcome: IngestRunOutcome;
+  try {
+    outcome = { ...(await ingest(db, resolve(sourceId))), status: "ok" };
+  } catch (error) {
+    const status = error instanceof SourceNotConfiguredError ? "skipped" : "error";
+    outcome = { source: sourceId, fetched: 0, inserted: 0, status, error };
+  }
+  await db.insert(ingestRuns).values({
+    source: outcome.source,
+    status: outcome.status,
+    fetched: outcome.fetched,
+    inserted: outcome.inserted,
+    message: outcome.error === undefined ? null : errorMessage(outcome.error).slice(0, 500),
+  });
+  return outcome;
+}
+
+export function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }

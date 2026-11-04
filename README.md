@@ -10,8 +10,8 @@ los agrupa, los puntúa y los muestra como ideas accionables con evidencia traza
 
 Estado: **fase 1 en curso**. Listas: H1 (ingesta de Hacker News), H2 (extracción de dolores con IA),
 H3 (agrupación en oportunidades), H4 (puntaje), H5 (tablero con filtros), H6 (Reddit como fuente),
-H7 (favoritas y notas), H9 (análisis con Claude Code, sin costos de API) y H10 (estado del
-analista diario). H8 (evaluación de la
+H7 (favoritas y notas), H9 (análisis con Claude Code, sin costos de API), H10 (estado del
+analista diario) y H14 (de qué fuente y de qué público viene el radar). H8 (evaluación de la
 extracción): herramienta lista, etiquetado pendiente.
 
 ## Desarrollo local
@@ -38,7 +38,8 @@ npm run dev                   # http://localhost:3000
 
 Páginas: `/` tablero de oportunidades (filtros, orden y pesos en la URL; `/?fav=1` favoritas),
 `/opportunities/[id]` detalle con puntaje, notas y evidencia, `/activity` estado del analista
-(pendientes, última entrega, balance de 7 días) y dolores y posts recientes, `/labeling`
+(pendientes, última entrega, balance de 7 días), de dónde viene el radar (conteos y verticales por
+fuente y subreddit en 30 días, cada número enlaza a su lista filtrada) y dolores y posts recientes, `/labeling`
 etiquetado (sólo en desarrollo).
 
 ## Despliegue
@@ -74,7 +75,8 @@ src/
   lib/
     db/                # esquema Drizzle y conexión
     sources/           # adaptadores de fuentes: Hacker News y Reddit (ADR-0002, ADR-0006)
-    ingest.ts          # guarda señales nuevas sin duplicar
+    ingest.ts          # guarda señales nuevas sin duplicar y registra cada corrida por fuente
+    source-mix.ts      # conteos y verticales por fuente y subreddit (H14)
     pains.ts           # esquema de un dolor (verticales, intensidad, disposición a pagar)
     extraction.ts      # extracción de dolores con Claude (ADR-0003)
     process.ts         # procesa las señales pendientes

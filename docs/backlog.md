@@ -214,7 +214,7 @@ de análisis detenido también aparece en el tablero. "Procesado" = post con la 
 terminada (con dolores o descartado) dentro de los últimos 7 días. El criterio de las dos
 corridas se verifica en operación, después de desplegar la migración `0005_agent_deliveries`.
 
-### H14. Ver de qué fuente y de qué público viene el radar · S · ⬜ pendiente
+### H14. Ver de qué fuente y de qué público viene el radar · S · ✅ hecha
 **Como** usuario **quiero** ver, por fuente (y por subreddit en Reddit), cuántos posts entran,
 cuántos tienen dolores y en qué verticales caen **para** saber si el radar está sesgado hacia
 desarrolladores y comprobar si una fuente nueva lo corrige.
@@ -232,6 +232,17 @@ Criterios de aceptación:
 
 Notas: es la línea base para H15 y H16. Con la primera corrida debería mostrar 100 % Hacker
 News y ~61 % devtools.
+
+Implementación: `/activity` → "De dónde viene el radar" muestra, por fuente y en ventana móvil de
+30 días, posts ingresados (por `fetched_at`), procesados (extracción terminada, con dolores o
+descartados, por `processed_at`, igual que H10), descartados (sin dolores) y dolores extraídos
+(por fecha de creación del dolor), más su reparto por vertical con el % de "Herramientas para
+devs" destacado. En Reddit se agrega una tabla por subreddit (`metadata.subreddit`). Cada
+`ingest` registra una fila por fuente en la tabla `ingest_runs` (estado `ok`/`skipped`/`error`,
+conteos y fecha; migración `0006_ingest_runs`); si la última corrida omitió la fuente, se ve
+"no configurada". Sin registro, la fuente se muestra neutra ("Sin ingestas registradas"). Cada
+número abre la lista filtrada en `/activity?ver=posts|dolores&source=…&sub=…&vertical=…&estado=…&days=30`
+(hasta 200 ítems, cada uno con su link a la fuente). Captura: `docs/screenshot-h14.png`.
 
 ### H11. Repartir primero el trabajo más prometedor · S · ⬜ pendiente
 **Como** usuario **quiero** que el analista reciba primero los posts y oportunidades con más

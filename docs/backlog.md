@@ -178,11 +178,15 @@ Orden y por qué:
 7. **H13** al final: libera la mayor parte de la capacidad, pero sólo es seguro con la línea base
    de H8.
 
+Actualización 2026-11-04: según fuentes secundarias, Reddit dejó de recibir pedidos de acceso
+nuevos el 31-10-2026 (ver ADR-0009); Felipe lo confirma en la página oficial. Por eso **H16**
+(Stack Exchange) sale de espera y va justo después de H11, en paralelo a H15: no necesita
+aprobación previa. Si Reddit confirma el cierre, H15 se descarta y H16 la reemplaza. El
+`architect` revisa primero los términos de la API de Stack Exchange y deja un ADR.
+
 En espera, a propósito: ingestar comentarios de HN (más evidencia por oportunidad, pero suma
-volumen a una cola que ya no damos abasto), fusionar oportunidades duplicadas (esperar a que el
-catálogo crezca y ver si el agrupamiento consolida solo) y **H16** (Stack Exchange no técnico,
-plan B si Reddit no aprueba el acceso o si H14 sigue mostrando un sesgo fuerte con Reddit
-activo). Las reseñas de tiendas de apps quedan para la fase 2: el `architect` debe confirmar antes
+volumen a una cola que ya no damos abasto) y fusionar oportunidades duplicadas (esperar a que el
+catálogo crezca y ver si el agrupamiento consolida solo). Las reseñas de tiendas de apps quedan para la fase 2: el `architect` debe confirmar antes
 que el link a la ficha de la app cumple la regla de evidencia trazable. Se revisan después de H13.
 
 ### H10. Analista diario automático y su estado a la vista · S · ✅ hecha
@@ -333,7 +337,7 @@ al repartir trabajo) y si conviene un ADR. Si una regla resulta discutible, se q
 preferimos analizar ruido a perder evidencia.
 
 
-### H16. Ingestar preguntas de sitios no técnicos de Stack Exchange · M · ⏸ en espera
+### H16. Ingestar preguntas de sitios no técnicos de Stack Exchange · M · ⬜ pendiente
 **Como** usuario **quiero** que el radar lea preguntas de comunidades no técnicas de Stack
 Exchange, en especial las de quienes buscan software para una tarea concreta **para** tener una
 fuente de público amplio que no dependa de la aprobación de Reddit.
@@ -349,8 +353,8 @@ Criterios de aceptación:
 - Dados 7 días activa, cuando miro H14, entonces aparece como fuente propia con sus conteos y
   verticales.
 
-Notas: sale de espera si Reddit rechaza el acceso o si H14, con Reddit activo, sigue mostrando
-más de 40 % de devtools. Requiere al `architect` y un ADR nuevo: revisar los términos de la API
+Notas: salió de espera el 2026-11-04 por el posible cierre del acceso nuevo a Reddit (ADR-0009).
+Requiere al `architect` y un ADR nuevo: revisar los términos de la API
 de Stack Exchange (restringen la recolección automatizada para IA generativa; confirmar si
 alcanza a analizar con Claude sin entrenar), la cuota (10.000 consultas diarias con clave
 gratuita) y el uso comercial antes de la fase 3.

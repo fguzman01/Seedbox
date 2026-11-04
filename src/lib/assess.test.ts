@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { describe, expect, it, vi } from "vitest";
-import { assessPendingOpportunities } from "./assess";
+import { assessPendingOpportunities, getDueOpportunities } from "./assess";
 import type { AssessmentInput, OpportunityAssessor } from "./assessment";
 import { opportunities, pains, signals } from "./db/schema";
 import { getOpportunities, getOpportunity } from "./queries";
@@ -100,6 +100,26 @@ describe.skipIf(!testDatabaseUrl)("assessPendingOpportunities (database)", () =>
     await assessPendingOpportunities(db, assessor);
 
     expect(calls.map((c) => c.title)).toEqual(["grande", "chica", "vieja"]);
+  });
+
+  it("orders never-assessed ones by distinct authors, then partial score, aged ones first (H11)", async () => {
+    // Same number of pains, but "repetida" comes from a single author.
+    await seedOpportunity("repetida", 3);
+    const [repeated] = await db.select().from(opportunities);
+    await db.update(signals).set({ author: "same" });
+    await seedOpportunity("dos", 2);
+    // Two authors as well, but with weaker evidence: lower partial score.
+    const weak = await seedOpportunity("dos-debil", 2);
+    await db.update(pains).set({ intensity: "low", willingnessToPay: "none" }).where(eq(pains.opportunityId, weak.id));
+    await seedOpportunity("vieja", 1, { createdAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000) });
+    await seedOpportunity("reevaluar", 5, { assessedAt: new Date(Date.now() - 40 * 24 * 60 * 60 * 1000) });
+
+    const due = await getDueOpportunities(db, 10);
+
+    expect(due.map((o) => o.title)).toEqual(["vieja", "dos", "dos-debil", "repetida", "reevaluar"]);
+    expect(due.find((o) => o.id === repeated.id)?.pains).toHaveLength(3);
+    expect((await getDueOpportunities(db, 10, 30, { maxPendingDays: 30 })).map((o) => o.title)[0]).toBe("dos");
+    expect(await getDueOpportunities(db, 2)).toHaveLength(2);
   });
 
   it("respects the limit and keeps failures unassessed", async () => {

@@ -15,6 +15,11 @@ export interface RawSignal {
 export interface FetchOptions {
   /** Only return items published strictly after this date. */
   since?: Date;
+  /**
+   * Only return items published at or before this date, so their activity has matured
+   * (ADR-0009). Newer items are left for a later run; `since` makes sure they are not lost.
+   */
+  until?: Date;
 }
 
 /** An optional source without credentials: skipped when ingesting all sources, not a failure. */

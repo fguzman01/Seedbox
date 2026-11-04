@@ -76,7 +76,8 @@ describe.skipIf(!testDatabaseUrl)("agent work exchange (database)", () => {
 
     const work = await getExtractWork(db, 10);
     expect(work.rules).toContain("Evidence over opinion");
-    expect(work.items.map((i) => i.id)).toEqual([a.id, b.id]);
+    // Same activity (none): the most recent post first (H11).
+    expect(work.items.map((i) => i.id)).toEqual([b.id, a.id]);
 
     const summary = await submitAgentResults(db, {
       kind: "extract",

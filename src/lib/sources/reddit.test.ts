@@ -145,6 +145,40 @@ describe("reddit adapter", () => {
     expect(calls.filter((c) => c.url.hostname === "oauth.reddit.com")).toHaveLength(1);
   });
 
+  it("skips posts newer than `until` without stopping the pagination", async () => {
+    const { fetchImpl, calls } = fakeReddit({
+      "SaaS:": listing([post({ name: "t3_fresh", created_utc: T("2026-10-21T12:00:00Z") })], "t3_fresh"),
+      "SaaS:t3_fresh": listing([
+        post({ name: "t3_mature", created_utc: T("2026-10-20T12:00:00Z") }),
+        post({ name: "t3_old", created_utc: T("2026-10-19T12:00:00Z") }),
+      ]),
+    });
+    const adapter = createRedditAdapter({ ...credentials, subreddits: ["SaaS"], fetchImpl });
+
+    const signals = await adapter.fetchSignals({ since: new Date("2026-10-20T00:00:00Z"), until: new Date("2026-10-21T00:00:00Z") });
+
+    expect(signals.map((s) => s.externalId)).toEqual(["t3_mature"]);
+    expect(calls.filter((c) => c.url.hostname === "oauth.reddit.com")).toHaveLength(2);
+  });
+
+  it("keeps at most maxNewPerFeed posts per subreddit, the most commented first", async () => {
+    const { fetchImpl } = fakeReddit({
+      "SaaS:": listing([
+        post({ name: "t3_quiet", num_comments: 0, created_utc: T("2026-10-20T15:00:00Z") }),
+        post({ name: "t3_busy", num_comments: 30 }),
+        post({ name: "t3_tie_new", num_comments: 5, score: 1, created_utc: T("2026-10-20T14:00:00Z") }),
+        post({ name: "t3_tie_old", num_comments: 5, score: 1, created_utc: T("2026-10-20T13:00:00Z") }),
+      ]),
+      "freelance:": listing([post({ name: "t3_other", subreddit: "freelance", num_comments: 0 })]),
+    });
+    const adapter = createRedditAdapter({ ...credentials, subreddits: ["SaaS", "freelance"], fetchImpl, maxNewPerFeed: 3 });
+
+    const signals = await adapter.fetchSignals();
+
+    // The cap is per subreddit: r/freelance keeps its only post.
+    expect(signals.map((s) => s.externalId)).toEqual(["t3_busy", "t3_tie_new", "t3_tie_old", "t3_other"]);
+  });
+
   it("filters out posts that are not useful signals", async () => {
     const { fetchImpl } = fakeReddit({
       "SaaS:": listing([post({ name: "t3_ok" }), post({ name: "t3_pin", stickied: true }), post({ name: "t3_link", is_self: false })]),

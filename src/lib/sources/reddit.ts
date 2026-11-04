@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { maxNewPerFeed as maxNewPerFeedFromEnv } from "../settings";
+import { keepMostActive } from "../work-order";
 import { SourceNotConfiguredError, type FetchOptions, type RawSignal, type SourceAdapter } from "./types";
 
 const TOKEN_URL = "https://www.reddit.com/api/v1/access_token";
@@ -76,6 +78,8 @@ export interface RedditOptions {
   fetchImpl?: typeof fetch;
   /** Pages of 100 posts per subreddit and run. */
   maxPages?: number;
+  /** Useful posts kept per subreddit and run, the most commented first (ADR-0009). */
+  maxNewPerFeed?: number;
 }
 
 export function createRedditAdapter({
@@ -85,6 +89,7 @@ export function createRedditAdapter({
   subreddits = DEFAULT_SUBREDDITS,
   fetchImpl = fetch,
   maxPages = 3,
+  maxNewPerFeed = 25,
 }: RedditOptions): SourceAdapter {
   let token: string | undefined;
 
@@ -106,7 +111,7 @@ export function createRedditAdapter({
     return token;
   }
 
-  async function fetchSubreddit(subreddit: string, since?: Date): Promise<RawSignal[]> {
+  async function fetchSubreddit(subreddit: string, { since, until }: FetchOptions): Promise<RawSignal[]> {
     const signals: RawSignal[] = [];
     let after: string | null | undefined;
     for (let page = 0; page < maxPages; page++) {
@@ -121,20 +126,22 @@ export function createRedditAdapter({
       const posts = data.children.map((child) => child.data);
       // Listings are newest first: stop once we reach posts we already have.
       const fresh = since ? posts.filter((p) => p.created_utc * 1000 > since.getTime()) : posts;
-      signals.push(...fresh.filter(isUsefulPost).map(toSignal));
+      // Posts too new for their activity to have matured are left for a later run.
+      const mature = until ? fresh.filter((p) => p.created_utc * 1000 <= until.getTime()) : fresh;
+      signals.push(...mature.filter(isUsefulPost).map(toSignal));
       if (fresh.length < posts.length || !data.after) break;
       after = data.after;
     }
-    return signals;
+    return keepMostActive(signals, maxNewPerFeed);
   }
 
   return {
     id: "reddit",
     domain: "software",
-    async fetchSignals({ since }: FetchOptions = {}) {
+    async fetchSignals(options: FetchOptions = {}) {
       const signals: RawSignal[] = [];
       for (const subreddit of subreddits) {
-        signals.push(...(await fetchSubreddit(subreddit, since)));
+        signals.push(...(await fetchSubreddit(subreddit, options)));
       }
       return signals;
     },
@@ -159,5 +166,6 @@ export function createRedditAdapterFromEnv(
     clientSecret: REDDIT_CLIENT_SECRET,
     userAgent: REDDIT_USER_AGENT || "seedbox/0.1",
     subreddits: subreddits?.length ? subreddits : DEFAULT_SUBREDDITS,
+    maxNewPerFeed: maxNewPerFeedFromEnv(env),
   });
 }

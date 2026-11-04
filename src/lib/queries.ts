@@ -42,18 +42,26 @@ export async function getRecentPains(limit = 20) {
 const countWhere = (condition: ReturnType<typeof sql>) =>
   sql<number>`count(*) filter (where ${condition})`.mapWith(Number);
 
-/** Evidence counts are computed on read so they never go stale (ADR-0004, ADR-0005). */
-const evidence = {
-  painCount: count(pains.id),
-  signalCount: countDistinct(pains.signalId),
+/**
+ * The evidence counts the score is computed from (EvidenceCounts), aggregated over an
+ * opportunity's pains joined with their signals. Also used to order the assessment batch (H11).
+ */
+export const scoringEvidence = {
   authorCount: countDistinct(signals.author),
-  mainVertical: sql<Vertical>`mode() within group (order by ${pains.vertical})`,
   intensityLow: countWhere(sql`${pains.intensity} = 'low'`),
   intensityMedium: countWhere(sql`${pains.intensity} = 'medium'`),
   intensityHigh: countWhere(sql`${pains.intensity} = 'high'`),
   willingnessNone: countWhere(sql`${pains.willingnessToPay} = 'none'`),
   willingnessImplied: countWhere(sql`${pains.willingnessToPay} = 'implied'`),
   willingnessExplicit: countWhere(sql`${pains.willingnessToPay} = 'explicit'`),
+};
+
+/** Evidence counts are computed on read so they never go stale (ADR-0004, ADR-0005). */
+const evidence = {
+  painCount: count(pains.id),
+  signalCount: countDistinct(pains.signalId),
+  ...scoringEvidence,
+  mainVertical: sql<Vertical>`mode() within group (order by ${pains.vertical})`,
   verticals: sql<Vertical[]>`array_agg(distinct ${pains.vertical})`,
   // A subquery, so joining notes does not multiply the pain rows above.
   noteCount: sql<number>`(select count(*) from ${notes} where ${notes.opportunityId} = ${opportunities.id})`.mapWith(Number),

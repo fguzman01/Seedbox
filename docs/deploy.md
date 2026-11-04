@@ -40,6 +40,7 @@ Haz merge del pull request en GitHub para que todo el código quede en `main`.
    | `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` |
    | `SEEDBOX_BASIC_AUTH` | Tu clave del sitio (`usuario:clave`) |
    | `SEEDBOX_AGENT_TOKEN` | Tu token del analista |
+   | `SEEDBOX_MAX_PENDING_DAYS` | Opcional, por defecto `14`: días que un post u oportunidad puede esperar antes de entrar al lote sí o sí (ver [Orden de reparto](#orden-de-reparto-del-trabajo)) |
 
 4. `web` → **Settings → Networking → Generate Domain**. Anota la URL, por ejemplo
    `https://seedbox-production.up.railway.app`.
@@ -58,6 +59,8 @@ Haz merge del pull request en GitHub para que todo el código quede en `main`.
    | `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` |
    | `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET`, `REDDIT_USER_AGENT` | Opcional (ver ADR-0006); sin ellas sólo se usa Hacker News |
    | `SEEDBOX_SUBREDDITS` | Opcional |
+   | `SEEDBOX_INGEST_MIN_AGE_HOURS` | Opcional, por defecto `24`: sólo se guardan posts con al menos esas horas de publicados, para que sus comentarios y puntos ya reflejen el interés. Los más nuevos llegan en la corrida siguiente |
+   | `SEEDBOX_MAX_NEW_PER_FEED` | Opcional, por defecto `25`: máximo de posts nuevos por subreddit y por corrida; se guardan los de más comentarios y, a igualdad, los más recientes. Lo que queda fuera no se vuelve a pedir. Hacker News no tiene este tope |
 
    > **Reddit requiere aprobación previa.** Crear la app en `reddit.com/prefs/apps` ya no basta:
    > Reddit tiene que aprobar el acceso antes de que funcionen las credenciales, y se informa que
@@ -118,6 +121,25 @@ ingresados, procesados y descartados y los dolores de los últimos 30 días, con
 vertical. Cada `ingest` deja registrada su corrida por fuente: una fuente que el último `ingest`
 omitió por falta de variables aparece como **"no configurada"**.
 
+### Orden de reparto del trabajo
+
+El sitio decide qué recibe el analista en cada lote (H11, ADR-0009). El pipeline con la API de
+Claude usa el mismo orden.
+
+- **Extraer:** el lote se divide en **partes iguales por fuente** con posts pendientes (Hacker
+  News, Reddit…), no por subreddit. Si una fuente tiene menos pendientes que su parte, lo que
+  sobra se reparte entre las demás. Dentro de cada fuente, los posts que llevan más de
+  `SEEDBOX_MAX_PENDING_DAYS` días pendientes (desde que se recolectaron) ocupan hasta la mitad de
+  su parte, del más antiguo al más nuevo; el resto va a los de más comentarios, luego más puntos
+  y, a igualdad, los más recientes. La actividad no se compara entre fuentes.
+- **Evaluar:** primero las oportunidades nunca evaluadas creadas hace más de
+  `SEEDBOX_MAX_PENDING_DAYS` días, de la más antigua a la más nueva; luego las demás nunca
+  evaluadas, por más autores distintos y, a igualdad, mayor puntaje parcial (con los pesos por
+  defecto); al final las reevaluaciones de las evaluadas hace más de 30 días.
+
+Si en `/activity` la mayor parte de cada lote son posts envejecidos, la capacidad no alcanza:
+sube las rondas o la frecuencia del analista en vez de cambiar `SEEDBOX_MAX_PENDING_DAYS`.
+
 ## Checklist
 
 - [ ] `GET https://<tu-sitio>/api/health` responde `{"status":"ok"}`.
@@ -155,4 +177,6 @@ análisis detenido entre corridas (umbral de 36 horas).
 
 Si algún día prefieres no depender de la suscripción, el pipeline completo con la API sigue
 disponible: en el servicio `ingest` cambia `SEEDBOX_SERVICE` a `pipeline` y agrega
-`ANTHROPIC_API_KEY`. Costos y detalles en ADR-0003, ADR-0004 y ADR-0005.
+`ANTHROPIC_API_KEY`. Costos y detalles en ADR-0003, ADR-0004 y ADR-0005. Ese servicio reparte
+el trabajo con el mismo orden que el analista; si cambias `SEEDBOX_MAX_PENDING_DAYS` en `web`,
+ponlo igual en él.

@@ -56,6 +56,17 @@ describe("hackernews adapter", () => {
     expect(url.searchParams.get("numericFilters")).toBe("created_at_i>1792454400");
   });
 
+  it("asks only for posts published up to `until`, so their activity has matured", async () => {
+    const fetchImpl = mockFetch([{ ...page0, nbPages: 1 }]);
+    const adapter = createHackerNewsAdapter({ fetchImpl });
+
+    await adapter.fetchSignals({ since: new Date("2026-10-20T00:00:00Z"), until: new Date("2026-10-21T00:00:00Z") });
+    await adapter.fetchSignals({ until: new Date("2026-10-21T00:00:00Z") });
+
+    const filters = fetchImpl.mock.calls.map(([input]) => new URL(String(input)).searchParams.get("numericFilters"));
+    expect(filters).toEqual(["created_at_i>1792454400,created_at_i<=1792540800", "created_at_i<=1792540800"]);
+  });
+
   it("stops at maxPages", async () => {
     const fetchImpl = mockFetch([page0, page1]);
     await createHackerNewsAdapter({ fetchImpl, maxPages: 1 }).fetchSignals();

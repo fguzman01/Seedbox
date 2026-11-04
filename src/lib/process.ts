@@ -1,17 +1,38 @@
-import { asc, eq, sql } from "drizzle-orm";
+import { eq, inArray, sql } from "drizzle-orm";
 import type { Database } from "./db/client";
 import { pains, signals, type Signal } from "./db/schema";
 import type { PainExtractor } from "./extraction";
 import type { ExtractedPain } from "./pains";
+import { maxPendingDays } from "./settings";
+import { planExtraction, type PlanOptions } from "./work-order";
 
-/** Oldest pending signals first. Shared by the API pipeline and the Claude Code analyst (H9). */
-export async function getPendingSignals(db: Database, limit: number) {
-  return db
-    .select()
+/**
+ * The next extraction batch, in hand-out order: equal shares per source, aged posts first and
+ * then the most active ones (see planExtraction, ADR-0009). Shared by the API pipeline and the
+ * Claude Code analyst (H9, H11).
+ */
+export async function getPendingSignals(
+  db: Database,
+  limit: number,
+  { now = new Date(), maxPendingDays: days = maxPendingDays() }: Partial<PlanOptions> = {},
+): Promise<Signal[]> {
+  // Only the columns the plan needs, so the whole queue can be ranked without loading bodies.
+  const pending = await db
+    .select({
+      id: signals.id,
+      source: signals.source,
+      publishedAt: signals.publishedAt,
+      fetchedAt: signals.fetchedAt,
+      metadata: signals.metadata,
+    })
     .from(signals)
-    .where(eq(signals.status, "pending"))
-    .orderBy(asc(signals.publishedAt))
-    .limit(limit);
+    .where(eq(signals.status, "pending"));
+  const plan = planExtraction(pending, limit, { now, maxPendingDays: days });
+  if (plan.length === 0) return [];
+
+  const rows = await db.select().from(signals).where(inArray(signals.id, plan.map((p) => p.id)));
+  const byId = new Map(rows.map((row) => [row.id, row]));
+  return plan.map((p) => byId.get(p.id)).filter((row): row is Signal => row !== undefined);
 }
 
 /**

@@ -244,7 +244,7 @@ conteos y fecha; migración `0006_ingest_runs`); si la última corrida omitió l
 número abre la lista filtrada en `/activity?ver=posts|dolores&source=…&sub=…&vertical=…&estado=…&days=30`
 (hasta 200 ítems, cada uno con su link a la fuente). Captura: `docs/screenshot-h14.png`.
 
-### H11. Repartir primero el trabajo más prometedor · S · ⬜ pendiente
+### H11. Repartir primero el trabajo más prometedor · S · ✅ hecha
 **Como** usuario **quiero** que el analista reciba primero los posts y oportunidades con más
 señal **para** que la capacidad diaria, que es limitada, se gaste en lo que más probablemente
 termine en una oportunidad útil.
@@ -267,6 +267,17 @@ guarda puntaje y comentarios; hay que confirmar Hacker News) y el valor de N. La
 actividad no son comparables entre fuentes (puntos de HN contra puntaje de Reddit) y, como Reddit
 se lee de `/new`, al ingerir casi todo vale cero; el `architect` decide cómo normalizar o
 refrescar.
+
+Implementación (ADR-0009): `getPendingSignals` (analista y pipeline con la API) reparte el lote en
+partes iguales entre las fuentes con pendientes, redistribuye lo que una fuente no usa e intercala
+las fuentes; dentro de cada una, los posts con más de `SEEDBOX_MAX_PENDING_DAYS` (14) días desde
+`fetched_at` ocupan hasta la mitad de su parte (redondeada hacia arriba) y el resto va por
+comentarios (`numComments` o `answerCount`), puntos (`points` o `score`) y fecha. La evaluación
+(`getDueOpportunities`) pone primero las nunca evaluadas con más de N días, luego autores
+distintos y puntaje parcial (pesos por defecto), y al final las reevaluaciones. La ingesta sólo
+guarda posts con `SEEDBOX_INGEST_MIN_AGE_HOURS` (24) horas de publicados y Reddit guarda hasta
+`SEEDBOX_MAX_NEW_PER_FEED` (25) posts por subreddit y corrida, los de más comentarios. Sin
+migración. Orden documentado en el skill y en `docs/deploy.md`.
 
 ### H15. Reddit activo con comunidades de público amplio · S · ⏸ en espera (Felipe revisa el acceso a Reddit)
 **Como** usuario **quiero** que el radar lea a diario subreddits donde escriben dueños de pymes,

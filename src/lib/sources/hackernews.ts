@@ -58,6 +58,7 @@ function toSignal(hit: Hit): RawSignal {
   };
 }
 
+/** A single feed, so the per-feed cap of ADR-0009 does not apply; `maxPages` bounds a run. */
 export interface HackerNewsOptions {
   fetchImpl?: typeof fetch;
   /** Algolia tags filter; "ask_hn" is where people describe problems. */
@@ -75,7 +76,11 @@ export function createHackerNewsAdapter({
   return {
     id: "hackernews",
     domain: "software",
-    async fetchSignals({ since }: FetchOptions = {}) {
+    async fetchSignals({ since, until }: FetchOptions = {}) {
+      const filters = [
+        since && `created_at_i>${Math.floor(since.getTime() / 1000)}`,
+        until && `created_at_i<=${Math.floor(until.getTime() / 1000)}`,
+      ].filter(Boolean);
       const signals: RawSignal[] = [];
       for (let page = 0; page < maxPages; page++) {
         const params = new URLSearchParams({
@@ -83,9 +88,7 @@ export function createHackerNewsAdapter({
           hitsPerPage: String(hitsPerPage),
           page: String(page),
         });
-        if (since) {
-          params.set("numericFilters", `created_at_i>${Math.floor(since.getTime() / 1000)}`);
-        }
+        if (filters.length) params.set("numericFilters", filters.join(","));
         const res = await fetchImpl(`${API_URL}?${params}`);
         if (!res.ok) {
           throw new Error(`Hacker News API responded ${res.status}`);

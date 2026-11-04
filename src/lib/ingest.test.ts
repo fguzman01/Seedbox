@@ -57,12 +57,23 @@ describe.skipIf(!testDatabaseUrl)("ingest (database)", () => {
       [signal("b", "2026-10-02T00:00:00Z"), signal("c", "2026-10-03T00:00:00Z")],
     ]);
 
-    await ingest(db, adapter);
-    const second = await ingest(db, adapter);
+    const now = new Date("2026-10-05T12:00:00Z");
+    await ingest(db, adapter, { now });
+    const second = await ingest(db, adapter, { now });
 
     expect(second).toEqual({ source: "fake", fetched: 2, inserted: 1 });
-    expect(adapter.calls).toEqual([{ since: undefined }, { since: new Date("2026-10-02T00:00:00Z") }]);
+    const until = new Date("2026-10-04T12:00:00Z"); // 24 h before `now` by default (ADR-0009)
+    expect(adapter.calls).toEqual([
+      { since: undefined, until },
+      { since: new Date("2026-10-02T00:00:00Z"), until },
+    ]);
     expect(await db.$count(signals)).toBe(3);
+  });
+
+  it("asks only for posts at least minAgeHours old", async () => {
+    const adapter = fakeAdapter([[]]);
+    await ingest(db, adapter, { now: new Date("2026-10-05T12:00:00Z"), minAgeHours: 6 });
+    expect(adapter.calls).toEqual([{ since: undefined, until: new Date("2026-10-05T06:00:00Z") }]);
   });
 
   it("handles an empty fetch", async () => {

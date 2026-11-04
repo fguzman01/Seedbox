@@ -290,6 +290,18 @@ Exchange corte el acceso a la clave sin aviso. Para mantener esa lectura:
   escrito a legal@stackoverflow.com (hay un borrador del correo en el historial de la sesión
   del 2026-11-04) o se apaga la fuente quitando `STACKEXCHANGE_KEY`.
 
+### Actualización 2026-11-04: actividad medida (C3) y sitios activados
+
+Preguntas de los últimos 30 días (`filter=total`, desde el 2026-10-05), medidas por Felipe:
+academia 52, webapps 20, workplace 16, softwarerecs 14, money 13, expatriates 5, parenting 1,
+freelancing 0. Sólo dos sitios pasaban el mínimo de 20. Se bajó el mínimo a **10**: un sitio con
+poca actividad cuesta un par de consultas diarias, y softwarerecs, el más afín al radar, quedaba
+fuera por poco. Activados en `ingest` (`SEEDBOX_SE_SITES`):
+`softwarerecs,webapps,money,workplace,academia`. Quedan fuera expatriates, parenting y
+freelancing (`pm` no se midió). Volumen esperado: ~115 preguntas al mes; se revisa con H14
+según la regla de ~10 dolores por semana. `STACKEXCHANGE_KEY` configurada el 2026-11-04.
+
+## Alternativas consideradas
 
 - **Rechazar Stack Exchange hasta leer los términos oficiales.** Frena una historia que no depende
   de aprobación de nadie, por un riesgo que se controla con no configurar la clave. El código se

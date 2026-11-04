@@ -108,18 +108,6 @@ Criterios de aceptación:
 Notas: ver `docs/adr/0006-fuente-reddit.md`, en especial las condiciones de uso antes de
 monetizar.
 
-### H8. Evaluar la calidad de la extracción · S · 🟡 herramienta lista, falta etiquetar
-**Como** usuario **quiero** un conjunto de posts reales con los dolores esperados **para**
-medir si un cambio de prompt o de modelo mejora o empeora la extracción.
-
-Criterios de aceptación:
-- Al menos 30 posts reales etiquetados a mano (con y sin dolores).
-- Un comando que corre la extracción sobre ellos y reporta aciertos, falsos positivos y costo.
-
-Notas: ver `evals/extraction/README.md`. Listo: formato del dataset, `npm run eval:sample`,
-página `/labeling` (solo en desarrollo) y `npm run eval` con precisión, recall, vertical y
-costo. Pendiente: etiquetar 30+ posts reales y registrar la primera línea base.
-
 ### H7. Guardar y anotar oportunidades · M · ✅ hecha
 **Como** usuario **quiero** marcar oportunidades como favoritas y agregar notas **para**
 llevar seguimiento de las que me interesan.
@@ -153,4 +141,124 @@ Criterios de aceptación:
 - El modo API sigue disponible como alternativa.
 
 Notas: ver `docs/adr/0008-analista-claude-code.md` y `docs/deploy.md`.
+
+## Fase 1c: radar en operación diaria
+
+Objetivo: que el radar funcione solo todos los días y que lo que muestra sea confiable. Sale de
+la primera corrida real del analista (2026-11-04):
+
+- La corrida fue manual. Procesó 60 de 500 posts pendientes (lotes de 30, 2 rondas); quedan 440,
+  unas 8 corridas si no entrara nada nuevo. Como `ingest` suma posts cada día, la cola podría no
+  vaciarse nunca.
+- De 60 posts de Hacker News sólo 17 tenían dolores (18 dolores); 43 eran ruido (anuncios,
+  opiniones, preguntas generales). Cerca del 70 % del análisis se gasta en descartar.
+- Con el catálogo vacío, 18 dolores generaron 16 oportunidades, casi todas con un solo dolor:
+  evidencia débil.
+- La evaluación hace 5 oportunidades por corrida; quedan 11 sin evaluar.
+- La validación funcionó (0 citas descartadas) y salió una oportunidad prometedora (cobros
+  desbocados por API keys de IA filtradas; competencia 5, construibilidad 7).
+
+Orden y por qué:
+
+1. **H10** primero: sin corrida automática nada más avanza, y sin el balance entrada/salida no
+   sabemos si la cola se vacía alguna vez.
+2. **H11** después: mientras la cola sea más grande que la capacidad diaria, el orden en que se
+   reparte el trabajo decide qué ve el usuario. Mejor gastar la suscripción en lo prometedor.
+3. **H12**: protege el principio central. Con 16 oportunidades casi todas de un dolor, el
+   tablero no debe hacer pasar una anécdota por una tendencia.
+4. **H8** (reubicada desde la fase 1): pasa a ser requisito de H13. No se puede recortar ruido
+   sin medir que no se pierden dolores reales. Los 60 posts de hoy ya son buen material.
+5. **H13** al final: libera la mayor parte de la capacidad, pero sólo es seguro con la línea base
+   de H8.
+
+En espera, a propósito: ingestar comentarios de HN (más evidencia por oportunidad, pero suma
+volumen a una cola que ya no damos abasto) y fusionar oportunidades duplicadas (esperar a que el
+catálogo crezca y ver si el agrupamiento consolida solo). Se revisan después de H13.
+
+### H10. Analista diario automático y su estado a la vista · S · ⬜ pendiente
+**Como** usuario **quiero** que el analista corra solo cada día y que el sitio me muestre cómo
+va la cola **para** no tener que acordarme de dispararlo y saber si el radar da abasto.
+
+Criterios de aceptación:
+- Dada la tarea programada de Claude Code configurada según `docs/deploy.md`, cuando pasan dos
+  días sin que nadie intervenga, entonces hay dos corridas registradas con resultados en el sitio.
+- El sitio muestra, por tipo de trabajo (extraer, agrupar, evaluar): cuántos ítems hay
+  pendientes y la fecha de la última entrega del analista.
+- El sitio muestra el balance de los últimos 7 días: posts ingresados contra posts procesados,
+  y si a ese ritmo la cola crece o baja.
+- Dado que pasaron más de 36 horas desde la última entrega del analista, cuando abro el sitio,
+  entonces veo un aviso claro de que el análisis está detenido.
+- La vista no expone el token del analista ni datos que no sean conteos y fechas.
+
+Notas: crear la rutina es configuración (paso 5 de `docs/deploy.md`); el desarrollo es sólo la
+vista de estado. Con el balance a la vista, el usuario decide si sube las rondas del skill o la
+frecuencia; esa decisión depende de los límites de la suscripción y no la toma el sistema.
+
+### H11. Repartir primero el trabajo más prometedor · S · ⬜ pendiente
+**Como** usuario **quiero** que el analista reciba primero los posts y oportunidades con más
+señal **para** que la capacidad diaria, que es limitada, se gaste en lo que más probablemente
+termine en una oportunidad útil.
+
+Criterios de aceptación:
+- Dados posts pendientes con distinta actividad, cuando el analista pide trabajo de extracción,
+  entonces recibe primero los de más actividad (comentarios y puntos en la fuente) y, a igualdad,
+  los más recientes.
+- Dadas oportunidades sin evaluar, cuando el analista pide trabajo de evaluación, entonces
+  recibe primero las de más autores distintos y, a igualdad, las de mayor puntaje parcial.
+- Ningún ítem queda postergado para siempre: un post o una oportunidad que lleva más de N días
+  pendiente entra al lote aunque tenga poca señal (N definido por el arquitecto).
+- El orden de reparto queda documentado en el skill y en `docs/deploy.md`.
+
+Notas: requiere al `architect` para definir qué métricas de actividad hay por fuente (Reddit ya
+guarda puntaje y comentarios; hay que confirmar Hacker News) y el valor de N.
+
+### H12. Distinguir la evidencia débil en el tablero · S · ⬜ pendiente
+**Como** usuario **quiero** ver de inmediato qué oportunidades se apoyan en una sola persona
+**para** no confundir una anécdota con un dolor compartido.
+
+Criterios de aceptación:
+- Dada una oportunidad respaldada por un solo autor, cuando la veo en el tablero o en su
+  detalle, entonces aparece marcada como "evidencia débil", con una explicación al pasar el mouse.
+- El tablero tiene un filtro "mínimo de autores distintos" (1, 2, 3 o más) que se combina con
+  los demás y vive en la URL, igual que los filtros de H5.
+- Cuando una oportunidad suma un segundo autor en una corrida de agrupamiento posterior,
+  entonces deja de marcarse como débil sin intervención manual.
+- El puntaje no cambia por esta historia: la marca y el filtro sólo hacen visible lo que la
+  frecuencia ya mide.
+
+### H8. Evaluar la calidad de la extracción · S · 🟡 herramienta lista, falta etiquetar
+**Como** usuario **quiero** un conjunto de posts reales con los dolores esperados **para**
+medir si un cambio de prompt o de modelo mejora o empeora la extracción.
+
+Criterios de aceptación:
+- Al menos 30 posts reales etiquetados a mano (con y sin dolores).
+- Un comando que corre la extracción sobre ellos y reporta aciertos, falsos positivos y costo.
+
+Notas: ver `evals/extraction/README.md`. Listo: formato del dataset, `npm run eval:sample`,
+página `/labeling` (solo en desarrollo) y `npm run eval` con precisión, recall, vertical y
+costo. Pendiente: etiquetar 30+ posts reales y registrar la primera línea base. Reubicada desde
+la fase 1 porque ahora bloquea a H13. Conviene que el dataset incluya posts de los tipos que hoy
+se descartan (anuncios, opiniones, preguntas generales) para medir el prefiltro. La línea base
+debe correrse también con `model = "claude-code"` (ADR-0008), que es el modo en producción.
+
+### H13. Descartar el ruido evidente antes del análisis · S · ⬜ pendiente
+**Como** usuario **quiero** que los posts que claramente no cuentan un problema se descarten
+sin gastar análisis de IA **para** que la capacidad diaria alcance para los posts que sí tienen
+dolores.
+
+Criterios de aceptación:
+- Dado un post que cumple una regla de ruido (por ejemplo, hilos recurrentes tipo "What are you
+  working on?", ofertas de trabajo, anuncios o posts sin texto propio), cuando se reparte el
+  trabajo de extracción, entonces no se entrega al analista y queda descartado con el motivo
+  "prefiltro: <regla>".
+- Las reglas son explícitas, están documentadas y no usan IA.
+- Los posts descartados por prefiltro se pueden revisar en la página de actividad, con su
+  motivo y link a la fuente.
+- Dado el dataset de H8, cuando se aplica el prefiltro, entonces no descarta ningún post
+  etiquetado con dolores; el informe muestra cuántos posts sin dolor se ahorra.
+- El balance de H10 muestra cuántos posts descartó el prefiltro en los últimos 7 días.
+
+Notas: depende de H8. Requiere al `architect` para decidir dónde vive el filtro (al ingerir o
+al repartir trabajo) y si conviene un ADR. Si una regla resulta discutible, se queda fuera:
+preferimos analizar ruido a perder evidencia.
 

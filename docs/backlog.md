@@ -162,18 +162,28 @@ Orden y por qué:
 
 1. **H10** primero: sin corrida automática nada más avanza, y sin el balance entrada/salida no
    sabemos si la cola se vacía alguna vez.
-2. **H11** después: mientras la cola sea más grande que la capacidad diaria, el orden en que se
-   reparte el trabajo decide qué ve el usuario. Mejor gastar la suscripción en lo prometedor.
-3. **H12**: protege el principio central. Con 16 oportunidades casi todas de un dolor, el
+2. **H14**: la primera corrida mostró 11 de 18 dolores en devtools y 60 de 60 posts de Hacker
+   News. Antes de sumar fuentes para ampliar el público, medimos el sesgo por fuente; si no, no
+   sabremos si el cambio sirvió.
+3. **H11**: mientras la cola sea más grande que la capacidad diaria, el orden en que se reparte
+   el trabajo decide qué ve el usuario. Además, sin reparto entre fuentes, los posts de Reddit
+   esperarían detrás de los ~440 de Hacker News.
+4. **H15**: responde al pedido de ver dolores de un público más amplio que los desarrolladores.
+   Va después de H11 porque suma volumen; la aprobación de Reddit tarda semanas, así que el
+   pedido se hace ya y el desarrollo llega a tiempo.
+5. **H12**: protege el principio central. Con 16 oportunidades casi todas de un dolor, el
    tablero no debe hacer pasar una anécdota por una tendencia.
-4. **H8** (reubicada desde la fase 1): pasa a ser requisito de H13. No se puede recortar ruido
-   sin medir que no se pierden dolores reales. Los 60 posts de hoy ya son buen material.
-5. **H13** al final: libera la mayor parte de la capacidad, pero sólo es seguro con la línea base
+6. **H8** (reubicada desde la fase 1): pasa a ser requisito de H13. No se puede recortar ruido
+   sin medir que no se pierden dolores reales. Conviene que el dataset ya incluya posts de Reddit.
+7. **H13** al final: libera la mayor parte de la capacidad, pero sólo es seguro con la línea base
    de H8.
 
 En espera, a propósito: ingestar comentarios de HN (más evidencia por oportunidad, pero suma
-volumen a una cola que ya no damos abasto) y fusionar oportunidades duplicadas (esperar a que el
-catálogo crezca y ver si el agrupamiento consolida solo). Se revisan después de H13.
+volumen a una cola que ya no damos abasto), fusionar oportunidades duplicadas (esperar a que el
+catálogo crezca y ver si el agrupamiento consolida solo) y **H16** (Stack Exchange no técnico,
+plan B si Reddit no aprueba el acceso o si H14 sigue mostrando un sesgo fuerte con Reddit
+activo). Las reseñas de tiendas de apps quedan para la fase 2: el `architect` debe confirmar antes
+que el link a la ficha de la app cumple la regla de evidencia trazable. Se revisan después de H13.
 
 ### H10. Analista diario automático y su estado a la vista · S · ✅ hecha
 **Como** usuario **quiero** que el analista corra solo cada día y que el sitio me muestre cómo
@@ -200,6 +210,25 @@ de análisis detenido también aparece en el tablero. "Procesado" = post con la 
 terminada (con dolores o descartado) dentro de los últimos 7 días. El criterio de las dos
 corridas se verifica en operación, después de desplegar la migración `0005_agent_deliveries`.
 
+### H14. Ver de qué fuente y de qué público viene el radar · S · ⬜ pendiente
+**Como** usuario **quiero** ver, por fuente (y por subreddit en Reddit), cuántos posts entran,
+cuántos tienen dolores y en qué verticales caen **para** saber si el radar está sesgado hacia
+desarrolladores y comprobar si una fuente nueva lo corrige.
+
+Criterios de aceptación:
+- Dada la vista de estado de H10, cuando la abro, entonces veo por fuente: posts ingresados,
+  procesados, descartados y dolores extraídos en los últimos 30 días.
+- Para cada fuente veo la distribución de dolores por vertical, con el porcentaje de
+  "Herramientas para devs" destacado.
+- En Reddit, los mismos conteos se pueden ver por subreddit.
+- Dado un `ingest` en el que una fuente se omitió por falta de configuración, cuando veo la
+  vista, entonces la fuente aparece como "no configurada" (no como "sin posts").
+- La vista sólo muestra conteos y porcentajes; cada número lleva a la lista de posts o dolores
+  correspondientes con su link a la fuente.
+
+Notas: es la línea base para H15 y H16. Con la primera corrida debería mostrar 100 % Hacker
+News y ~61 % devtools.
+
 ### H11. Repartir primero el trabajo más prometedor · S · ⬜ pendiente
 **Como** usuario **quiero** que el analista reciba primero los posts y oportunidades con más
 señal **para** que la capacidad diaria, que es limitada, se gaste en lo que más probablemente
@@ -213,10 +242,45 @@ Criterios de aceptación:
   recibe primero las de más autores distintos y, a igualdad, las de mayor puntaje parcial.
 - Ningún ítem queda postergado para siempre: un post o una oportunidad que lleva más de N días
   pendiente entra al lote aunque tenga poca señal (N definido por el arquitecto).
+- Dados posts pendientes de más de una fuente, cuando el analista pide trabajo de extracción,
+  entonces el lote incluye posts de cada fuente con pendientes (ninguna fuente acapara el lote
+  por tener más volumen o posts más antiguos), con la proporción documentada.
 - El orden de reparto queda documentado en el skill y en `docs/deploy.md`.
 
 Notas: requiere al `architect` para definir qué métricas de actividad hay por fuente (Reddit ya
-guarda puntaje y comentarios; hay que confirmar Hacker News) y el valor de N.
+guarda puntaje y comentarios; hay que confirmar Hacker News) y el valor de N. Las métricas de
+actividad no son comparables entre fuentes (puntos de HN contra puntaje de Reddit) y, como Reddit
+se lee de `/new`, al ingerir casi todo vale cero; el `architect` decide cómo normalizar o
+refrescar.
+
+### H15. Reddit activo con comunidades de público amplio · S · ⬜ pendiente
+**Como** usuario **quiero** que el radar lea a diario subreddits donde escriben dueños de pymes,
+profesionales y personas comunes **para** encontrar dolores de un público más amplio que los
+desarrolladores.
+
+Criterios de aceptación:
+- Dado el acceso a la Data API de Reddit aprobado y las variables `REDDIT_*` y
+  `SEEDBOX_SUBREDDITS` configuradas en `ingest`, cuando corre la recolección diaria, entonces el
+  log muestra, por subreddit, posts traídos e insertados, y no aparece `[reddit] skipped`.
+- La lista de subreddits recomendada en `docs/deploy.md` excluye las comunidades de fundadores
+  de software y de TI (SaaS, startups, sysadmin) y cubre al menos cinco verticales distintas de
+  devtools; cada subreddit tiene una línea que dice qué público aporta.
+- Hay un tope de posts nuevos por subreddit y por corrida, configurable y documentado, para que
+  la primera ingesta no sume miles de posts a la cola.
+- `docs/deploy.md` explica cómo pedir el acceso a Reddit (qué uso declarar, qué datos incluir) y
+  qué hacer si lo rechazan.
+- Dados 7 días con Reddit activo, cuando miro H14, entonces Reddit aporta posts procesados con
+  dolores y el porcentaje de devtools sobre el total de dolores de esos días baja respecto de la
+  línea base.
+
+Notas: Felipe pide el acceso a Reddit en paralelo (decidido el 2026-11-04), porque tarda semanas:
+según fuentes de terceros, desde noviembre de 2025 Reddit aprueba a mano cada app nueva. Antes,
+confirmar en la página oficial que siguen recibiendo pedidos. Requiere al `architect`: ADR-0006
+debe reflejar la aprobación previa y el uso declarado, y hay que definir el tope por subreddit.
+Depende de H11 (reparto entre fuentes). La lista final de subreddits la elige Felipe; candidatos
+a verificar (actividad y reglas de cada comunidad): smallbusiness, freelance, Entrepreneur,
+SomebodyMakeThis, software, Bookkeeping, Accounting, propertymanagement, Teachers, nursing,
+Parenting, personalfinance, Etsy, y alguna comunidad en español para el foco de la fase 2.
 
 ### H12. Distinguir la evidencia débil en el tablero · S · ⬜ pendiente
 **Como** usuario **quiero** ver de inmediato qué oportunidades se apoyan en una sola persona
@@ -268,3 +332,25 @@ Notas: depende de H8. Requiere al `architect` para decidir dónde vive el filtro
 al repartir trabajo) y si conviene un ADR. Si una regla resulta discutible, se queda fuera:
 preferimos analizar ruido a perder evidencia.
 
+
+### H16. Ingestar preguntas de sitios no técnicos de Stack Exchange · M · ⏸ en espera
+**Como** usuario **quiero** que el radar lea preguntas de comunidades no técnicas de Stack
+Exchange, en especial las de quienes buscan software para una tarea concreta **para** tener una
+fuente de público amplio que no dependa de la aprobación de Reddit.
+
+Criterios de aceptación:
+- Dado un job programado, cuando se ejecuta, entonces guarda las preguntas nuevas de una lista
+  configurable de sitios (por ejemplo Software Recommendations, Personal Finance & Money,
+  Parenting, The Workplace, Freelancing) sin duplicar las existentes, igual que H1.
+- Cada señal guarda el sitio, el link a la pregunta, el puntaje y la cantidad de respuestas.
+- Cada cita mostrada enlaza a la pregunta original y la atribución cumple la licencia CC BY-SA.
+- Si la fuente falla o no está configurada, las demás se ingieren igual y el error se informa,
+  igual que H6.
+- Dados 7 días activa, cuando miro H14, entonces aparece como fuente propia con sus conteos y
+  verticales.
+
+Notas: sale de espera si Reddit rechaza el acceso o si H14, con Reddit activo, sigue mostrando
+más de 40 % de devtools. Requiere al `architect` y un ADR nuevo: revisar los términos de la API
+de Stack Exchange (restringen la recolección automatizada para IA generativa; confirmar si
+alcanza a analizar con Claude sin entrenar), la cuota (10.000 consultas diarias con clave
+gratuita) y el uso comercial antes de la fase 3.

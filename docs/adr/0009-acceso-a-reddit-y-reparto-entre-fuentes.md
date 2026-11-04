@@ -29,7 +29,32 @@ actuar.
 | **El 30-09-2026 Reddit anunció el cierre del Data API público: dejó de aceptar pedidos nuevos el 31-10-2026, empieza a cortar apps no registradas el 12-01-2027 y termina todo el acceso público en marzo de 2027**, salvo socios con acuerdo escrito. La alternativa que propone es Devvit, pensada para apps que corren dentro de las comunidades, no para leer datos desde afuera. | TechRepublic, ppc.land, Winbuzzer, How2Shout y otras (ver enlaces) | Varias fuentes concuerdan; no verificado en la fuente oficial. Wikipedia da otra fecha de cierre (noviembre de 2026) |
 | Los endpoints `.json` sin autenticar responden 403 (para Apify, desde el 16-10-2026). | Changelog de Apify; dato del PO | No verificado |
 
-Si el cierre se confirma, **el plazo para pedir acceso venció cuatro días antes de que
+### Actualización 2026-11-04: lo que dice la fuente oficial
+
+Felipe leyó en su navegador el artículo oficial "Plataforma para desarrolladores y acceso a los
+datos de Reddit" (`support.reddithelp.com/hc/es-es/articles/14945211791892`) y abrió el formulario:
+
+- **El acceso para uso no comercial sigue abierto.** Se pide con el formulario
+  `support.reddithelp.com/hc/es-es/requests/new?ticket_form_id=14868593862164` → *Data Access
+  Request* → rol *Desarrollador* → "quiero crear una app de Reddit que no funcione en el
+  ecosistema Devvit". El formulario permitió enviar el pedido el 2026-11-04. La página no
+  menciona el cierre del 31-10-2026 ni las fechas de 2027 que daban las fuentes secundarias.
+- **El formulario pide:** cuenta de Reddit, beneficio para los redditors, descripción detallada
+  con ejemplos, qué le falta a Devvit, enlace al código fuente, subreddits y usuario del bot.
+  Remite a la *Responsible Builder Policy* para decidir la elegibilidad.
+- **Investigación:** la única vía autorizada para investigar con datos de Reddit es el programa
+  *Reddit for Researchers*; usar la API para investigación académica es una infracción. Por eso
+  el uso se declara como herramienta personal, no como investigación (ver punto 2).
+- **Uso comercial:** cualquier uso por una empresa o como parte de un producto monetizado
+  requiere permiso y contrato.
+- **IA:** no se puede usar contenido de Reddit para entrenar modelos sin consentimiento. Analizar
+  posts con IA no aparece prohibido.
+
+**Pedido enviado el 2026-11-04.** H15 queda en espera de la respuesta de Reddit. Las fuentes
+secundarias sobre el cierre de marzo de 2027 siguen sin confirmarse: si la respuesta llega
+aprobada, se revisa de nuevo si el acceso tiene fecha de término.
+
+Lo que sigue se escribió antes de esa lectura. Si el cierre se confirma, **el plazo para pedir acceso venció cuatro días antes de que
 decidiéramos pedirlo**, y aun con un pedido aprobado el acceso terminaría en marzo de 2027.
 
 ## Decisión
@@ -54,9 +79,10 @@ decidiéramos pedirlo**, y aun con un pedido aprobado el acceso terminaría en m
 
 ### 2. Uso declarado y datos del pedido
 
-- **Uso:** investigación personal, no comercial, de un solo desarrollador (fase 1 de
-  `docs/VISION.md`). Sólo lectura: no publica, no vota, no manda mensajes y no actúa como
-  usuario.
+- **Uso:** herramienta personal, no comercial, de un solo desarrollador (fase 1 de
+  `docs/VISION.md`). **No se declara como "investigación"**: según la página oficial, eso
+  corresponde al programa Reddit for Researchers. Sólo lectura: no publica, no vota, no manda
+  mensajes y no actúa como usuario.
 - **Qué incluir en el pedido:**
   - Nombre y propósito de la app: Seedbox, radar personal que lee posts públicos de texto para
     encontrar problemas que alguien podría resolver con software.

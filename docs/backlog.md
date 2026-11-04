@@ -279,7 +279,7 @@ guarda posts con `SEEDBOX_INGEST_MIN_AGE_HOURS` (24) horas de publicados y Reddi
 `SEEDBOX_MAX_NEW_PER_FEED` (25) posts por subreddit y corrida, los de más comentarios. Sin
 migración. Orden documentado en el skill y en `docs/deploy.md`.
 
-### H15. Reddit activo con comunidades de público amplio · S · ⏸ en espera (Felipe revisa el acceso a Reddit)
+### H15. Reddit activo con comunidades de público amplio · S · ⏸ en espera (pedido de acceso a Reddit enviado el 2026-11-04)
 **Como** usuario **quiero** que el radar lea a diario subreddits donde escriben dueños de pymes,
 profesionales y personas comunes **para** encontrar dolores de un público más amplio que los
 desarrolladores.

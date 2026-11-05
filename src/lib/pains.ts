@@ -12,6 +12,7 @@ export const VERTICAL_LABELS = {
   marketing: "Marketing y ventas",
   ecommerce: "E-commerce",
   hr: "Recursos humanos",
+  career: "Trabajo y carrera",
   legal: "Legal",
   real_estate: "Inmobiliario",
   logistics: "Logística",
@@ -21,6 +22,19 @@ export const VERTICAL_LABELS = {
 
 export type Vertical = keyof typeof VERTICAL_LABELS;
 export const VERTICALS = Object.keys(VERTICAL_LABELS) as [Vertical, ...Vertical[]];
+
+/**
+ * Kinds of pain (H17): a concrete task or situation that fails, or a latent, sustained need
+ * without a failing task. The extraction does not produce a type yet (H18); evaluation labels do.
+ */
+export const PAIN_TYPES = ["concrete", "latent"] as const;
+export type PainType = (typeof PAIN_TYPES)[number];
+export const PAIN_TYPE_LABELS = { concrete: "Concreto", latent: "Latente" } as const;
+
+/** A pain without a type is read as concrete, so data labeled before H17 keeps its meaning. */
+export function painType(pain: { type?: PainType | null }): PainType {
+  return pain.type ?? "concrete";
+}
 
 export const INTENSITIES = ["low", "medium", "high"] as const;
 export const WILLINGNESS_TO_PAY = ["none", "implied", "explicit"] as const;

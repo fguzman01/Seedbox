@@ -1,14 +1,25 @@
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { z } from "zod";
-import { VERTICALS } from "../pains";
+import { PAIN_TYPES, VERTICALS } from "../pains";
 
 export const DEFAULT_DATASET_PATH = path.join("evals", "extraction", "dataset.jsonl");
+
+/**
+ * Versions of the labeling criterion (H17). v0: the original labels, which mix criteria;
+ * v1: labels reviewed with the concrete / latent / no pain definition.
+ */
+export const LABEL_VERSIONS = ["v0", "v1"] as const;
+export type LabelVersion = (typeof LABEL_VERSIONS)[number];
+/** The version written by the labeling page. */
+export const CURRENT_LABEL_VERSION: LabelVersion = "v1";
 
 /** A pain a human expects the extractor to find, identified by its quote in the post. */
 export const expectedPainSchema = z.object({
   quote: z.string().min(1),
   vertical: z.enum(VERTICALS),
+  /** Absent = concrete (labels written before H17). */
+  type: z.enum(PAIN_TYPES).optional(),
 });
 
 export const evalItemSchema = z.object({
@@ -20,6 +31,8 @@ export const evalItemSchema = z.object({
   /** null = not labeled yet; [] = labeled as having no pains. */
   expected: z.array(expectedPainSchema).nullable(),
   notes: z.string().optional(),
+  /** Criterion the labels follow. Absent = v0. */
+  labels: z.enum(LABEL_VERSIONS).optional(),
 });
 
 export type ExpectedPain = z.infer<typeof expectedPainSchema>;
@@ -28,6 +41,20 @@ export type LabeledEvalItem = EvalItem & { expected: ExpectedPain[] };
 
 export function isLabeled(item: EvalItem): item is LabeledEvalItem {
   return item.expected !== null;
+}
+
+export function labelVersion(item: EvalItem): LabelVersion {
+  return item.labels ?? "v0";
+}
+
+/** How many items follow each label version; versions without items are left out. */
+export function countLabelVersions(items: EvalItem[]): Partial<Record<LabelVersion, number>> {
+  const counts: Partial<Record<LabelVersion, number>> = {};
+  for (const version of LABEL_VERSIONS) {
+    const count = items.filter((item) => labelVersion(item) === version).length;
+    if (count) counts[version] = count;
+  }
+  return counts;
 }
 
 export function parseDataset(content: string): EvalItem[] {

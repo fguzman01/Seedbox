@@ -10,6 +10,7 @@ import {
 import { isLabeled, loadDataset } from "../src/lib/eval/dataset";
 import { runEval, type EvalRun } from "../src/lib/eval/run";
 import { createClaudeExtractor } from "../src/lib/extraction";
+import { painType } from "../src/lib/pains";
 
 // Load .env when present; in production the variables come from the environment.
 try {
@@ -84,11 +85,17 @@ async function main() {
   }
   const { summary } = run;
 
+  const { concrete, latent } = summary.byType;
+  const labels = Object.entries(run.labelVersions).map(([version, n]) => `${version}: ${n}`).join(", ");
   console.log(`
 Posts evaluated     ${summary.items} (failed: ${summary.failed})
-Has pain? precision ${pct(summary.post.precision)}   recall ${pct(summary.post.recall)}   accuracy ${pct(summary.post.accuracy)}
-Pains     precision ${pct(summary.pain.precision)}   recall ${pct(summary.pain.recall)}
+Labels              ${labels || "—"}
+Has pain? precision ${pct(summary.post.precision)}   recall ${pct(summary.post.recall)}   accuracy ${pct(summary.post.accuracy)} (concrete pains)
+Concrete  precision ${pct(concrete.precision)} (${concrete.matched}/${concrete.extracted})   recall ${pct(concrete.recall)} (${concrete.matched}/${concrete.expected})
+Latent    precision ${pct(latent.precision)} (${latent.matched}/${latent.extracted})   recall ${pct(latent.recall)} (${latent.matched}/${latent.expected})
+All pains precision ${pct(summary.pain.precision)}   recall ${pct(summary.pain.recall)}
 Vertical  accuracy  ${pct(summary.verticalAccuracy)} (of matched pains)
+Type      accuracy  ${summary.typeAccuracy === null ? "— (the extraction gives no type)" : `${pct(summary.typeAccuracy)} (of matched pains with a type)`}
 Cost                ${run.costUsd === null ? (fromResults ? "— (subscription)" : "unknown model price") : `$${run.costUsd.toFixed(4)}`} (${run.usage.inputTokens} in / ${run.usage.outputTokens} out / ${run.usage.cacheReadTokens} cached)
 Avg latency         ${run.avgLatencyMs === null ? "—" : `${(run.avgLatencyMs / 1000).toFixed(1)}s`}`);
 
@@ -96,7 +103,7 @@ Avg latency         ${run.avgLatencyMs === null ? "—" : `${(run.avgLatencyMs /
     if (item.error) console.log(`\n✗ ${id}: ${item.error}`);
     else if (item.score && (item.score.missed.length || item.score.extra.length)) {
       console.log(`\n• ${id}`);
-      for (const m of item.score.missed) console.log(`  missed: "${m.quote}"`);
+      for (const m of item.score.missed) console.log(`  missed (${painType(m)}): "${m.quote}"`);
       for (const e of item.score.extra) console.log(`  extra:  "${e.quote}" — ${e.description}`);
     }
   }

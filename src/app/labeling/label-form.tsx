@@ -2,7 +2,15 @@
 
 import { useRef, useState, useTransition } from "react";
 import type { EvalItem, ExpectedPain } from "@/lib/eval/dataset";
-import { VERTICAL_LABELS, VERTICALS, type Vertical } from "@/lib/pains";
+import {
+  PAIN_TYPE_LABELS,
+  PAIN_TYPES,
+  painType,
+  VERTICAL_LABELS,
+  VERTICALS,
+  type PainType,
+  type Vertical,
+} from "@/lib/pains";
 import { saveLabel } from "./actions";
 
 export function LabelForm({ item }: { item: EvalItem }) {
@@ -20,9 +28,13 @@ export function LabelForm({ item }: { item: EvalItem }) {
       setError("Selecciona en el post el texto que muestra el dolor.");
       return;
     }
-    setPains((current) => [...current, { quote, vertical }]);
+    setPains((current) => [...current, { quote, vertical, type: "concrete" }]);
     selection.removeAllRanges();
     setError(null);
+  }
+
+  function setType(index: number, type: PainType) {
+    setPains((current) => current.map((pain, i) => (i === index ? { ...pain, type } : pain)));
   }
 
   function save(expected: ExpectedPain[]) {
@@ -55,7 +67,9 @@ export function LabelForm({ item }: { item: EvalItem }) {
         <h3 className="font-semibold">Dolores en este post</h3>
         <p className="mt-1 text-sm text-zinc-500">
           Selecciona en el post el fragmento que muestra cada dolor, elige la vertical y agrégalo.
+          Después indica si es concreto o latente.
         </p>
+        <PainCriterion />
         <div className="mt-4 flex flex-col gap-2 sm:flex-row">
           <select
             value={vertical}
@@ -87,9 +101,23 @@ export function LabelForm({ item }: { item: EvalItem }) {
                 className="flex items-start justify-between gap-3 rounded-lg bg-zinc-900 p-3 text-sm"
               >
                 <div>
-                  <span className="rounded bg-emerald-500/15 px-1.5 py-0.5 text-xs text-emerald-300">
-                    {VERTICAL_LABELS[pain.vertical]}
-                  </span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="rounded bg-emerald-500/15 px-1.5 py-0.5 text-xs text-emerald-300">
+                      {VERTICAL_LABELS[pain.vertical]}
+                    </span>
+                    <select
+                      value={painType(pain)}
+                      onChange={(e) => setType(i, e.target.value as PainType)}
+                      aria-label="Tipo de dolor"
+                      className="rounded border border-zinc-700 bg-zinc-900 px-1.5 py-0.5 text-xs"
+                    >
+                      {PAIN_TYPES.map((t) => (
+                        <option key={t} value={t}>
+                          {PAIN_TYPE_LABELS[t]}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                   <p className="mt-1.5 text-zinc-300 italic">“{pain.quote}”</p>
                 </div>
                 <button
@@ -135,5 +163,38 @@ export function LabelForm({ item }: { item: EvalItem }) {
         </div>
       </section>
     </div>
+  );
+}
+
+/** Short version of the criterion in evals/extraction/README.md, visible while labeling (H17). */
+function PainCriterion() {
+  return (
+    <dl className="mt-3 space-y-1.5 rounded-lg bg-zinc-900/60 p-3 text-xs leading-relaxed text-zinc-400">
+      <div>
+        <dt className="inline font-semibold text-zinc-200">Concreto: </dt>
+        <dd className="inline">
+          una tarea o situación que falla (lenta, cara, propensa a errores, frustrante o sin
+          herramienta); el autor diría “si existiera X, se resolvería”.
+        </dd>
+      </div>
+      <div>
+        <dt className="inline font-semibold text-zinc-200">Latente: </dt>
+        <dd className="inline">
+          las tres cosas, con una cita que lo pruebe: (1) alguien afectado identificable; (2) un
+          estado o necesidad sostenida sin tarea que falle (incertidumbre, desorientación, pérdida
+          de motivación o práctica, ansiedad por un cambio); (3) lo que falta podría aportarlo el
+          software (información, aprendizaje, orientación, acompañamiento, comunidad,
+          planificación). La cita muestra el estado, no sólo el tema.
+        </dd>
+      </div>
+      <div>
+        <dt className="inline font-semibold text-zinc-200">Sin dolor: </dt>
+        <dd className="inline">
+          opiniones sobre el mercado o empresas, llamados a la acción, avisos de incidentes de
+          terceros, preguntas generales sin interés personal, hilos recurrentes y miedos que el
+          software no puede abordar.
+        </dd>
+      </div>
+    </dl>
   );
 }

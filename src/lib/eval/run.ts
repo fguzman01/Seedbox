@@ -1,7 +1,7 @@
 import type { ExtractionInput, ExtractionResult, TokenUsage } from "../extraction";
 import type { ExtractedPain } from "../pains";
 import { estimateCost, sumUsage } from "./cost";
-import type { LabeledEvalItem } from "./dataset";
+import { countLabelVersions, type LabeledEvalItem, type LabelVersion } from "./dataset";
 import { scoreItem, summarize, type EvalSummary, type ItemScore } from "./metrics";
 
 export interface ItemRun {
@@ -15,6 +15,8 @@ export interface ItemRun {
 export interface EvalRun {
   model: string;
   startedAt: string;
+  /** Evaluated posts by label version (H17), so results on v0 and v1 are not compared blindly. */
+  labelVersions: Partial<Record<LabelVersion, number>>;
   summary: EvalSummary;
   usage: TokenUsage;
   costUsd: number | null;
@@ -72,6 +74,7 @@ export async function runEval(
   return {
     model: extractor.model,
     startedAt,
+    labelVersions: countLabelVersions(items),
     summary: summarize(
       completed.map((r) => r.score!),
       items.length - completed.length,

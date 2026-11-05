@@ -74,7 +74,8 @@ marked as discarded and not handed out again.
 
 - `quote` must be copied **verbatim** from the post's title or body; anything else is dropped.
 - `vertical`: smb, freelance, devtools, productivity, finance, health, education, marketing,
-  ecommerce, hr, legal, real_estate, logistics, consumer, other.
+  ecommerce, hr, career, legal, real_estate, logistics, consumer, other. `career` is for
+  employment, job searching and professional careers; `hr`, for managing people in companies.
 - `intensity`: low, medium, high. `willingness_to_pay`: none, implied, explicit.
 
 ### cluster

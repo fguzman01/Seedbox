@@ -1,12 +1,16 @@
+import { painType } from "../pains";
 import { quoteAppearsIn } from "../text";
-import type { EvalItem, ExpectedPain } from "./dataset";
+import { CURRENT_LABEL_VERSION, type EvalItem, type ExpectedPain } from "./dataset";
 
 /** Target size of the dataset (H8). */
 export const LABELING_GOAL = 30;
 
 export class LabelError extends Error {}
 
-/** Returns a copy of the dataset with the item labeled. Quotes must be copied from the post. */
+/**
+ * Returns a copy of the dataset with the item labeled. Quotes must be copied from the post.
+ * The label follows the current criterion (H17): every pain gets an explicit type.
+ */
 export function applyLabel(
   items: EvalItem[],
   id: string,
@@ -23,7 +27,12 @@ export function applyLabel(
     }
   }
 
-  const updated: EvalItem = { ...item, expected, notes: notes?.trim() || undefined };
+  const updated: EvalItem = {
+    ...item,
+    expected: expected.map((pain) => ({ ...pain, type: painType(pain) })),
+    notes: notes?.trim() || undefined,
+    labels: CURRENT_LABEL_VERSION,
+  };
   return items.map((it, i) => (i === index ? updated : it));
 }
 

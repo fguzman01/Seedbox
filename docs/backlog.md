@@ -175,8 +175,13 @@ Orden y por qué:
    tablero no debe hacer pasar una anécdota por una tendencia.
 6. **H8** (reubicada desde la fase 1): pasa a ser requisito de H13. No se puede recortar ruido
    sin medir que no se pierden dolores reales. Conviene que el dataset ya incluya posts de Reddit.
-7. **H13** al final: libera la mayor parte de la capacidad, pero sólo es seguro con la línea base
-   de H8.
+7. **H17** entre H8 y H13: el prefiltro debe probar que no pierde dolores, y el dataset tiene que
+   decir cuáles son (las etiquetas originales mezclan criterios).
+8. **H13**: libera la mayor parte de la capacidad, pero sólo es seguro con la línea base v1 de
+   H17.
+9. **H18** al final: suma necesidades latentes al tablero, en una vista aparte. Aporta señal de
+   menor calidad que los dolores concretos y no alivia la cola; si la fase se alarga, pasa a la
+   fase 2.
 
 Actualización 2026-11-04: según fuentes secundarias, Reddit dejó de recibir pedidos de acceso
 nuevos el 31-10-2026 (ver ADR-0009); Felipe lo confirma en la página oficial. Por eso **H16**
@@ -334,22 +339,104 @@ teclado (tooltip con `aria-describedby`). Filtro en la URL: `?authors=2` o `?aut
 el valor por defecto, 1, no filtra, así que las oportunidades sin autor identificable siguen
 visibles. Captura: `docs/screenshot-h12.png`.
 
-### H8. Evaluar la calidad de la extracción · S · 🟡 herramienta lista, falta etiquetar
+### H8. Evaluar la calidad de la extracción · S · ✅ hecha (etiquetas v0; la revisión v1 es H17)
 **Como** usuario **quiero** un conjunto de posts reales con los dolores esperados **para**
 medir si un cambio de prompt o de modelo mejora o empeora la extracción.
 
 Criterios de aceptación:
 - Al menos 30 posts reales etiquetados a mano (con y sin dolores).
 - Un comando que corre la extracción sobre ellos y reporta aciertos, falsos positivos y costo.
+- La línea base v0 (etiquetas originales, 40 posts) queda registrada en `evals/extraction/results/`
+  con `model = "claude-code"`.
 
 Notas: ver `evals/extraction/README.md`. Listo: formato del dataset, `npm run eval:sample`,
 página `/labeling` (solo en desarrollo) y `npm run eval` con precisión, recall, vertical y
-costo. Pendiente: etiquetar 30+ posts reales y registrar la primera línea base. Reubicada desde
+costo. Reubicada desde
 la fase 1 porque ahora bloquea a H13. Conviene que el dataset incluya posts de los tipos que hoy
 se descartan (anuncios, opiniones, preguntas generales) para medir el prefiltro. La línea base
 debe correrse también con `model = "claude-code"` (ADR-0008), que es el modo en producción. No incluir
 preguntas de Stack Exchange en el dataset: su política prohíbe usar su contenido para probar o
 comparar herramientas de IA (ADR-0010).
+
+Resultado (2026-11-04): Felipe etiquetó 40 posts de Hacker News (20 con dolor). Se agregó la
+medición sin API (`npm run eval -- --export` / `--from-results`, ver `evals/extraction/README.md`).
+Línea base v0 con Claude Code, extracción hecha por un agente que no vio las etiquetas: 5 posts
+con dolor; precisión 40 %, recall 10 %, 0 citas rechazadas. Los 3 dolores "de más" eran dolores
+concretos que las etiquetas v0 no marcaron, y casi todo lo no encontrado son necesidades latentes
+o posts que no son dolor según la visión. v0 mezcla criterios, así que es referencia, no umbral:
+el umbral para H13 sale de la línea base v1 de H17. No se mide con la API de Claude (costo aparte
+de la suscripción, ADR-0008).
+
+### H17. Criterio de dolor concreto y latente en la evaluación · S · ⬜ pendiente
+**Como** usuario **quiero** que el dataset de evaluación distinga dolores concretos, dolores
+latentes y posts sin dolor, con un criterio escrito **para** medir la extracción con la misma
+vara con la que etiqueto y saber qué no debe perder el prefiltro.
+
+Criterios de aceptación:
+- La definición operativa de dolor concreto, dolor latente y "sin dolor" (con ejemplos y
+  contraejemplos tomados del dataset) está en `evals/extraction/README.md` y se ve mientras
+  etiqueto.
+- Cada dolor etiquetado tiene un tipo (concreto o latente); un dolor sin tipo en el dataset
+  existente se lee como concreto.
+- Dados los 40 posts actuales, cuando Felipe termina la revisión (partiendo de la clasificación
+  propuesta por el PO), entonces cada post con dolor tiene su tipo, los que no cumplen el
+  criterio quedan "sin dolor" y los posts sin dolor que sí lo tienen quedan etiquetados.
+- La medición informa precisión y recall por separado para concretos y para latentes, y
+  "¿tiene dolor?" calculado sobre concretos; los latentes no extraídos no cuentan como falsos
+  negativos de concretos.
+- El archivo de resultados indica la versión de etiquetas usada (v0 original, v1 revisada), y la
+  línea base v1 queda registrada con `model = "claude-code"`.
+- La vertical "Trabajo y carrera" (`career`) existe para dolores sobre empleo, búsqueda de
+  trabajo y carrera profesional; "Recursos humanos" (`hr`) queda para la gestión de personas en
+  las empresas.
+
+Notas: decisión de criterio del PO (2026-11-04):
+- **Dolor concreto:** una tarea o situación que falla (lenta, cara, propensa a errores, frustrante
+  o sin herramienta), que el autor podría describir como "si existiera X, se resolvería".
+- **Dolor latente:** cumple las tres condiciones, con una cita que lo pruebe: (1) hay alguien
+  afectado identificable (el autor o un grupo concreto); (2) expresa un estado o necesidad
+  sostenida sin una tarea concreta que falle (incertidumbre, desorientación, pérdida de motivación
+  o de práctica, ansiedad por un cambio); (3) lo que falta podría aportarlo el software
+  (información, aprendizaje, orientación, acompañamiento, comunidad, planificación). La cita
+  muestra el estado, no sólo el tema.
+- **No es dolor:** opiniones sobre el mercado o empresas, llamados a la acción, avisos de
+  incidentes de terceros, preguntas generales sin interés personal, hilos recurrentes y miedos
+  cuyo objeto no es abordable con software.
+- La recurrencia no se juzga al extraer: la mide el agrupamiento. Las notas de Felipe son ideas,
+  no evidencia. El cambio de formato del dataset es compatible hacia atrás. No cambia la
+  extracción en producción: eso es H18. No se mide con la API de Claude.
+
+### H18. Extraer necesidades latentes y mostrarlas aparte · M · ⬜ pendiente
+**Como** usuario **quiero** que el radar capte también las necesidades latentes que se repiten
+(p. ej. la desorientación laboral frente a la IA) y me las muestre separadas de los dolores
+concretos **para** ver tendencias de fondo sin que se confundan con problemas listos para
+resolver.
+
+Criterios de aceptación:
+- Cada dolor extraído tiene un tipo, concreto o latente, según la definición de H17; las reglas
+  son las mismas en el modo API y en el skill del analista, y la cita se verifica igual que hoy.
+- Dado un post de opinión, aviso, llamado a la acción o pregunta general sin persona afectada,
+  cuando se extrae, entonces no produce dolores de ningún tipo.
+- El tablero muestra por defecto sólo oportunidades con dolores concretos; una vista
+  "Necesidades latentes" (en la URL, como los filtros de H5) las lista ordenadas por autores
+  distintos, con un mínimo por defecto de 3 autores que el usuario puede bajar.
+- Cada card y detalle de una oportunidad latente lleva la marca "latente" con su explicación al
+  pasar el mouse, y el detalle muestra cuántos autores aportan dolor concreto y cuántos latente.
+- La frecuencia del ranking principal cuenta sólo autores con dolor concreto; agregar dolores
+  latentes no cambia el puntaje de una oportunidad concreta.
+- La evaluación con búsqueda web sólo entra al reparto (H11) para oportunidades latentes con 3 o
+  más autores.
+- Dado el dataset v1 de H17, cuando corre la medición con las reglas nuevas, entonces la
+  precisión y el recall de concretos no bajan más de 5 puntos respecto de la línea base v1
+  (umbral propuesto, Felipe lo puede ajustar), y se registra el recall de latentes.
+- H14 muestra, por fuente, cuántos dolores son latentes.
+
+Notas: requiere al `architect`: modificar ADR-0003 (o un ADR nuevo) para el tipo de dolor,
+cambiar el esquema de `src/lib/pains.ts`, la migración, `EXTRACTION_RULES`, el skill
+`seedbox-analyst`, y decidir si el agrupamiento mezcla tipos (ADR-0004) y cómo se reflejan en el
+puntaje (ADR-0005). Los posts ya procesados no se reprocesan (ADR-0003); el `architect` decide si
+conviene marcar para reproceso los descartados de los últimos 30 días. Riesgo a vigilar con H14:
+el tema "IA y trabajo" puede dominar la vista latente y reforzar el sesgo hacia devs.
 
 ### H13. Descartar el ruido evidente antes del análisis · S · ⬜ pendiente
 **Como** usuario **quiero** que los posts que claramente no cuentan un problema se descarten
@@ -364,11 +451,15 @@ Criterios de aceptación:
 - Las reglas son explícitas, están documentadas y no usan IA.
 - Los posts descartados por prefiltro se pueden revisar en la página de actividad, con su
   motivo y link a la fuente.
-- Dado el dataset de H8, cuando se aplica el prefiltro, entonces no descarta ningún post
-  etiquetado con dolores; el informe muestra cuántos posts sin dolor se ahorra.
+- Dado el dataset de H8 con las etiquetas revisadas de H17 (v1), cuando se aplica el prefiltro,
+  entonces no descarta ningún post etiquetado con dolor concreto o latente; el informe muestra
+  cuántos posts sin dolor se ahorra.
+- Las reglas descartan por forma (hilos recurrentes, ofertas de trabajo, anuncios, posts sin
+  texto propio), nunca por tema u opinión: un post de opinión o de pregunta abierta (p. ej. sobre
+  la IA y el trabajo) no se prefiltra, porque puede tener un dolor latente.
 - El balance de H10 muestra cuántos posts descartó el prefiltro en los últimos 7 días.
 
-Notas: depende de H8. Requiere al `architect` para decidir dónde vive el filtro (al ingerir o
+Notas: depende de H8 y H17. Requiere al `architect` para decidir dónde vive el filtro (al ingerir o
 al repartir trabajo) y si conviene un ADR. Si una regla resulta discutible, se queda fuera:
 preferimos analizar ruido a perder evidencia.
 

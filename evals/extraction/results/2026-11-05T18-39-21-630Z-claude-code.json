@@ -1,0 +1,1363 @@
+{
+  "model": "claude-code",
+  "startedAt": "2026-11-05T18:39:21.630Z",
+  "labelVersions": {
+    "v1": 40
+  },
+  "summary": {
+    "items": 40,
+    "failed": 0,
+    "post": {
+      "precision": 0.4,
+      "recall": 0.6666666666666666,
+      "accuracy": 0.8
+    },
+    "pain": {
+      "precision": 0.4,
+      "recall": 0.3333333333333333
+    },
+    "byType": {
+      "concrete": {
+        "expected": 6,
+        "extracted": 10,
+        "matched": 4,
+        "precision": 0.4,
+        "recall": 0.6666666666666666
+      },
+      "latent": {
+        "expected": 6,
+        "extracted": 0,
+        "matched": 0,
+        "precision": null,
+        "recall": 0
+      }
+    },
+    "verticalAccuracy": 1,
+    "typeAccuracy": null
+  },
+  "usage": {
+    "inputTokens": 0,
+    "outputTokens": 0,
+    "cacheReadTokens": 0,
+    "cacheWriteTokens": 0
+  },
+  "costUsd": null,
+  "avgLatencyMs": null,
+  "items": {
+    "hackernews:50328896": {
+      "score": {
+        "id": "hackernews:50328896",
+        "expected": 0,
+        "extracted": 0,
+        "matched": 0,
+        "verticalCorrect": 0,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          },
+          "latent": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [],
+        "extra": []
+      },
+      "extracted": [],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50200997": {
+      "score": {
+        "id": "hackernews:50200997",
+        "expected": 0,
+        "extracted": 0,
+        "matched": 0,
+        "verticalCorrect": 0,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          },
+          "latent": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [],
+        "extra": []
+      },
+      "extracted": [],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50338726": {
+      "score": {
+        "id": "hackernews:50338726",
+        "expected": 0,
+        "extracted": 0,
+        "matched": 0,
+        "verticalCorrect": 0,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          },
+          "latent": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [],
+        "extra": []
+      },
+      "extracted": [],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50338728": {
+      "score": {
+        "id": "hackernews:50338728",
+        "expected": 0,
+        "extracted": 0,
+        "matched": 0,
+        "verticalCorrect": 0,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          },
+          "latent": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [],
+        "extra": []
+      },
+      "extracted": [],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50301479": {
+      "score": {
+        "id": "hackernews:50301479",
+        "expected": 1,
+        "extracted": 1,
+        "matched": 1,
+        "verticalCorrect": 1,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 1,
+            "extracted": 1,
+            "matched": 1
+          },
+          "latent": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [],
+        "extra": []
+      },
+      "extracted": [
+        {
+          "description": "Sobrecarga mental por tener que supervisar, decidir y cambiar de contexto constantemente al trabajar con IA",
+          "persona": "Desarrollador o profesional que trabaja con herramientas de IA",
+          "quote": "The constant guardrailing, decision making, and context switching overload me.",
+          "vertical": "productivity",
+          "intensity": "medium",
+          "willingness_to_pay": "none"
+        }
+      ],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50352757": {
+      "score": {
+        "id": "hackernews:50352757",
+        "expected": 1,
+        "extracted": 1,
+        "matched": 1,
+        "verticalCorrect": 1,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 1,
+            "extracted": 1,
+            "matched": 1
+          },
+          "latent": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [],
+        "extra": []
+      },
+      "extracted": [
+        {
+          "description": "La configuración que desactiva el entrenamiento con los chats se reactiva sin aviso, poniendo en riesgo la propiedad intelectual de la empresa",
+          "persona": "Equipo de desarrollo en una empresa preocupada por filtrar propiedad intelectual",
+          "quote": "But yesterday my coworkers and I noticed that the setting had been silently reenabled in Codex.",
+          "vertical": "devtools",
+          "intensity": "medium",
+          "willingness_to_pay": "none"
+        }
+      ],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50312756": {
+      "score": {
+        "id": "hackernews:50312756",
+        "expected": 0,
+        "extracted": 0,
+        "matched": 0,
+        "verticalCorrect": 0,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          },
+          "latent": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [],
+        "extra": []
+      },
+      "extracted": [],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50271808": {
+      "score": {
+        "id": "hackernews:50271808",
+        "expected": 0,
+        "extracted": 0,
+        "matched": 0,
+        "verticalCorrect": 0,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          },
+          "latent": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [],
+        "extra": []
+      },
+      "extracted": [],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50328340": {
+      "score": {
+        "id": "hackernews:50328340",
+        "expected": 0,
+        "extracted": 0,
+        "matched": 0,
+        "verticalCorrect": 0,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          },
+          "latent": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [],
+        "extra": []
+      },
+      "extracted": [],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50326727": {
+      "score": {
+        "id": "hackernews:50326727",
+        "expected": 0,
+        "extracted": 0,
+        "matched": 0,
+        "verticalCorrect": 0,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          },
+          "latent": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [],
+        "extra": []
+      },
+      "extracted": [],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50255318": {
+      "score": {
+        "id": "hackernews:50255318",
+        "expected": 1,
+        "extracted": 1,
+        "matched": 1,
+        "verticalCorrect": 1,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 1,
+            "extracted": 1,
+            "matched": 1
+          },
+          "latent": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [],
+        "extra": []
+      },
+      "extracted": [
+        {
+          "description": "Dificultad para encontrar roles remotos de marketing abiertos a candidatos desde cualquier país",
+          "persona": "Profesional de marketing en India que busca trabajo remoto",
+          "quote": "there's no good role hiring remotely everywhere",
+          "vertical": "career",
+          "intensity": "medium",
+          "willingness_to_pay": "none"
+        }
+      ],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50331001": {
+      "score": {
+        "id": "hackernews:50331001",
+        "expected": 0,
+        "extracted": 0,
+        "matched": 0,
+        "verticalCorrect": 0,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          },
+          "latent": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [],
+        "extra": []
+      },
+      "extracted": [],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50337431": {
+      "score": {
+        "id": "hackernews:50337431",
+        "expected": 0,
+        "extracted": 0,
+        "matched": 0,
+        "verticalCorrect": 0,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          },
+          "latent": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [],
+        "extra": []
+      },
+      "extracted": [],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50271004": {
+      "score": {
+        "id": "hackernews:50271004",
+        "expected": 0,
+        "extracted": 0,
+        "matched": 0,
+        "verticalCorrect": 0,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          },
+          "latent": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [],
+        "extra": []
+      },
+      "extracted": [],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50285134": {
+      "score": {
+        "id": "hackernews:50285134",
+        "expected": 1,
+        "extracted": 1,
+        "matched": 1,
+        "verticalCorrect": 1,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 1,
+            "extracted": 1,
+            "matched": 1
+          },
+          "latent": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [],
+        "extra": []
+      },
+      "extracted": [
+        {
+          "description": "Miedo a las entrevistas y a no tener las habilidades al día tras un despido, lo que frena la búsqueda de empleo",
+          "persona": "Profesional despedido que busca empleo",
+          "quote": "My main reason has been that I am afraid of interviewing and that my skills are not up to par.",
+          "vertical": "career",
+          "intensity": "medium",
+          "willingness_to_pay": "none"
+        }
+      ],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50318646": {
+      "score": {
+        "id": "hackernews:50318646",
+        "expected": 0,
+        "extracted": 0,
+        "matched": 0,
+        "verticalCorrect": 0,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          },
+          "latent": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [],
+        "extra": []
+      },
+      "extracted": [],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50204125": {
+      "score": {
+        "id": "hackernews:50204125",
+        "expected": 0,
+        "extracted": 0,
+        "matched": 0,
+        "verticalCorrect": 0,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          },
+          "latent": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [],
+        "extra": []
+      },
+      "extracted": [],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50353457": {
+      "score": {
+        "id": "hackernews:50353457",
+        "expected": 0,
+        "extracted": 0,
+        "matched": 0,
+        "verticalCorrect": 0,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          },
+          "latent": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [],
+        "extra": []
+      },
+      "extracted": [],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50296367": {
+      "score": {
+        "id": "hackernews:50296367",
+        "expected": 0,
+        "extracted": 1,
+        "matched": 0,
+        "verticalCorrect": 0,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 0,
+            "extracted": 1,
+            "matched": 0
+          },
+          "latent": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [],
+        "extra": [
+          {
+            "description": "Caída repentina de la calidad de las respuestas del modelo en varios agentes y proyectos",
+            "persona": "Desarrollador que usa agentes de codificación con IA",
+            "quote": "Noticeably worse output across multiple agents on very different projects.",
+            "vertical": "devtools",
+            "intensity": "medium",
+            "willingness_to_pay": "none"
+          }
+        ]
+      },
+      "extracted": [
+        {
+          "description": "Caída repentina de la calidad de las respuestas del modelo en varios agentes y proyectos",
+          "persona": "Desarrollador que usa agentes de codificación con IA",
+          "quote": "Noticeably worse output across multiple agents on very different projects.",
+          "vertical": "devtools",
+          "intensity": "medium",
+          "willingness_to_pay": "none"
+        }
+      ],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50313705": {
+      "score": {
+        "id": "hackernews:50313705",
+        "expected": 0,
+        "extracted": 0,
+        "matched": 0,
+        "verticalCorrect": 0,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          },
+          "latent": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [],
+        "extra": []
+      },
+      "extracted": [],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50293459": {
+      "score": {
+        "id": "hackernews:50293459",
+        "expected": 0,
+        "extracted": 0,
+        "matched": 0,
+        "verticalCorrect": 0,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          },
+          "latent": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [],
+        "extra": []
+      },
+      "extracted": [],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50220934": {
+      "score": {
+        "id": "hackernews:50220934",
+        "expected": 0,
+        "extracted": 0,
+        "matched": 0,
+        "verticalCorrect": 0,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          },
+          "latent": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [],
+        "extra": []
+      },
+      "extracted": [],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50354336": {
+      "score": {
+        "id": "hackernews:50354336",
+        "expected": 0,
+        "extracted": 1,
+        "matched": 0,
+        "verticalCorrect": 0,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 0,
+            "extracted": 1,
+            "matched": 0
+          },
+          "latent": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [],
+        "extra": [
+          {
+            "description": "Falta de comunicación oficial y notificación a clientes tras una brecha de seguridad de un proveedor",
+            "persona": "Cliente de GitBook afectado por una brecha",
+            "quote": "We have yet to see any official customer communication or breach notification.",
+            "vertical": "devtools",
+            "intensity": "low",
+            "willingness_to_pay": "none"
+          }
+        ]
+      },
+      "extracted": [
+        {
+          "description": "Falta de comunicación oficial y notificación a clientes tras una brecha de seguridad de un proveedor",
+          "persona": "Cliente de GitBook afectado por una brecha",
+          "quote": "We have yet to see any official customer communication or breach notification.",
+          "vertical": "devtools",
+          "intensity": "low",
+          "willingness_to_pay": "none"
+        }
+      ],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50355959": {
+      "score": {
+        "id": "hackernews:50355959",
+        "expected": 0,
+        "extracted": 1,
+        "matched": 0,
+        "verticalCorrect": 0,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 0,
+            "extracted": 1,
+            "matched": 0
+          },
+          "latent": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [],
+        "extra": [
+          {
+            "description": "Verificaciones anti-bot (captchas, Cloudflare) en casi todos los sitios impiden leer artículos con normalidad",
+            "persona": "Lector habitual de la web",
+            "quote": "every other one of them requires me to solve some fking puzzle or click on a checkbox",
+            "vertical": "other",
+            "intensity": "high",
+            "willingness_to_pay": "none"
+          }
+        ]
+      },
+      "extracted": [
+        {
+          "description": "Verificaciones anti-bot (captchas, Cloudflare) en casi todos los sitios impiden leer artículos con normalidad",
+          "persona": "Lector habitual de la web",
+          "quote": "every other one of them requires me to solve some fking puzzle or click on a checkbox",
+          "vertical": "other",
+          "intensity": "high",
+          "willingness_to_pay": "none"
+        }
+      ],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50306776": {
+      "score": {
+        "id": "hackernews:50306776",
+        "expected": 0,
+        "extracted": 0,
+        "matched": 0,
+        "verticalCorrect": 0,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          },
+          "latent": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [],
+        "extra": []
+      },
+      "extracted": [],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50275640": {
+      "score": {
+        "id": "hackernews:50275640",
+        "expected": 0,
+        "extracted": 0,
+        "matched": 0,
+        "verticalCorrect": 0,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          },
+          "latent": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [],
+        "extra": []
+      },
+      "extracted": [],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50249194": {
+      "score": {
+        "id": "hackernews:50249194",
+        "expected": 1,
+        "extracted": 0,
+        "matched": 0,
+        "verticalCorrect": 0,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          },
+          "latent": {
+            "expected": 1,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [
+          {
+            "quote": "I expect more and more professions getting affected in the next 3 to 5 years, not all on the positive side. Software dev is already changing. What are your plans? Are you planning to quit software altogether? Or stop coding and adapt, accept AI but stay in software field? Or something else? If you’re not in software, what plans then? It would be helpful if you can include what career level are you at (or age range, if you prefer)",
+            "vertical": "career",
+            "type": "latent"
+          }
+        ],
+        "extra": []
+      },
+      "extracted": [],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50322477": {
+      "score": {
+        "id": "hackernews:50322477",
+        "expected": 1,
+        "extracted": 0,
+        "matched": 0,
+        "verticalCorrect": 0,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          },
+          "latent": {
+            "expected": 1,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [
+          {
+            "quote": "I’m curious if anyone here still actually writes code, in any meaningful amount, because they actually still need to. Excluding reasons like fun / learning. I loved coding in the past, but no matter what I do at this point, I can’t find a reason to anymore that’s actually necessary",
+            "vertical": "productivity",
+            "type": "latent"
+          }
+        ],
+        "extra": []
+      },
+      "extracted": [],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50302246": {
+      "score": {
+        "id": "hackernews:50302246",
+        "expected": 0,
+        "extracted": 0,
+        "matched": 0,
+        "verticalCorrect": 0,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          },
+          "latent": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [],
+        "extra": []
+      },
+      "extracted": [],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50346164": {
+      "score": {
+        "id": "hackernews:50346164",
+        "expected": 0,
+        "extracted": 0,
+        "matched": 0,
+        "verticalCorrect": 0,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          },
+          "latent": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [],
+        "extra": []
+      },
+      "extracted": [],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50344065": {
+      "score": {
+        "id": "hackernews:50344065",
+        "expected": 1,
+        "extracted": 0,
+        "matched": 0,
+        "verticalCorrect": 0,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          },
+          "latent": {
+            "expected": 1,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [
+          {
+            "quote": "Now that all I do is basically prompt AI all day, I'm struggling to actually enjoy work anymore. I don't get in the flow like I used with coding, which was when I loved the job the most. I'm finding all of the AI trends boring at this point. Trying to go with the flow, but not sure I'm enjoying the ride... How are y'all feeling?",
+            "vertical": "productivity",
+            "type": "latent"
+          }
+        ],
+        "extra": []
+      },
+      "extracted": [],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50214803": {
+      "score": {
+        "id": "hackernews:50214803",
+        "expected": 0,
+        "extracted": 1,
+        "matched": 0,
+        "verticalCorrect": 0,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 0,
+            "extracted": 1,
+            "matched": 0
+          },
+          "latent": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [],
+        "extra": [
+          {
+            "description": "Exceso de contenido irrelevante o negativo en el feed de HN que obliga a filtrarlo manualmente",
+            "persona": "Lector técnico de Hacker News",
+            "quote": "I'm seeing almost 200-300 submissions being blocked a day",
+            "vertical": "other",
+            "intensity": "low",
+            "willingness_to_pay": "none"
+          }
+        ]
+      },
+      "extracted": [
+        {
+          "description": "Exceso de contenido irrelevante o negativo en el feed de HN que obliga a filtrarlo manualmente",
+          "persona": "Lector técnico de Hacker News",
+          "quote": "I'm seeing almost 200-300 submissions being blocked a day",
+          "vertical": "other",
+          "intensity": "low",
+          "willingness_to_pay": "none"
+        }
+      ],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50256932": {
+      "score": {
+        "id": "hackernews:50256932",
+        "expected": 1,
+        "extracted": 0,
+        "matched": 0,
+        "verticalCorrect": 0,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          },
+          "latent": {
+            "expected": 1,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [
+          {
+            "quote": "Hey, Y Combinator - What will happen to humans? this community is by far the one i respect the most. you are well educated, well informed builders. you know best. so i ask, what will happen to humans with this ai revolution? im in a pretty depressed mood lately, not because i think it will affect me badly but because i think humanity will have to face extreme hunger, poverty and war.",
+            "vertical": "productivity",
+            "type": "latent"
+          }
+        ],
+        "extra": []
+      },
+      "extracted": [],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50234108": {
+      "score": {
+        "id": "hackernews:50234108",
+        "expected": 0,
+        "extracted": 0,
+        "matched": 0,
+        "verticalCorrect": 0,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          },
+          "latent": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [],
+        "extra": []
+      },
+      "extracted": [],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50237680": {
+      "score": {
+        "id": "hackernews:50237680",
+        "expected": 0,
+        "extracted": 1,
+        "matched": 0,
+        "verticalCorrect": 0,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 0,
+            "extracted": 1,
+            "matched": 0
+          },
+          "latent": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [],
+        "extra": [
+          {
+            "description": "No puede completar la inscripción al programa Apple Developer por fallos de verificación de identidad, pagos rechazados y soporte inútil",
+            "persona": "Fundador de una LLC que necesita publicar apps en Apple",
+            "quote": "I've been trying to enroll for Apple Developer for over a month and nothing works.",
+            "vertical": "devtools",
+            "intensity": "high",
+            "willingness_to_pay": "none"
+          }
+        ]
+      },
+      "extracted": [
+        {
+          "description": "No puede completar la inscripción al programa Apple Developer por fallos de verificación de identidad, pagos rechazados y soporte inútil",
+          "persona": "Fundador de una LLC que necesita publicar apps en Apple",
+          "quote": "I've been trying to enroll for Apple Developer for over a month and nothing works.",
+          "vertical": "devtools",
+          "intensity": "high",
+          "willingness_to_pay": "none"
+        }
+      ],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50229834": {
+      "score": {
+        "id": "hackernews:50229834",
+        "expected": 1,
+        "extracted": 0,
+        "matched": 0,
+        "verticalCorrect": 0,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 1,
+            "extracted": 0,
+            "matched": 0
+          },
+          "latent": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [
+          {
+            "quote": "Ask HN: Are tab completion models dead? I think there is still place for this type of coding where you autocomplete predictable chunks and review it as you go. But I haven't seen much development in this space. Are there any notable models optimized for this task or full/semi-autonomous coding has taken over?",
+            "vertical": "devtools",
+            "type": "concrete"
+          }
+        ],
+        "extra": []
+      },
+      "extracted": [],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50256342": {
+      "score": {
+        "id": "hackernews:50256342",
+        "expected": 1,
+        "extracted": 0,
+        "matched": 0,
+        "verticalCorrect": 0,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          },
+          "latent": {
+            "expected": 1,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [
+          {
+            "quote": "There have been, increasingly, a large number of posts [1] on HN in the past few weeks, where developers are slowly coming to terms with the breakneck speed with which Agentic Coding has advanced in the past few months.",
+            "vertical": "productivity",
+            "type": "latent"
+          }
+        ],
+        "extra": []
+      },
+      "extracted": [],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50242424": {
+      "score": {
+        "id": "hackernews:50242424",
+        "expected": 0,
+        "extracted": 1,
+        "matched": 0,
+        "verticalCorrect": 0,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 0,
+            "extracted": 1,
+            "matched": 0
+          },
+          "latent": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [],
+        "extra": [
+          {
+            "description": "Crecimiento lineal y lento de adopción de un proyecto open source sin saber cómo acelerarlo",
+            "persona": "Fundador de una startup con producto open source",
+            "quote": "We've been trying to grow the project for months, and it's lowkey growing in stars and adoption. But it's linear.",
+            "vertical": "marketing",
+            "intensity": "medium",
+            "willingness_to_pay": "none"
+          }
+        ]
+      },
+      "extracted": [
+        {
+          "description": "Crecimiento lineal y lento de adopción de un proyecto open source sin saber cómo acelerarlo",
+          "persona": "Fundador de una startup con producto open source",
+          "quote": "We've been trying to grow the project for months, and it's lowkey growing in stars and adoption. But it's linear.",
+          "vertical": "marketing",
+          "intensity": "medium",
+          "willingness_to_pay": "none"
+        }
+      ],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50336034": {
+      "score": {
+        "id": "hackernews:50336034",
+        "expected": 1,
+        "extracted": 0,
+        "matched": 0,
+        "verticalCorrect": 0,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 1,
+            "extracted": 0,
+            "matched": 0
+          },
+          "latent": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [
+          {
+            "quote": "It seems inevitable that Anthropic and OpenAI will either raise prices or nerf their models for cost savings. What are the most competitive alternatives for something like Claude Code? Are there any good coding models that can run on an M5 Mac yet? What’s the best agentic coding harness?",
+            "vertical": "devtools",
+            "type": "concrete"
+          }
+        ],
+        "extra": []
+      },
+      "extracted": [],
+      "error": null,
+      "latencyMs": null
+    },
+    "hackernews:50334841": {
+      "score": {
+        "id": "hackernews:50334841",
+        "expected": 1,
+        "extracted": 0,
+        "matched": 0,
+        "verticalCorrect": 0,
+        "typed": 0,
+        "typeCorrect": 0,
+        "byType": {
+          "concrete": {
+            "expected": 0,
+            "extracted": 0,
+            "matched": 0
+          },
+          "latent": {
+            "expected": 1,
+            "extracted": 0,
+            "matched": 0
+          }
+        },
+        "missed": [
+          {
+            "quote": "If the layoffs keep growing, along with the possibility of a market crash and the continuation of regional wars, do you have a plan B to work it out with your family and/or friends? Not to sound alarmist, just want to read the view of other people on this topic.",
+            "vertical": "career",
+            "type": "latent"
+          }
+        ],
+        "extra": []
+      },
+      "extracted": [],
+      "error": null,
+      "latencyMs": null
+    }
+  },
+  "resultsFile": "/tmp/claude-0/-home-user-Seedbox/4d90395e-c27e-545b-917e-fcc7a6a44c5a/scratchpad/blind2/results.json",
+  "unverifiedPains": {},
+  "unknownResultIds": []
+}

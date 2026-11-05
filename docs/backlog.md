@@ -367,7 +367,7 @@ o posts que no son dolor según la visión. v0 mezcla criterios, así que es ref
 el umbral para H13 sale de la línea base v1 de H17. No se mide con la API de Claude (costo aparte
 de la suscripción, ADR-0008).
 
-### H17. Criterio de dolor concreto y latente en la evaluación · S · ⬜ pendiente
+### H17. Criterio de dolor concreto y latente en la evaluación · S · ✅ hecha
 **Como** usuario **quiero** que el dataset de evaluación distinga dolores concretos, dolores
 latentes y posts sin dolor, con un criterio escrito **para** medir la extracción con la misma
 vara con la que etiqueto y saber qué no debe perder el prefiltro.
@@ -405,6 +405,15 @@ Notas: decisión de criterio del PO (2026-11-04):
 - La recurrencia no se juzga al extraer: la mide el agrupamiento. Las notas de Felipe son ideas,
   no evidencia. El cambio de formato del dataset es compatible hacia atrás. No cambia la
   extracción en producción: eso es H18. No se mide con la API de Claude.
+
+Resultado (2026-11-05): Felipe revisó las 40 etiquetas (v1): 12 posts con dolor, 6 concretos y
+6 latentes (los tipos y verticales de 10 de ellos se aplicaron desde la sugerencia del PO, con su
+aprobación). Felipe mantuvo sin dolor 4 posts que el PO consideraba concretos (captchas,
+inscripción en Apple Developer, crecimiento de un proyecto open source, filtro casero para HN).
+Línea base v1 con Claude Code, extracción ciega: concretos con precisión 40 % (4/10) y recall 67 %
+(4/6); latentes con recall 0 % (0/6, esperado hasta H18); vertical 100 % de los aciertos. De los 6
+dolores "de más", 4 son esos posts que Felipe dejó sin dolor. Resultados en
+`evals/extraction/results/2026-11-05T18-39-21-630Z-claude-code.json`.
 
 ### H18. Extraer necesidades latentes y mostrarlas aparte · M · ⬜ pendiente
 **Como** usuario **quiero** que el radar capte también las necesidades latentes que se repiten

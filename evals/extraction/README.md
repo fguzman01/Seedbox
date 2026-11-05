@@ -74,8 +74,8 @@ agrupamiento), y las notas son ideas, no evidencia.
      acompañamiento, comunidad, planificación).
 
   La cita muestra el estado, no sólo el tema.
-  - Ejemplos: `hackernews:50285134`, "I was laid off six months ago […] Since then, I have been
-    rotting" (desorientación tras un despido); `hackernews:50344065`, "I'm struggling to actually
+  - Ejemplos: `hackernews:50249194`, incertidumbre propia sobre la carrera por la IA ("What are
+    your plans?"); `hackernews:50344065`, "I'm struggling to actually
     enjoy work anymore" (pérdida de motivación y de práctica al programar con IA).
   - Contraejemplo: una pregunta sobre el futuro de la IA y el trabajo sin que nadie diga cómo le
     afecta (`hackernews:50271004`) es el tema, no el estado.

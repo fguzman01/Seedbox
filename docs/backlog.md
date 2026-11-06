@@ -447,7 +447,7 @@ puntaje (ADR-0005). Los posts ya procesados no se reprocesan (ADR-0003); el `arc
 conviene marcar para reproceso los descartados de los últimos 30 días. Riesgo a vigilar con H14:
 el tema "IA y trabajo" puede dominar la vista latente y reforzar el sesgo hacia devs.
 
-### H13. Descartar el ruido evidente antes del análisis · XS · ⬜ pendiente
+### H13. Descartar el ruido evidente antes del análisis · XS · ✅ hecha
 **Como** usuario **quiero** que los posts que por su forma claramente no cuentan un problema se
 descarten sin gastar análisis de IA **para** que la capacidad diaria no se gaste en hilos
 recurrentes ni posts vacíos, y poder revisar qué se descartó.
@@ -474,6 +474,11 @@ mes y 3 de 28 posts sin dolor del dataset v1 (11 %); casi todo el ruido es de co
 puede sacar sin leerlo. Si la cola sigue creciendo, las palancas son otras: bajar el volumen de
 ingesta, subir las rondas del analista o una clasificación barata con su propia medición
 (historia aparte).
+
+Resultado (2026-11-06): reglas `hn-monthly-thread` y `empty` de ADR-0011 en
+`src/lib/prefilter.ts`, aplicadas en `getPendingSignals`. `npm run eval:prefilter` sobre el
+dataset v1: 40 posts (12 con dolor, 28 sin dolor), descarta 3 (los tres hilos mensuales, regla
+`hn-monthly-thread`), 0 posts con dolor perdidos, ahorro 3 de 28 sin dolor (11 %).
 
 ### H16. Ingestar preguntas de sitios no técnicos de Stack Exchange · M · ✅ hecha (activación pendiente de C1–C3 de ADR-0010)
 **Como** usuario **quiero** que el radar lea preguntas de comunidades no técnicas de Stack

@@ -5,6 +5,7 @@ import { getAnalystStatus } from "@/lib/analyst-status";
 import { getDb } from "@/lib/db/client";
 import type { Signal } from "@/lib/db/schema";
 import { VERTICAL_LABELS } from "@/lib/pains";
+import { prefilterReason, prefilterRuleId } from "@/lib/prefilter";
 import { getRecentPains, getRecentSignals } from "@/lib/queries";
 import {
   ACTIVITY_LIST_ID,
@@ -140,6 +141,14 @@ async function RecentLists() {
   );
 }
 
+/** Where the post stands; a prefiltered post shows its rule (H13, ADR-0011). */
+function signalStatusText(signal: Signal): string {
+  if (signal.status === "processed") return "con dolores";
+  if (signal.status === "pending") return "por analizar";
+  const ruleId = prefilterRuleId(signal.metadata);
+  return ruleId ? prefilterReason(ruleId) : "sin dolores";
+}
+
 function SignalList({ signals }: { signals: Signal[] }) {
   return (
     <ul className="space-y-3">
@@ -155,7 +164,7 @@ function SignalList({ signals }: { signals: Signal[] }) {
               <span className="rounded bg-zinc-800 px-1.5 py-0.5 text-zinc-300">{sourceLabel(s.source, s.metadata, s.url)}</span>
               <span>{dateFormat.format(s.publishedAt)}</span>
               {s.author && <span>· {s.author}</span>}
-              <span>· {s.status === "processed" ? "con dolores" : s.status === "discarded" ? "sin dolores" : "por analizar"}</span>
+              <span>· {signalStatusText(s)}</span>
             </div>
             <p className="mt-2 font-medium text-zinc-100">{s.title ?? s.body.slice(0, 120)}</p>
             {s.title && s.body !== s.title && <p className="mt-1 line-clamp-2 text-sm text-zinc-400">{s.body}</p>}

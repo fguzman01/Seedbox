@@ -3,19 +3,23 @@ import type { Database } from "./db/client";
 import { pains, signals, type Signal } from "./db/schema";
 import type { PainExtractor } from "./extraction";
 import type { ExtractedPain } from "./pains";
+import { prefilterPending } from "./prefilter";
 import { maxPendingDays } from "./settings";
 import { planExtraction, type PlanOptions } from "./work-order";
 
 /**
  * The next extraction batch, in hand-out order: equal shares per source, aged posts first and
  * then the most active ones (see planExtraction, ADR-0009). Shared by the API pipeline and the
- * Claude Code analyst (H9, H11).
+ * Claude Code analyst (H9, H11). The form-based noise prefilter runs first over the whole queue,
+ * so a post that matches a noise rule is discarded and never handed out (H13, ADR-0011).
  */
 export async function getPendingSignals(
   db: Database,
   limit: number,
   { now = new Date(), maxPendingDays: days = maxPendingDays() }: Partial<PlanOptions> = {},
 ): Promise<Signal[]> {
+  await prefilterPending(db, now);
+
   // Only the columns the plan needs, so the whole queue can be ranked without loading bodies.
   const pending = await db
     .select({

@@ -16,6 +16,7 @@
     "extract": "tsx scripts/extract.ts",
     "eval": "tsx scripts/eval.ts",
     "eval:sample": "tsx scripts/eval-sample.ts",
+    "eval:prefilter": "tsx scripts/eval-prefilter.ts",
     "cluster": "tsx scripts/cluster.ts",
     "assess": "tsx scripts/assess.ts",
     "db:migrate:deploy": "node scripts/migrate.mjs",

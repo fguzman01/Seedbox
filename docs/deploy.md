@@ -174,6 +174,34 @@ Claude usa el mismo orden.
 Si en `/activity` la mayor parte de cada lote son posts envejecidos, la capacidad no alcanza:
 sube las rondas o la frecuencia del analista en vez de cambiar `SEEDBOX_MAX_PENDING_DAYS`.
 
+### Prefiltro de ruido
+
+Antes de armar cada lote de extracción (analista o API), el sitio descarta sin IA los posts
+pendientes que por su **forma** nunca traen un dolor (H13, ADR-0011). Las reglas están en
+`NOISE_RULES` (`src/lib/prefilter.ts`), se aplican a toda la cola en cada reparto y no tocan
+los posts ya procesados ni los descartados por el analista. `npm run agent -- status` no aplica
+el prefiltro, así que puede contar unos pocos posts que se descartarán en el próximo reparto.
+
+| Regla (`id`) | Fuente | Ejemplo de título | Por qué es seguro |
+|---|---|---|---|
+| `hn-monthly-thread` | Hacker News | `Ask HN: Who is hiring? (November 2026)` (también "Who wants to be hired?", "Freelancer? Seeking freelancer?" y "What are you working on?" con mes y año exactos, o cualquier post de `whoishiring`) | El texto es una plantilla fija; lo que cuenta la gente está en los comentarios, que no se ingieren |
+| `empty` | todas | (sin título ni texto) | No hay nada que leer ni cita posible |
+
+Cada descarte queda con `status = 'discarded'` y `metadata.prefilter = '<id>'`. En `/activity`
+se ven en "De dónde viene el radar" → **Prefiltro** (separado de "Sin dolores (analista)"), con
+el motivo "prefiltro: …" y el link al post, y el balance de 7 días dice cuántos descartó.
+`npm run eval:prefilter` mide las reglas contra el dataset de evaluación (no debe perder ningún
+post con dolor). Una regla nueva necesita una justificación por forma en esta tabla, tests de
+casos cercanos que no deben coincidir y pasar esa medición.
+
+Si una regla resulta mala, quítala de `NOISE_RULES` y devuelve sus posts a la cola:
+
+```sql
+UPDATE signals
+SET status = 'pending', processed_at = NULL, metadata = metadata - 'prefilter'
+WHERE status = 'discarded' AND metadata->>'prefilter' = '<rule id>';
+```
+
 ## Checklist
 
 - [ ] `GET https://<tu-sitio>/api/health` responde `{"status":"ok"}`.

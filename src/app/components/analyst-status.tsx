@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { formatAge, STALE_AFTER_HOURS, type AnalystStatus } from "@/lib/analyst-status";
 import type { WorkKind } from "@/lib/agent";
+import { activityHref } from "@/lib/source-mix";
 
 const KIND_LABELS: Record<WorkKind, { label: string; unit: string }> = {
   extract: { label: "Extraer dolores", unit: "posts pendientes" },
@@ -77,6 +78,15 @@ export function AnalystStatusSection({ status, now }: { status: AnalystStatus; n
         <p className="mt-1 text-zinc-200">
           <span className="font-semibold">{balance.ingested}</span> posts ingresados ·{" "}
           <span className="font-semibold">{balance.processed}</span> procesados
+        </p>
+        <p className="mt-1 text-xs text-zinc-500">
+          de ellos, descartados por prefiltro:{" "}
+          <Link
+            href={activityHref({ list: "posts", stage: "prefiltered", days: balance.days })}
+            className="font-semibold text-zinc-300 hover:text-emerald-300 hover:underline"
+          >
+            {balance.prefiltered}
+          </Link>
         </p>
         <p
           className={`mt-1 ${

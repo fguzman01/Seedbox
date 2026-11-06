@@ -92,7 +92,12 @@ describe.skipIf(!testDatabaseUrl)("analyst status (database)", () => {
 
   async function seedSignal(
     externalId: string,
-    { fetchedAt, status = "pending", processedAt }: { fetchedAt: Date; status?: "pending" | "processed" | "discarded"; processedAt?: Date },
+    {
+      fetchedAt,
+      status = "pending",
+      processedAt,
+      metadata = {},
+    }: { fetchedAt: Date; status?: "pending" | "processed" | "discarded"; processedAt?: Date; metadata?: Record<string, unknown> },
   ) {
     await db.insert(signals).values({
       source: "test",
@@ -103,6 +108,7 @@ describe.skipIf(!testDatabaseUrl)("analyst status (database)", () => {
       fetchedAt,
       status,
       processedAt,
+      metadata,
     });
   }
 
@@ -128,7 +134,16 @@ describe.skipIf(!testDatabaseUrl)("analyst status (database)", () => {
     await seedSignal("old-discarded", { fetchedAt: hoursAgo(24 * 10), status: "discarded", processedAt: hoursAgo(20) });
     await seedSignal("old-processed", { fetchedAt: hoursAgo(24 * 10), status: "processed", processedAt: hoursAgo(24 * 8) });
 
-    expect(await getBalance(db, now)).toEqual({ days: 7, ingested: 2, processed: 2, net: 0, trend: "steady" });
+    expect(await getBalance(db, now)).toEqual({ days: 7, ingested: 2, processed: 2, net: 0, trend: "steady", prefiltered: 0 });
+  });
+
+  it("counts the posts discarded by the prefilter among the processed ones (H13)", async () => {
+    await seedSignal("analyst", { fetchedAt: hoursAgo(30), status: "discarded", processedAt: hoursAgo(10) });
+    const prefiltered = { status: "discarded" as const, metadata: { prefilter: "hn-monthly-thread" } };
+    await seedSignal("prefiltered", { fetchedAt: hoursAgo(30), processedAt: hoursAgo(5), ...prefiltered });
+    await seedSignal("old-prefiltered", { fetchedAt: hoursAgo(24 * 10), processedAt: hoursAgo(24 * 8), ...prefiltered });
+
+    expect(await getBalance(db, now)).toMatchObject({ ingested: 2, processed: 2, prefiltered: 1 });
   });
 
   it("reports pending work, last delivery per kind and the stopped state", async () => {

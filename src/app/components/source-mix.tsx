@@ -41,14 +41,19 @@ function CountStats({ counts, scope }: { counts: MixCounts; scope: Scope }) {
     { label: "Ingresados", value: counts.ingested, href: activityHref({ list: "posts", stage: "ingested", ...scope }) },
     { label: "Procesados", value: counts.processed, href: activityHref({ list: "posts", stage: "processed", ...scope }) },
     {
-      label: "Descartados",
+      label: "Sin dolores (analista)",
       value: counts.discarded,
       href: activityHref({ list: "posts", stage: "discarded", ...scope }),
+    },
+    {
+      label: "Prefiltro",
+      value: counts.prefiltered,
+      href: activityHref({ list: "posts", stage: "prefiltered", ...scope }),
     },
     { label: "Dolores", value: counts.pains, href: activityHref({ list: "pains", ...scope }) },
   ];
   return (
-    <dl className="grid grid-cols-4 gap-2">
+    <dl className="grid grid-cols-5 gap-2">
       {stats.map((s) => (
         <div key={s.label}>
           <dt className="text-xs text-zinc-500">{s.label}</dt>
@@ -145,7 +150,8 @@ function FeedTable({ source, days }: { source: SourceMix; days: number }) {
             <th className="py-1 text-left font-normal">{names.column}</th>
             <th className="py-1 text-right font-normal">Ingresados</th>
             <th className="py-1 text-right font-normal">Procesados</th>
-            <th className="py-1 text-right font-normal">Descartados</th>
+            <th className="py-1 text-right font-normal">Sin dolores (analista)</th>
+            <th className="py-1 text-right font-normal">Prefiltro</th>
             <th className="py-1 text-right font-normal">Dolores</th>
             <th className="py-1 text-right font-normal">% devs</th>
           </tr>
@@ -164,6 +170,9 @@ function FeedTable({ source, days }: { source: SourceMix; days: number }) {
                 </td>
                 <td className="py-1.5 text-right">
                   <NumberLink href={activityHref({ list: "posts", stage: "discarded", ...scope })}>{sub.discarded}</NumberLink>
+                </td>
+                <td className="py-1.5 text-right">
+                  <NumberLink href={activityHref({ list: "posts", stage: "prefiltered", ...scope })}>{sub.prefiltered}</NumberLink>
                 </td>
                 <td className="py-1.5 text-right">
                   <NumberLink href={activityHref({ list: "pains", ...scope })}>{sub.pains}</NumberLink>
@@ -240,7 +249,8 @@ export function SourceMixSection({ mix, now }: { mix: SourceMixSummary; now: Dat
       </h2>
       <p className="mt-1 mb-4 text-sm text-zinc-500">
         Últimos {mix.days} días, por fuente: posts ingresados, procesados (con dolores o descartados), descartados
-        sin dolores y dolores extraídos, con su reparto por vertical. Cada número abre la lista correspondiente.
+        sin dolores por el analista, descartados por el prefiltro de ruido (sin análisis) y dolores extraídos, con su
+        reparto por vertical. Cada número abre la lista correspondiente.
       </p>
       <ul className="grid gap-4 lg:grid-cols-2">
         {mix.sources.map((source) => (

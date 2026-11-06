@@ -1,7 +1,8 @@
-import { and, count, gte, max, ne } from "drizzle-orm";
+import { and, count, gte, max, ne, sql } from "drizzle-orm";
 import { getAgentStatus, WORK_KINDS, WORK_LIMITS, type WorkKind } from "./agent";
 import type { Database } from "./db/client";
 import { agentDeliveries, signals } from "./db/schema";
+import { prefilteredSql } from "./prefilter";
 
 /**
  * State of the daily Claude Code analyst (H10): pending work per kind, last delivery per kind and
@@ -42,7 +43,7 @@ export function balanceWindowStart(now: Date, days = BALANCE_DAYS): Date {
 
 export type QueueTrend = "growing" | "shrinking" | "steady";
 
-export interface Balance {
+export interface QueueBalance {
   days: number;
   ingested: number;
   processed: number;
@@ -51,8 +52,13 @@ export interface Balance {
   trend: QueueTrend;
 }
 
+export interface Balance extends QueueBalance {
+  /** Of the processed, how many the noise prefilter discarded (H13, ADR-0011). */
+  prefiltered: number;
+}
+
 /** At the window's pace, the extraction queue grows when more posts come in than get processed. */
-export function summarizeBalance(ingested: number, processed: number, days = BALANCE_DAYS): Balance {
+export function summarizeBalance(ingested: number, processed: number, days = BALANCE_DAYS): QueueBalance {
   const net = ingested - processed;
   return { days, ingested, processed, net, trend: net > 0 ? "growing" : net < 0 ? "shrinking" : "steady" };
 }
@@ -80,18 +86,22 @@ export async function getLastDeliveryAt(db: Database): Promise<Date | null> {
 /**
  * Posts in: signals fetched within the window. Posts out ("processed"): signals whose extraction
  * finished within the window, i.e. status "processed" (has pains) or "discarded" (no pains),
- * by `processed_at`, whoever ran the extraction (analyst or API pipeline).
+ * by `processed_at`, whoever ran the extraction (analyst or API pipeline) or the noise
+ * prefilter. Prefiltered: the processed ones with `metadata.prefilter`.
  */
 export async function getBalance(db: Database, now: Date, days = BALANCE_DAYS): Promise<Balance> {
   const since = balanceWindowStart(now, days);
   const [[ingested], [processed]] = await Promise.all([
     db.select({ n: count() }).from(signals).where(gte(signals.fetchedAt, since)),
     db
-      .select({ n: count() })
+      .select({
+        n: count(),
+        prefiltered: sql<number>`count(*) filter (where ${prefilteredSql})`.mapWith(Number),
+      })
       .from(signals)
       .where(and(ne(signals.status, "pending"), gte(signals.processedAt, since))),
   ]);
-  return summarizeBalance(ingested.n, processed.n, days);
+  return { ...summarizeBalance(ingested.n, processed.n, days), prefiltered: processed.prefiltered };
 }
 
 export async function getAnalystStatus(db: Database, now = new Date()) {

@@ -1,12 +1,14 @@
-import { and, count, desc, eq, getTableColumns, gte, ne, or, sql, type SQL } from "drizzle-orm";
+import { and, count, desc, eq, getTableColumns, gte, ne, not, or, sql, type SQL } from "drizzle-orm";
 import type { Database } from "./db/client";
 import { ingestRuns, pains, signals, type IngestRunStatus } from "./db/schema";
 import { VERTICALS, type Vertical } from "./pains";
+import { prefilteredSql } from "./prefilter";
 import { feedLabel } from "./sources/types";
 
 /**
  * Where the radar's input comes from (H14): per source, and per feed (subreddit in Reddit, site in
- * Stack Exchange), how many posts came in, got processed or discarded and how many pains they
+ * Stack Exchange), how many posts came in, got processed or discarded (by the analyst or by the
+ * noise prefilter, H13) and how many pains they
  * produced over the last 30 days, plus the pains' vertical mix. Only counts, percentages and dates.
  */
 
@@ -45,7 +47,10 @@ export interface SignalCountRow {
   feed: string | null;
   ingested: number;
   processed: number;
+  /** Discarded by the analyst (no pains). */
   discarded: number;
+  /** Discarded by the noise prefilter (`metadata.prefilter`, ADR-0011). */
+  prefiltered: number;
 }
 
 export interface PainCountRow {
@@ -87,8 +92,10 @@ export interface MixCounts {
   ingested: number;
   /** Extraction finished in the window: with pains or discarded (same meaning as in H10). */
   processed: number;
-  /** Processed without pains. */
+  /** Processed by the analyst without pains. */
   discarded: number;
+  /** Discarded by the noise prefilter, without analysis. */
+  prefiltered: number;
   pains: number;
   /** Verticals with at least one pain, most pains first. */
   verticals: VerticalShare[];
@@ -118,7 +125,7 @@ export interface SourceMixSummary {
 }
 
 function summarize(signalRows: SignalCountRow[], painRows: PainCountRow[]): MixCounts {
-  const sum = (key: "ingested" | "processed" | "discarded") => signalRows.reduce((n, r) => n + r[key], 0);
+  const sum = (key: "ingested" | "processed" | "discarded" | "prefiltered") => signalRows.reduce((n, r) => n + r[key], 0);
   const byVertical = new Map<Vertical, number>();
   for (const row of painRows) byVertical.set(row.vertical, (byVertical.get(row.vertical) ?? 0) + row.pains);
   const total = [...byVertical.values()].reduce((a, b) => a + b, 0);
@@ -130,6 +137,7 @@ function summarize(signalRows: SignalCountRow[], painRows: PainCountRow[]): MixC
     ingested: sum("ingested"),
     processed: sum("processed"),
     discarded: sum("discarded"),
+    prefiltered: sum("prefiltered"),
     pains: total,
     verticals,
     devPercent: percent(byVertical.get(DEV_VERTICAL) ?? 0, total),
@@ -194,7 +202,8 @@ export function buildSourceMix({
 // ---------------------------------------------------------------------------------------------
 // Links from each number to the matching list on /activity
 
-export const POST_STAGES = ["ingested", "processed", "discarded"] as const;
+/** "discarded" = discarded by the analyst (no pains); "prefiltered" = by the noise prefilter. */
+export const POST_STAGES = ["ingested", "processed", "discarded", "prefiltered"] as const;
 export type PostStage = (typeof POST_STAGES)[number];
 
 /** The list behind a number: posts or pains, narrowed by source, feed, vertical and stage. */
@@ -252,10 +261,11 @@ export function activityHref(filter: ActivityFilter): string {
 const STAGE_TEXT: Record<PostStage, string> = {
   ingested: "ingresados",
   processed: "procesados",
-  discarded: "descartados (sin dolores)",
+  discarded: "descartados por el analista (sin dolores)",
+  prefiltered: "descartados por prefiltro",
 };
 
-/** "Posts de r/SaaS descartados (sin dolores) en los últimos 30 días", for the list heading. */
+/** "Posts de r/SaaS descartados por el analista (sin dolores) en los últimos 30 días", for the list heading. */
 export function describeActivityFilter(filter: ActivityFilter, verticalLabel: (v: Vertical) => string): string {
   const parts = [filter.list === "posts" ? "Posts" : "Dolores"];
   if (filter.feed && filter.source && filter.source !== "reddit") {
@@ -278,7 +288,8 @@ const countWhere = (condition: SQL | undefined) => sql<number>`count(*) filter (
 
 /**
  * Per source and feed, within the window: posts in (by `fetched_at`), and posts whose
- * extraction finished (by `processed_at`): processed = with pains or discarded, discarded = no pains.
+ * extraction finished (by `processed_at`): processed = with pains or discarded, discarded = no
+ * pains according to the analyst, prefiltered = discarded by the noise prefilter.
  */
 export async function getSignalCounts(db: Database, since: Date): Promise<SignalCountRow[]> {
   const finished = and(ne(signals.status, "pending"), gte(signals.processedAt, since));
@@ -288,7 +299,8 @@ export async function getSignalCounts(db: Database, since: Date): Promise<Signal
       feed: feedSql,
       ingested: countWhere(gte(signals.fetchedAt, since)),
       processed: countWhere(finished),
-      discarded: countWhere(and(eq(signals.status, "discarded"), gte(signals.processedAt, since))),
+      discarded: countWhere(and(eq(signals.status, "discarded"), not(prefilteredSql), gte(signals.processedAt, since))),
+      prefiltered: countWhere(and(eq(signals.status, "discarded"), prefilteredSql, gte(signals.processedAt, since))),
     })
     .from(signals)
     .where(or(gte(signals.fetchedAt, since), finished))
@@ -349,7 +361,8 @@ export async function getFilteredSignals(db: Database, filter: ActivityFilter, n
   const since = filter.days ? mixWindowStart(now, filter.days) : null;
   const stage = filter.stage ?? "ingested";
   if (stage === "processed") conditions.push(ne(signals.status, "pending"));
-  if (stage === "discarded") conditions.push(eq(signals.status, "discarded"));
+  if (stage === "discarded") conditions.push(eq(signals.status, "discarded"), not(prefilteredSql));
+  if (stage === "prefiltered") conditions.push(eq(signals.status, "discarded"), prefilteredSql);
   if (since) conditions.push(gte(stage === "ingested" ? signals.fetchedAt : signals.processedAt, since));
   return db
     .select()

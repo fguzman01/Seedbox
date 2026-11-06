@@ -37,6 +37,8 @@ ADR-0009), and the Claude API pipeline uses the same order.
   in the batch. Within a source, posts pending for more than `SEEDBOX_MAX_PENDING_DAYS` days
   (default 14) take up to half of its part, oldest first; the rest are the most commented, then
   the most upvoted, then the most recent. Items alternate between sources.
+  The batch is already prefiltered: recurring Hacker News monthly threads and posts without any
+  text are discarded by the site before hand-out (H13, ADR-0011), so analyze every item you get.
 - **assess:** never-assessed opportunities created more than `SEEDBOX_MAX_PENDING_DAYS` days ago
   first (oldest first), then the other never-assessed ones by distinct authors and partial score,
   then re-assessments of those assessed more than 30 days ago.

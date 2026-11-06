@@ -21,12 +21,20 @@ import { testDatabaseUrl, useTestDb } from "./test-db";
 const now = new Date("2026-11-04T12:00:00Z");
 const daysAgo = (d: number) => new Date(now.getTime() - d * 24 * 60 * 60 * 1000);
 
-const signalRow = (source: string, feed: string | null, ingested: number, processed = 0, discarded = 0): SignalCountRow => ({
+const signalRow = (
+  source: string,
+  feed: string | null,
+  ingested: number,
+  processed = 0,
+  discarded = 0,
+  prefiltered = 0,
+): SignalCountRow => ({
   source,
   feed,
   ingested,
   processed,
   discarded,
+  prefiltered,
 });
 const painRow = (source: string, feed: string | null, vertical: Vertical, n: number): PainCountRow => ({
   source,
@@ -146,6 +154,16 @@ describe("buildSourceMix", () => {
     expect(mix.sources[0].ingestedPercent).toBe(60);
   });
 
+  it("keeps the prefilter's discards apart from the analyst's, both within processed (H13)", () => {
+    const mix = buildSourceMix({
+      knownSources: ["hackernews"],
+      signalRows: [signalRow("hackernews", null, 100, 40, 25, 3)],
+      painRows: [],
+      lastRuns: [],
+    });
+    expect(mix.sources[0]).toMatchObject({ ingested: 100, processed: 40, discarded: 25, prefiltered: 3 });
+  });
+
   it("lists unknown sources with data or runs after the known ones, e.g. a future source", () => {
     const mix = buildSourceMix({
       knownSources: ["hackernews"],
@@ -188,8 +206,18 @@ describe("activity filter", () => {
     expect(parseActivityFilter({ ver: "other", source: "reddit" })).toBeNull();
   });
 
+  it("parses the prefiltered stage (H13)", () => {
+    expect(parseActivityFilter({ ver: "posts", source: "hackernews", estado: "prefiltered", days: "7" })).toEqual({
+      list: "posts",
+      source: "hackernews",
+      stage: "prefiltered",
+      days: 7,
+    });
+  });
+
   it("round-trips through the link", () => {
     const filters = [
+      { list: "posts", source: "hackernews", stage: "prefiltered", days: 30 },
       { list: "posts", source: "reddit", feed: "SaaS", stage: "processed", days: 30 },
       { list: "pains", source: "stackexchange", feed: "money", vertical: "finance", days: 30 },
       { list: "pains", source: "hackernews", vertical: "devtools", days: 30 },
@@ -209,7 +237,10 @@ describe("activity filter", () => {
   it("describes the list in Spanish", () => {
     const label = (v: Vertical) => VERTICAL_LABELS[v];
     expect(describeActivityFilter({ list: "posts", source: "reddit", feed: "SaaS", stage: "discarded", days: 30 }, label)).toBe(
-      "Posts de r/SaaS descartados (sin dolores) en los últimos 30 días",
+      "Posts de r/SaaS descartados por el analista (sin dolores) en los últimos 30 días",
+    );
+    expect(describeActivityFilter({ list: "posts", source: "hackernews", stage: "prefiltered", days: 7 }, label)).toBe(
+      "Posts de Hacker News descartados por prefiltro en los últimos 7 días",
     );
     expect(describeActivityFilter({ list: "pains", source: "hackernews", vertical: "devtools", days: 30 }, label)).toBe(
       "Dolores de Hacker News en Herramientas para devs extraídos en los últimos 30 días",
@@ -233,6 +264,7 @@ describe.skipIf(!testDatabaseUrl)("source mix (database)", () => {
       fetchedAt,
       status = "pending",
       processedAt,
+      prefilter,
     }: {
       source?: string;
       subreddit?: string;
@@ -240,6 +272,7 @@ describe.skipIf(!testDatabaseUrl)("source mix (database)", () => {
       fetchedAt: Date;
       status?: "pending" | "processed" | "discarded";
       processedAt?: Date;
+      prefilter?: string;
     },
   ): Promise<number> {
     const [row] = await db
@@ -253,7 +286,10 @@ describe.skipIf(!testDatabaseUrl)("source mix (database)", () => {
         fetchedAt,
         status,
         processedAt,
-        metadata: subreddit ? { subreddit } : site ? { site } : {},
+        metadata: {
+          ...(subreddit ? { subreddit } : site ? { site } : {}),
+          ...(prefilter ? { prefilter } : {}),
+        },
       })
       .returning({ id: signals.id });
     return row.id;
@@ -354,6 +390,22 @@ describe.skipIf(!testDatabaseUrl)("source mix (database)", () => {
     expect(await ids({ list: "posts", source: "hackernews", stage: "discarded", days: 30 })).toEqual(["hn-2"]);
     expect(await ids({ list: "posts", source: "reddit", feed: "SaaS", days: 30 })).toEqual(["rd-1"]);
     expect(await ids({ list: "posts", source: "hackernews" })).toHaveLength(5);
+  });
+
+  it("separates the prefilter's discards from the analyst's in counts and lists (H13)", async () => {
+    await seed();
+    await seedSignal("hn-monthly", { fetchedAt: daysAgo(2), status: "discarded", processedAt: daysAgo(1), prefilter: "hn-monthly-thread" });
+    await seedSignal("hn-monthly-old", { fetchedAt: daysAgo(60), status: "discarded", processedAt: daysAgo(45), prefilter: "hn-monthly-thread" });
+
+    const [hn] = (await getSourceMix(db, ["hackernews"], now)).sources;
+    expect(hn).toMatchObject({ ingested: 4, processed: 4, discarded: 1, prefiltered: 1 });
+
+    const ids = async (filter: Parameters<typeof getFilteredSignals>[1]) =>
+      (await getFilteredSignals(db, filter, now)).map((s) => s.externalId).sort();
+    expect(await ids({ list: "posts", source: "hackernews", stage: "prefiltered", days: 30 })).toEqual(["hn-monthly"]);
+    expect(await ids({ list: "posts", source: "hackernews", stage: "prefiltered" })).toEqual(["hn-monthly", "hn-monthly-old"]);
+    expect(await ids({ list: "posts", source: "hackernews", stage: "discarded", days: 30 })).toEqual(["hn-2"]);
+    expect(await ids({ list: "posts", source: "hackernews", stage: "processed", days: 30 })).toEqual(["hn-1", "hn-2", "hn-monthly", "hn-old"]);
   });
 
   it("lists exactly the pains behind each count, with their post link", async () => {

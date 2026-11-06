@@ -11,6 +11,7 @@ npm run eval:sample -- --count 40   # agrega 40 posts al azar, sin etiquetar, a 
 npm run dev                    # etiqueta en http://localhost:3000/labeling
 npm run eval                   # corre la extracción sobre los posts etiquetados
 npm run eval -- --model claude-haiku-5-5   # compara con otro modelo
+npm run eval:prefilter         # mide el prefiltro de ruido (H13), sin base ni API
 ```
 
 Cada corrida guarda el detalle en `results/<fecha>-<modelo>.json`. Conviene commitear los

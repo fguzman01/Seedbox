@@ -1,6 +1,6 @@
 # ADR-0004: Agrupación de dolores en oportunidades con Claude
 
-- Estado: aceptada
+- Estado: aceptada; modificada por [ADR-0012](0012-necesidades-latentes.md)
 - Fecha: 2026-10-28
 - Modifica: ADR-0001 (pgvector queda pospuesto)
 

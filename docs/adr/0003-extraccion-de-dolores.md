@@ -1,6 +1,6 @@
 # ADR-0003: Extracción de dolores con Claude
 
-- Estado: aceptada
+- Estado: aceptada; modificada por [ADR-0012](0012-necesidades-latentes.md)
 - Fecha: 2026-10-28
 
 ## Contexto

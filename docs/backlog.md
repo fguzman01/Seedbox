@@ -177,8 +177,8 @@ Orden y por qué:
    sin medir que no se pierden dolores reales. Conviene que el dataset ya incluya posts de Reddit.
 7. **H17** entre H8 y H13: el prefiltro debe probar que no pierde dolores, y el dataset tiene que
    decir cuáles son (las etiquetas originales mezclan criterios).
-8. **H13**: libera la mayor parte de la capacidad, pero sólo es seguro con la línea base v1 de
-   H17.
+8. **H13**: saca el ruido de forma (hilos mensuales, posts vacíos) con trazabilidad. Su ahorro es
+   chico (ADR-0011); sólo es seguro con la línea base v1 de H17.
 9. **H18** al final: suma necesidades latentes al tablero, en una vista aparte. Aporta señal de
    menor calidad que los dolores concretos y no alivia la cola; si la fase se alarga, pasa a la
    fase 2.
@@ -447,31 +447,33 @@ puntaje (ADR-0005). Los posts ya procesados no se reprocesan (ADR-0003); el `arc
 conviene marcar para reproceso los descartados de los últimos 30 días. Riesgo a vigilar con H14:
 el tema "IA y trabajo" puede dominar la vista latente y reforzar el sesgo hacia devs.
 
-### H13. Descartar el ruido evidente antes del análisis · S · ⬜ pendiente
-**Como** usuario **quiero** que los posts que claramente no cuentan un problema se descarten
-sin gastar análisis de IA **para** que la capacidad diaria alcance para los posts que sí tienen
-dolores.
+### H13. Descartar el ruido evidente antes del análisis · XS · ⬜ pendiente
+**Como** usuario **quiero** que los posts que por su forma claramente no cuentan un problema se
+descarten sin gastar análisis de IA **para** que la capacidad diaria no se gaste en hilos
+recurrentes ni posts vacíos, y poder revisar qué se descartó.
 
 Criterios de aceptación:
-- Dado un post que cumple una regla de ruido (por ejemplo, hilos recurrentes tipo "What are you
-  working on?", ofertas de trabajo, anuncios o posts sin texto propio), cuando se reparte el
-  trabajo de extracción, entonces no se entrega al analista y queda descartado con el motivo
-  "prefiltro: <regla>".
-- Las reglas son explícitas, están documentadas y no usan IA.
-- Los posts descartados por prefiltro se pueden revisar en la página de actividad, con su
-  motivo y link a la fuente.
-- Dado el dataset de H8 con las etiquetas revisadas de H17 (v1), cuando se aplica el prefiltro,
-  entonces no descarta ningún post etiquetado con dolor concreto o latente; el informe muestra
-  cuántos posts sin dolor se ahorra.
-- Las reglas descartan por forma (hilos recurrentes, ofertas de trabajo, anuncios, posts sin
-  texto propio), nunca por tema u opinión: un post de opinión o de pregunta abierta (p. ej. sobre
-  la IA y el trabajo) no se prefiltra, porque puede tener un dolor latente.
+- Dado un post pendiente que cumple una regla de ADR-0011 (hilos mensuales de Hacker News como
+  "Who is hiring?", "Who wants to be hired?", "Freelancer? Seeking freelancer?" o "What are you
+  working on?", y posts sin título ni texto), cuando se reparte el trabajo de extracción (modo
+  analista o API), entonces no se entrega y queda descartado con el motivo "prefiltro: <regla>".
+- Las reglas son explícitas, están documentadas y no usan IA. Descartan por forma, nunca por
+  tema u opinión: un post de opinión o de pregunta abierta no se prefiltra.
+- Los posts descartados por prefiltro se pueden revisar en la página de actividad, con su motivo
+  y link a la fuente; H14 los separa de los descartados por el analista.
+- Dado el dataset v1 de H17, cuando corre `npm run eval:prefilter`, entonces no descarta ningún
+  post etiquetado con dolor concreto o latente y muestra cuántos posts sin dolor se ahorra; un
+  test de `npm test` falla si alguna regla descarta un post con dolor.
 - El balance de H10 muestra cuántos posts descartó el prefiltro en los últimos 7 días.
+- Los posts ya procesados o descartados por el analista no se tocan.
 
-Notas: depende de H8 y H17. Requiere al `architect` para decidir dónde vive el filtro (al ingerir o
-al repartir trabajo) y si conviene un ADR. Si una regla resulta discutible, se queda fuera:
-preferimos analizar ruido a perder evidencia.
-
+Notas: decisión técnica en ADR-0011 (al repartir, en `getPendingSignals`; motivo en
+`metadata.prefilter`, sin migración). Si una regla resulta discutible, se queda fuera:
+preferimos analizar ruido a perder evidencia. Impacto esperado bajo (ADR-0011): unos 4 hilos al
+mes y 3 de 28 posts sin dolor del dataset v1 (11 %); casi todo el ruido es de contenido y no se
+puede sacar sin leerlo. Si la cola sigue creciendo, las palancas son otras: bajar el volumen de
+ingesta, subir las rondas del analista o una clasificación barata con su propia medición
+(historia aparte).
 
 ### H16. Ingestar preguntas de sitios no técnicos de Stack Exchange · M · ✅ hecha (activación pendiente de C1–C3 de ADR-0010)
 **Como** usuario **quiero** que el radar lea preguntas de comunidades no técnicas de Stack

@@ -187,7 +187,8 @@ describe.skipIf(!testDatabaseUrl)("ingest Stack Exchange (database)", () => {
       },
     };
 
-    const result = await ingestAndRecord(db, "stackexchange", () => failing);
+    // The fake questions are dated relative to NOW: ingest at NOW, not at the real clock.
+    const result = await ingestAndRecord(db, "stackexchange", () => failing, { now: NOW });
 
     expect(result).toMatchObject({ status: "error", fetched: 1, inserted: 1 });
     expect(await db.select().from(ingestRuns)).toMatchObject([

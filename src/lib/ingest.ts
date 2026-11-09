@@ -182,10 +182,11 @@ export async function ingestAndRecord(
   db: Database,
   sourceId: string,
   resolve: (id: string) => SourceAdapter = getSource,
+  options: IngestOptions = {},
 ): Promise<IngestRunOutcome> {
   let outcome: IngestRunOutcome;
   try {
-    outcome = { ...(await ingest(db, resolve(sourceId))), status: "ok" };
+    outcome = { ...(await ingest(db, resolve(sourceId), options)), status: "ok" };
   } catch (error) {
     const status = error instanceof SourceNotConfiguredError ? "skipped" : "error";
     // Items stored before a later step failed still count.

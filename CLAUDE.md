@@ -17,27 +17,34 @@ respecto de lo que conocen los modelos, y la documentación está en `node_modul
 
 ## Metodología
 
-Trabajamos con un flujo ágil liviano, ejecutado por agentes con roles definidos en
-`.claude/agents/`:
+Seedbox opera con el **marco de operación autónoma** de Felipe (`MARCO.md` de fguzman01/operador). Lo
+propio de este repo está en **`OPERACION.md`**: léelo antes de tomar una tarea.
+
+- **Las tareas son GitHub Issues**; su estado son las etiquetas de `.operador.yml`
+  (`estado:` `tipo:` `prio:` `riesgo:`). `docs/backlog.md` es la historia de lo hecho (H1–H18).
+- **Felipe decide desde Telegram** (grupo «Seedbox · Operación») con ✅ / ❌. El operador le manda las
+  tarjetas y el cierre del día; un comentario que empieza con `<!-- telegram -->` le llega al grupo.
 
 | Rol | Agente | Responsabilidad |
 |---|---|---|
-| Product Owner | `product-owner` | Prioriza el backlog, escribe historias con criterios de aceptación |
-| Arquitecto | `architect` | Decisiones técnicas, registra ADRs en `docs/adr/` |
-| Desarrollador | `developer` | Implementa una historia a la vez, con tests |
-| Tester / QA | `qa-tester` | Verifica criterios de aceptación, escribe tests de integración/e2e |
+| Product Owner | `product-owner` | Abre issues `estado:propuesta` como historias con criterios de aceptación |
+| Arquitecto / diseñador | `architect` | Plan en cada issue `aprobada` (→ `diseñada`), ADRs, responde pedidos |
+| Desarrollador | `developer` | Un issue `en-curso` por día: código + tests, PR con `Closes #N` |
+| Tester / QA | `qa-tester` | Revisa con contexto limpio cada PR contra los criterios y el plan |
 
 Además, el skill `seedbox-analyst` (`.claude/skills/seedbox-analyst/`) hace el análisis diario
 con Claude Code a través de la API del sitio (ADR-0008).
 
 Ciclo de una historia:
 
-1. **PO** toma una necesidad y la escribe en `docs/backlog.md` con formato
-   *Como… quiero… para…* + criterios de aceptación verificables.
-2. **Arquitecto** interviene sólo si la historia requiere una decisión técnica nueva.
-3. **Desarrollador** implementa en una rama, con tests unitarios.
-4. **QA** valida contra los criterios de aceptación y reporta hallazgos.
-5. El humano (Felipe) revisa y aprueba el merge.
+```
+propuesta ──✅──► aprobada ──► diseñada ──✅──► en-curso ──► en-revision ──✅──► hecha
+```
+
+1. **PO** la abre como issue `estado:propuesta`. Felipe la aprueba o descarta.
+2. **Arquitecto** escribe el plan en el issue (y el ADR si hace falta). Felipe aprueba el plan.
+3. **Desarrollador** implementa en una rama, con tests; **QA** lo revisa antes del PR.
+4. Con el CI en verde, Felipe fusiona desde Telegram. Railway despliega `main`.
 
 ## Reglas de trabajo
 

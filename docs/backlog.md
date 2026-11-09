@@ -1,6 +1,10 @@
 # Backlog
 
-Ordenado por prioridad. Mantenido por el agente `product-owner`.
+> **Desde el 2026-11-09 las tareas viven en GitHub Issues** (ver `OPERACION.md`). Este archivo queda
+> como historia de las historias H1–H18 y de por qué se ordenaron así; las nuevas (H19 en adelante) y
+> lo pendiente de aquí (H15, H18, la activación de Stack Exchange) se siguen como issues.
+
+Ordenado por prioridad. Mantenido por el agente `product-owner` hasta el 2026-11-09.
 
 ## Fase 0: Fundaciones
 

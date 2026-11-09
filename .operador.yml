@@ -1,0 +1,36 @@
+# Configuración del marco de operación (MARCO.md de fguzman01/operador; aquí, OPERACION.md) para
+# Seedbox. La lee el operador (servicio en Railway): grupo de Telegram, etiquetas de los issues y lo que
+# el operador hace por este repo. Las etiquetas se crean con POST /etiquetas?repo=fguzman01/Seedbox.
+proyecto: Seedbox
+nombre: Seedbox · radar de oportunidades
+telegram:
+  grupo: null   # «Seedbox · Operación»: escribe algo en el grupo y el bot responde el id que va aquí
+central:        # el operador manda las tarjetas (webhook de GitHub) y el cierre del día: no hay workflows propios
+  tarjetas: true
+  cierre: true
+etiquetas:
+  estado:
+    propuesta: {color: "c5def5", descripcion: "La escribió un agente; espera el ✅ de Felipe"}
+    aprobada: {color: "0e8a16", descripcion: "Felipe dijo que sí; espera diseño"}
+    diseñada: {color: "1d76db", descripcion: "Tiene plan; espera el ✅ para implementar"}
+    en-curso: {color: "fbca04", descripcion: "El desarrollador la está construyendo"}
+    en-revision: {color: "d93f0b", descripcion: "PR abierto; espera revisión y el ✅ para fusionar"}
+    hecha: {color: "5319e7", descripcion: "Fusionada (o resuelta)"}
+    descartada: {color: "cccccc", descripcion: "No se hace (con el motivo en un comentario)"}
+    en-espera: {color: "bfd4f2", descripcion: "Bloqueada por algo externo (p. ej. la aprobación de una API)"}
+    requiere-sesion: {color: "b60205", descripcion: "Toca dinero, términos de una fuente o datos de producción: se conversa con Felipe"}
+  tipo:
+    mejora: {color: "a2eeef", descripcion: "Mejora del sistema (historia de usuario)"}
+    pedido: {color: "f9d0c4", descripcion: "Lo pidió Felipe por el grupo"}
+    bug: {color: "ee0701", descripcion: "Algo roto"}
+    investigacion: {color: "d4c5f9", descripcion: "Pregunta a responder, sin código"}
+  prio:
+    P1: {color: "b60205", descripcion: "Sube la confianza en el radar o destraba algo"}
+    P2: {color: "fbca04", descripcion: "Ahorra trabajo o amplía la señal"}
+    P3: {color: "c2e0c6", descripcion: "Conveniente"}
+  riesgo:
+    bajo: {color: "c2e0c6", descripcion: "Docs, backlog, ADRs"}
+    medio: {color: "fbca04", descripcion: "Código con tests: pide ✅"}
+    alto: {color: "b60205", descripcion: "Migraciones, reglas de análisis, despliegue, workflows: pide ✅"}
+  operador:
+    tarjeta: {color: "ededed", descripcion: "Ya se mandó la tarjeta de este PR al grupo"}

@@ -4,7 +4,7 @@
 proyecto: Seedbox
 nombre: Seedbox · radar de oportunidades
 telegram:
-  grupo: null   # «Seedbox · Operación»: escribe algo en el grupo y el bot responde el id que va aquí
+  grupo: -1004321126298   # «Seedbox · Operación» (2026-11-09)
 central:        # el operador manda las tarjetas (webhook de GitHub) y el cierre del día: no hay workflows propios
   tarjetas: true
   cierre: true

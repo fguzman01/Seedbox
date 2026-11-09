@@ -67,7 +67,7 @@ primera sesión, más un tope semanal. Ocupación al 2026-11-09 (hora de Chile; 
 | 03:37–08:37 | factory: investigador, diseñador 04:45, desarrollador 05:15; **Seedbox: analista 08:23** | media |
 | 09:00–14:00 | btc-signal-web: desarrollador 09:00; sesiones de Felipe | media |
 
-**Propuesta (a confirmar por Felipe):** el ciclo de Seedbox en la ventana libre de la madrugada, en
+**Confirmado por Felipe (2026-11-09):** el ciclo de Seedbox en la ventana libre de la madrugada, en
 sonnet y con lotes chicos. Las tarjetas lo esperan en la mañana; el desarrollador implementa lo que
 Felipe aprobó el día anterior.
 

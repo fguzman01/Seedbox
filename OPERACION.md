@@ -45,6 +45,10 @@ pueda tomar ni algo que Felipe deba decidir. Se revisa en el PO semanal.
 **Rol propio:** el **analista** (`seedbox-analyst`, ya existe) procesa los datos del radar a diario. No
 toca código ni issues; su resultado se ve en el sitio (`/activity`). El PO usa su estado como fuente.
 
+**Rol propio:** el **evaluador** (`seedbox-evaluator`, H19, ADR-0013) toma cada semana las mejores
+oportunidades evaluadas y abre una ficha de viabilidad como issue `tipo:oportunidad` + `estado:propuesta`
+(✅ = explorarla como proyecto aparte). No toca código; el architect, el developer y el PO ignoran esos issues.
+
 ## 4. Qué pasa solo y qué pide ✅
 
 Railway despliega `main` directo a producción: **todo merge es un despliegue**. Por eso, por ahora,
@@ -76,6 +80,7 @@ Felipe aprobó el día anterior.
 | 01:13 diario | Diseñador + pedidos (`architect`) | hay un issue `aprobada` sin plan |
 | 01:47 lun–vie | Desarrollador + revisor (`developer`, `qa-tester`) | hay un issue `en-curso` y nada en `en-revision` |
 | 01:13 domingo | PO (`product-owner`), antes del diseñador | — |
+| 03:00 domingo | Evaluador (`seedbox-evaluator`, sonnet, búsqueda web) | hay oportunidades evaluadas sin ficha |
 | 08:23 diario | Analista (ya existe) | — |
 | 21:00 | Cierre (el operador, sin tokens) | hubo movimiento o hay decisiones pendientes |
 

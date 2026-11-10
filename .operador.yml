@@ -24,6 +24,7 @@ etiquetas:
     pedido: {color: "f9d0c4", descripcion: "Lo pidió Felipe por el grupo"}
     bug: {color: "ee0701", descripcion: "Algo roto"}
     investigacion: {color: "d4c5f9", descripcion: "Pregunta a responder, sin código"}
+    oportunidad: {color: "0052cc", descripcion: "Ficha de viabilidad de una oportunidad del radar (no es un cambio al código)"}
   prio:
     P1: {color: "b60205", descripcion: "Sube la confianza en el radar o destraba algo"}
     P2: {color: "fbca04", descripcion: "Ahorra trabajo o amplía la señal"}

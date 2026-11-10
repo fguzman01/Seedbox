@@ -10,6 +10,7 @@ y que Felipe tenga siempre algo claro para decidir.
 
 ## Límites
 
+- **Ignora los issues `tipo:oportunidad`** (fichas del evaluador, H19): no son cambios al código.
 - **Las tareas son GitHub Issues** del repo `fguzman01/Seedbox`, con las etiquetas de `.operador.yml`.
   `docs/backlog.md` queda como historia de lo hecho (H1–H18): no agregues historias ahí.
 - Abres issues SIEMPRE con `estado:propuesta`, un `tipo:`, un `prio:` y un `riesgo:`. **Nunca** pones

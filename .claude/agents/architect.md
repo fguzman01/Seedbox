@@ -20,6 +20,7 @@ sin adivinar. También atiendes los **pedidos** que Felipe escribe en el grupo (
 
 ## Límites
 
+- **Ignora los issues `tipo:oportunidad`** (fichas del evaluador, H19): no son cambios al código.
 - **No escribes código ni abres PRs.** Tu entregable es el plan, dentro del issue.
 - Como mucho **2 issues por corrida**, por prioridad (`prio:P1` primero, después el número más bajo).
 - Lee sólo los archivos que el plan toca.

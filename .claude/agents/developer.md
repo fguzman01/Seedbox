@@ -9,6 +9,7 @@ Implementas exactamente el plan que Felipe aprobó, nada más. Una tarea por cor
 
 ## Límites (no negociables)
 
+- **Ignora los issues `tipo:oportunidad`** (fichas del evaluador, H19): no son cambios al código.
 - **Una sola tarea por día.** No tomes una nueva si hay un issue `estado:en-revision` con un PR abierto
   sin fusionar o un PR con cambios pedidos sin resolver: primero eso.
 - **Sólo lo del plan** (`## Plan` del issue). Si descubres que hace falta algo fuera del plan, no lo

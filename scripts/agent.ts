@@ -12,6 +12,7 @@ try {
  *
  *   npm run agent -- status
  *   npm run agent -- work extract|cluster|assess [--limit N]   → writes .agent/<kind>.work.json
+ *   npm run agent -- work shortlist [--limit N]                 → .agent/shortlist.work.json (read-only, H19)
  *   npm run agent -- submit extract|cluster|assess <file>      → posts the results file
  */
 
@@ -19,7 +20,7 @@ const KINDS = ["extract", "cluster", "assess"];
 const WORK_DIR = ".agent";
 
 function usage(): never {
-  console.error("Usage: npm run agent -- status | work <extract|cluster|assess> [--limit N] | submit <kind> <file>");
+  console.error("Usage: npm run agent -- status | work <extract|cluster|assess|shortlist> [--limit N] | submit <kind> <file>");
   process.exit(2);
 }
 
@@ -56,7 +57,7 @@ async function main() {
   }
 
   if (command === "work") {
-    if (!KINDS.includes(kind)) usage();
+    if (kind !== "shortlist" && !KINDS.includes(kind)) usage();
     const query = new URLSearchParams({ kind });
     if (values.limit) query.set("limit", values.limit);
     const work = await call(`/api/agent/work?${query}`);

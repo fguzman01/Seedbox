@@ -3,10 +3,12 @@ import { describe, expect, it } from "vitest";
 import {
   agentResultsSchema,
   clampLimit,
+  clampShortlistLimit,
   getAgentStatus,
   getAssessWork,
   getClusterWork,
   getExtractWork,
+  getShortlistWork,
   submitAgentResults,
 } from "./agent";
 import { checkAgentToken } from "./auth";
@@ -43,6 +45,13 @@ describe("checkAgentToken", () => {
 });
 
 describe("clampLimit and the results schema", () => {
+  it("caps the shortlist at 5 (H19)", () => {
+    expect(clampShortlistLimit(undefined)).toBe(5);
+    expect(clampShortlistLimit("50")).toBe(5);
+    expect(clampShortlistLimit("0")).toBe(5);
+    expect(clampShortlistLimit("3")).toBe(3);
+  });
+
   it("defaults and caps batch sizes", () => {
     expect(clampLimit("extract", undefined)).toBe(30);
     expect(clampLimit("extract", "500")).toBe(100);
@@ -180,5 +189,45 @@ describe.skipIf(!testDatabaseUrl)("agent work exchange (database)", () => {
       assessmentModel: "claude-code",
     });
     expect((await getAgentStatus(db)).assess).toBe(0);
+  });
+});
+
+describe("agent route guard for the shortlist (H19)", () => {
+  it("rejects requests without the token, like every agent endpoint", async () => {
+    const { rejectUnauthorized } = await import("../app/api/agent/guard");
+    const old = process.env.SEEDBOX_AGENT_TOKEN;
+    process.env.SEEDBOX_AGENT_TOKEN = "s3cret-token";
+    try {
+      const url = "http://localhost/api/agent/work?kind=shortlist";
+      expect(rejectUnauthorized(new Request(url))?.status).toBe(401);
+      expect(rejectUnauthorized(new Request(url, { headers: { authorization: "Bearer s3cret-token" } }))).toBeNull();
+    } finally {
+      if (old === undefined) delete process.env.SEEDBOX_AGENT_TOKEN;
+      else process.env.SEEDBOX_AGENT_TOKEN = old;
+    }
+  });
+});
+
+describe.skipIf(!testDatabaseUrl)("getShortlistWork (database)", () => {
+  const db = useTestDb();
+
+  it("hands out a read-only list of evaluated opportunities with their quotes", async () => {
+    const [o] = await db
+      .insert(opportunities)
+      .values({ title: "T", summary: "S", model: "m", competitionScore: 7, buildabilityScore: 8, assessedAt: new Date() })
+      .returning();
+    for (const author of ["a", "b"]) {
+      const [s] = await db
+        .insert(signals)
+        .values({ source: "hn", externalId: author, url: `https://news.example/${author}`, body: "b", author, publishedAt: new Date() })
+        .returning();
+      await db.insert(pains).values({ signalId: s.id, opportunityId: o.id, description: "d", persona: "p", quote: "q", vertical: "smb", intensity: "high", willingnessToPay: "explicit", model: "m" });
+    }
+
+    const work = await getShortlistWork(db, 5);
+
+    expect(work.kind).toBe("shortlist");
+    expect(work.items.map((i) => i.id)).toEqual([o.id]);
+    expect(work.items[0].pains.map((p) => p.url).sort()).toEqual(["https://news.example/a", "https://news.example/b"]);
   });
 });

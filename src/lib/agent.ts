@@ -9,6 +9,7 @@ import { agentDeliveries, opportunities, pains, signals } from "./db/schema";
 import { EXTRACTION_RULES, keepVerifiedPains } from "./extraction";
 import { extractedPainSchema } from "./pains";
 import { getPendingSignals, saveExtraction } from "./process";
+import { getShortlist, SHORTLIST_MAX } from "./shortlist";
 import { DOMAINS } from "./sources/types";
 
 /**
@@ -69,6 +70,19 @@ export async function getClusterWork(db: Database, limit: number) {
 
 export async function getAssessWork(db: Database, limit: number) {
   return { kind: "assess" as const, rules: ASSESSMENT_RULES, items: await getDueOpportunities(db, limit) };
+}
+
+/** Read-only list for the weekly evaluator (H19, ADR-0013). Not a work kind: nothing is submitted back. */
+export const SHORTLIST_KIND = "shortlist";
+
+export function clampShortlistLimit(requested: unknown): number {
+  const n = Number(requested);
+  if (!Number.isInteger(n) || n <= 0) return SHORTLIST_MAX;
+  return Math.min(n, SHORTLIST_MAX);
+}
+
+export async function getShortlistWork(db: Database, limit: number) {
+  return { kind: SHORTLIST_KIND, items: await getShortlist(db, limit) };
 }
 
 export function getAgentWork(db: Database, kind: WorkKind, limit: number) {

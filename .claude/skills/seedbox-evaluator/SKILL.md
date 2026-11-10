@@ -15,13 +15,14 @@ You never write to the site's database, never approve, merge or close an issue.
 
 ## Procedure
 
-1. `npm run agent -- work shortlist` writes `.agent/shortlist.work.json`: up to 5 opportunities that are
-   assessed (competition and buildability), have non-weak evidence (H12), ordered by total score.
-   Each has its pains with quote, source and link. Empty list → say so and stop.
-2. **Skip what was already written up:** list the issues with label `tipo:oportunidad`, open **and**
-   closed. Each write-up starts with `Oportunidad #<id>` in its title or first line; skip those ids
-   (also the discarded ones). Nothing eligible → say so and stop.
-3. Pick **3 to 5** of the remaining ones, in the order given (fewer if fewer remain).
+1. **First, skip what was already written up:** list the issues with label `tipo:oportunidad`, open
+   **and** closed (discarded ones included). Each write-up starts with `Oportunidad #<id>` in its title or
+   first line; collect those ids.
+2. `npm run agent -- work shortlist --exclude <ids comma-separated>` (omit `--exclude` if none) writes
+   `.agent/shortlist.work.json`: up to 5 opportunities, not in your list, that are assessed (competition
+   and buildability) and have non-weak evidence (H12), ordered by total score. Each has its pains with
+   quote, source and link. Empty list → say so and stop (nothing new to write up this week).
+3. Write up **3 to 5** of them, in the order given (fewer if fewer came back).
 4. For each, research on the web (competitor pricing pages, market size reports) and open the issue:
    - Title: `Oportunidad #<id>: <title>`
    - Labels: `tipo:oportunidad`, `estado:propuesta`, `prio:P3`, `riesgo:bajo`

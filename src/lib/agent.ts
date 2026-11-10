@@ -81,8 +81,17 @@ export function clampShortlistLimit(requested: unknown): number {
   return Math.min(n, SHORTLIST_MAX);
 }
 
-export async function getShortlistWork(db: Database, limit: number) {
-  return { kind: SHORTLIST_KIND, items: await getShortlist(db, limit) };
+/** Ids from a comma-separated `exclude` parameter; anything that is not a positive integer is ignored. */
+export function parseExcludeIds(param: string | null): number[] {
+  return (param ?? "")
+    .split(",")
+    .map((part) => Number(part.trim()))
+    .filter((n) => Number.isInteger(n) && n > 0)
+    .slice(0, 500);
+}
+
+export async function getShortlistWork(db: Database, limit: number, exclude: number[] = []) {
+  return { kind: SHORTLIST_KIND, items: await getShortlist(db, limit, exclude) };
 }
 
 export function getAgentWork(db: Database, kind: WorkKind, limit: number) {

@@ -22,7 +22,9 @@ una en el tablero.
   autores distintos; máximo 5. Así la regla es una sola, la del tablero. No es un `WORK_KIND`: no hay
   nada que enviar de vuelta.
 - «No fichadas antes» se resuelve en GitHub: cada ficha empieza con `Oportunidad #<id>` y el skill salta
-  los ids ya presentes entre los issues `tipo:oportunidad`, abiertos y cerrados.
+  los ids ya presentes entre los issues `tipo:oportunidad`, abiertos y cerrados, y se los pasa al sitio con
+  `exclude=<ids>`: la lista corta ya sale sin ellos, así que cada semana llega a oportunidades nuevas
+  (si el sitio devolviera siempre el mismo top 5, el evaluador se atascaría desde la segunda semana).
 - La ficha vive en el issue. No hay migración ni endpoint de escritura.
 - El `architect`, el `developer` y el `product-owner` ignoran los issues `tipo:oportunidad`.
 

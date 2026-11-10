@@ -9,6 +9,7 @@ import {
   getClusterWork,
   getExtractWork,
   getShortlistWork,
+  parseExcludeIds,
   submitAgentResults,
 } from "./agent";
 import { checkAgentToken } from "./auth";
@@ -45,6 +46,11 @@ describe("checkAgentToken", () => {
 });
 
 describe("clampLimit and the results schema", () => {
+  it("parses the exclude ids, ignoring junk", () => {
+    expect(parseExcludeIds(null)).toEqual([]);
+    expect(parseExcludeIds("3, 7,x,-1,2.5,0,9")).toEqual([3, 7, 9]);
+  });
+
   it("caps the shortlist at 5 (H19)", () => {
     expect(clampShortlistLimit(undefined)).toBe(5);
     expect(clampShortlistLimit("50")).toBe(5);

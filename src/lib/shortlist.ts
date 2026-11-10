@@ -24,9 +24,11 @@ export interface ShortlistCandidate extends EvidenceCounts {
 }
 
 /** Eligible candidates, best first: total score, then distinct authors, then the lower id. */
-export function rankShortlist<T extends ShortlistCandidate>(candidates: T[], limit = SHORTLIST_MAX) {
+/** `exclude` holds the ids already written up (or discarded), so each week reaches new opportunities. */
+export function rankShortlist<T extends ShortlistCandidate>(candidates: T[], limit = SHORTLIST_MAX, exclude: number[] = []) {
   const size = Math.min(SHORTLIST_MAX, Math.max(0, Math.floor(limit)));
   return candidates
+    .filter((c) => !exclude.includes(c.id))
     .filter((c) => c.competitionScore !== null && c.buildabilityScore !== null && !isWeakEvidence(c.authorCount))
     .map((c) => {
       const axes = axisScores(c, c);
@@ -54,7 +56,7 @@ export interface ShortlistItem {
   pains: { description: string; persona: string; quote: string; source: string; url: string; author: string | null }[];
 }
 
-export async function getShortlist(db: Database, limit = SHORTLIST_MAX): Promise<ShortlistItem[]> {
+export async function getShortlist(db: Database, limit = SHORTLIST_MAX, exclude: number[] = []): Promise<ShortlistItem[]> {
   const rows = await db
     .select({
       id: opportunities.id,
@@ -75,7 +77,7 @@ export async function getShortlist(db: Database, limit = SHORTLIST_MAX): Promise
     .groupBy(opportunities.id);
 
   return Promise.all(
-    rankShortlist(rows, limit).map(async (row) => ({
+    rankShortlist(rows, limit, exclude).map(async (row) => ({
       id: row.id,
       title: row.title,
       summary: row.summary,

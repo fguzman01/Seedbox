@@ -39,6 +39,13 @@ describe("rankShortlist", () => {
     expect(ranked.map((c) => c.id)).toEqual([3, 4, 2, 1]);
   });
 
+  it("leaves out the excluded ids so the second week reaches new opportunities", () => {
+    const all = Array.from({ length: 8 }, (_, i) => candidate(i + 1, { competitionScore: 9 - i }));
+    const week1 = rankShortlist(all).map((c) => c.id);
+    expect(week1).toEqual([1, 2, 3, 4, 5]);
+    expect(rankShortlist(all, 5, week1).map((c) => c.id)).toEqual([6, 7, 8]);
+  });
+
   it("never returns more than 5, nor a negative size", () => {
     const many = Array.from({ length: 9 }, (_, i) => candidate(i + 1));
     expect(rankShortlist(many, 20)).toHaveLength(SHORTLIST_MAX);
@@ -105,6 +112,12 @@ describe.skipIf(!testDatabaseUrl)("getShortlist (database)", () => {
       expect(pain.quote).toMatch(/^cita/);
       expect(pain.url).toMatch(/^https:\/\/example\.com\/buena\//);
     }
+  });
+
+  it("skips excluded ids", async () => {
+    const a = await seed("a", 2, { competition: 9, buildability: 9 });
+    const b = await seed("b", 2, { competition: 5, buildability: 5 });
+    expect((await getShortlist(db, 5, [a.id])).map((o) => o.id)).toEqual([b.id]);
   });
 
   it("is empty when nothing qualifies and respects the limit", async () => {

@@ -5,6 +5,7 @@ import {
   getAgentStatus,
   getAgentWork,
   getShortlistWork,
+  parseExcludeIds,
   SHORTLIST_KIND,
   WORK_KINDS,
   type WorkKind,
@@ -12,7 +13,7 @@ import {
 import { getDb } from "@/lib/db/client";
 import { rejectUnauthorized } from "../guard";
 
-/** GET /api/agent/work?kind=status|extract|cluster|assess|shortlist&limit=N (ADR-0008). */
+/** GET /api/agent/work?kind=status|extract|cluster|assess|shortlist&limit=N&exclude=1,2 (shortlist only) (ADR-0008). */
 export async function GET(request: Request) {
   await connection();
   const rejected = rejectUnauthorized(request);
@@ -22,7 +23,7 @@ export async function GET(request: Request) {
   const kind = params.get("kind") ?? "status";
   if (kind === "status") return Response.json(await getAgentStatus(getDb()));
   if (kind === SHORTLIST_KIND) {
-    return Response.json(await getShortlistWork(getDb(), clampShortlistLimit(params.get("limit"))));
+    return Response.json(await getShortlistWork(getDb(), clampShortlistLimit(params.get("limit")), parseExcludeIds(params.get("exclude"))));
   }
   if (!(WORK_KINDS as readonly string[]).includes(kind)) {
     return Response.json({ error: `kind must be status, ${WORK_KINDS.join(", ")}, ${SHORTLIST_KIND}` }, { status: 400 });

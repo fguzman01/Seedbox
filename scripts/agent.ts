@@ -12,7 +12,7 @@ try {
  *
  *   npm run agent -- status
  *   npm run agent -- work extract|cluster|assess [--limit N]   → writes .agent/<kind>.work.json
- *   npm run agent -- work shortlist [--limit N]                 → .agent/shortlist.work.json (read-only, H19)
+ *   npm run agent -- work shortlist [--limit N] [--exclude 1,2]                 → .agent/shortlist.work.json (read-only, H19)
  *   npm run agent -- submit extract|cluster|assess <file>      → posts the results file
  */
 
@@ -46,6 +46,7 @@ async function main() {
     allowPositionals: true,
     options: {
       limit: { type: "string" },
+      exclude: { type: "string" },
       model: { type: "string", default: process.env.SEEDBOX_AGENT_MODEL ?? "claude-code" },
     },
   });
@@ -60,6 +61,7 @@ async function main() {
     if (kind !== "shortlist" && !KINDS.includes(kind)) usage();
     const query = new URLSearchParams({ kind });
     if (values.limit) query.set("limit", values.limit);
+    if (values.exclude && kind === "shortlist") query.set("exclude", values.exclude);
     const work = await call(`/api/agent/work?${query}`);
     await mkdir(WORK_DIR, { recursive: true });
     const out = path.join(WORK_DIR, `${kind}.work.json`);

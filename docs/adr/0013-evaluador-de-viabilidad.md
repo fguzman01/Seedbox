@@ -43,3 +43,7 @@ una en el tablero.
   declara. El veredicto «construir» está prohibido sin precios reales de competidores.
 - Hasta que H18 agregue el tipo de oportunidad, todas cuentan como concretas; el filtro entra con H18.
 - Costo: hasta 5 fichas por semana con búsqueda web. Felipe crea la rutina y llama `POST /etiquetas`.
+- Memoria del evaluador (H20): las decisiones de Felipe (cierre `completed`/`not_planned`, etiquetas y
+  motivo en comentarios de los issues `tipo:oportunidad`) se resumen en `docs/preferencias.md`, que el
+  evaluador actualiza por PR. No repite ideas descartadas salvo evidencia nueva declarada en la ficha, y
+  los cambios a `DEFAULT_WEIGHTS` sólo se proponen por issue (`riesgo:alto`), nunca se editan.

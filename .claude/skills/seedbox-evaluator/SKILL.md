@@ -11,28 +11,48 @@ can approve (✅ "quiero explorarla como proyecto aparte") or discard (❌) from
 "no encontrado". Never invent prices, market sizes or quotes.
 
 Requirements: `npm install` done, `SEEDBOX_URL` set, GitHub tools for `fguzman01/Seedbox`, web search.
-You never write to the site's database, never approve, merge or close an issue.
+You never write to the site's database, never approve, merge or close an issue, and never edit scoring weights.
 
 ## Procedure
 
 1. **First, skip what was already written up:** list the issues with label `tipo:oportunidad`, open
    **and** closed (discarded ones included). Each write-up starts with `Oportunidad #<id>` in its title or
    first line; collect those ids.
-2. `npm run agent -- work shortlist --exclude <ids comma-separated>` (omit `--exclude` if none) writes
+2. **Then, read Felipe's decisions** (H20, memory of the evaluator) from those same issues and classify:
+   - ✅ approved: closed as `completed`, or label `estado:hecha` / approved (he wants to explore it);
+   - ❌ discarded: closed as `not_planned`, or label `estado:descartada`;
+   - undecided: open and still `estado:propuesta`.
+   The reason is Felipe's last comment (or the operator's comment relaying his answer to the card). If he
+   left none, write "sin motivo": never invent one.
+3. **Update `docs/preferencias.md`** only if there are decisions not yet in its table: add the rows
+   (`Oportunidad #id | título | decisión | motivo | fecha`) and rewrite "Patrones" (3–5 lines). Open a
+   small PR for it (it needs Felipe's ✅ like any repo change); never push to `main`.
+4. `npm run agent -- work shortlist --exclude <ids comma-separated>` (omit `--exclude` if none) writes
    `.agent/shortlist.work.json`: up to 5 opportunities, not in your list, that are assessed (competition
    and buildability) and have non-weak evidence (H12), ordered by total score. Each has its pains with
    quote, source and link. Empty list → say so and stop (nothing new to write up this week).
-3. Write up **3 to 5** of them, in the order given (fewer if fewer came back).
-4. For each, research on the web (competitor pricing pages, market size reports) and open the issue:
+5. **Do not repeat discarded ideas:** compare each candidate by vertical, problem and affected group
+   against the ❌ rows of the table. If it matches and there are no new pains since the discard date,
+   skip it (and say so in the summary). If there is new evidence, write it up and open the write-up with
+   "Vuelve a ficharse porque: …" citing the new pains with their link.
+6. Write up **3 to 5** of them, in the order given (fewer if fewer came back).
+7. For each, research on the web (competitor pricing pages, market size reports) and open the issue:
    - Title: `Oportunidad #<id>: <title>`
    - Labels: `tipo:oportunidad`, `estado:propuesta`, `prio:P3`, `riesgo:bajo`
-   - Body: the template below, in Spanish.
-5. Finish with a short summary: ids written up, ids skipped and why, verdicts.
+   - Body: the template below, in Spanish, including the line "Preferencias consideradas" with a link to
+     the version of `docs/preferencias.md` you used.
+8. **Monthly weights proposal:** on the first run of each month, if there are at least 5 decisions and
+   the pattern contradicts `DEFAULT_WEIGHTS` (`src/lib/scoring.ts`), open an issue `estado:propuesta`,
+   `tipo:mejora`, `riesgo:alto` (it touches scoring rules) with the data and the suggested change. Weights
+   are only ever proposed through an issue: **never edit `scoring.ts`** or any weight.
+9. Finish with a short summary: ids written up, ids skipped and why, verdicts.
 
 ## Template of the write-up
 
 ```
 Oportunidad #<id> · veredicto: <construir | investigar más | descartar> · viabilidad: <0-10>/10
+Preferencias consideradas: [docs/preferencias.md](<link a la versión usada>)
+(si se vuelve a fichar: «Vuelve a ficharse porque: …» con los dolores nuevos y su link)
 
 ## Quién sufre y quién pagaría
 ## Competidores y precios reales

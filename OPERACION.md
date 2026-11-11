@@ -48,6 +48,9 @@ toca código ni issues; su resultado se ve en el sitio (`/activity`). El PO usa 
 **Rol propio:** el **evaluador** (`seedbox-evaluator`, H19, ADR-0013) toma cada semana las mejores
 oportunidades evaluadas y abre una ficha de viabilidad como issue `tipo:oportunidad` + `estado:propuesta`
 (✅ = explorarla como proyecto aparte). No toca código; el architect, el developer y el PO ignoran esos issues.
+El evaluador tiene memoria (H20): lee cuáles fichas aprobó o descartó Felipe, las resume en
+`docs/preferencias.md` (por PR, con ✅), no repite lo descartado sin evidencia nueva y sólo *propone*
+ajustes de pesos por issue.
 
 ## 4. Qué pasa solo y qué pide ✅
 

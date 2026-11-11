@@ -9,9 +9,15 @@ ficha cita la versión usada. Si no dejó motivo se anota «sin motivo»; no se 
 
 | Oportunidad #id | Título | Decisión | Motivo | Fecha |
 |---|---|---|---|---|
-| _(aún sin decisiones)_ | | | | |
+| Oportunidad #8 | Difícil comparar el valor de las suscripciones de IA para programar | ✅ aprobada (`estado:aprobada`, issue #18) | sin motivo | 2026-11-11 |
+| Oportunidad #2 | Pérdida de contexto y visibilidad al trabajar con varios agentes de código | ✅ aprobada (`estado:aprobada`, issue #20) | sin motivo | 2026-11-11 |
+| Oportunidad #13 | Fundadores tempranos sin estrategia de distribución | ✅ aprobada (`estado:aprobada`, issue #21) | sin motivo | 2026-11-11 |
+| Oportunidad #19 | Límites de uso y soporte deficiente en suscripciones de IA | ❌ descartada (issue #19) | sin motivo | 2026-11-11 |
+| Oportunidad #36 | Cuentas de GitHub suspendidas sin vía de apelación | ❌ descartada (issue #22) | sin motivo | 2026-11-11 |
 
 ## Patrones
 
-_(Se escriben de 3 a 5 líneas cuando haya decisiones; por ejemplo: «descarta ideas que dependen de
-cumplimiento legal».)_
+- Aprueba ideas ligadas a trabajar con agentes de código y suscripciones de IA para programar (#8, #2) y a distribución para fundadores (#13).
+- Descarta una queja sobre límites de uso/soporte de suscripciones de IA (#19) aunque #8 sobre comparar suscripciones sí la aprobó: parece preferir herramientas que ayudan a decidir antes que quejas sobre el servicio.
+- Descarta una queja sobre cuentas de GitHub suspendidas (#36): dependería de la plataforma, no de una herramienta propia.
+- Ninguna decisión trae motivo; los patrones son hipótesis (5 decisiones) y no cambian pesos.

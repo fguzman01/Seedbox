@@ -56,14 +56,16 @@ Cinco chequeos, con umbrales fijos (no dependen del criterio del día):
 
 1. **Fuentes** (`/activity`, por fuente): posts ingresados en 7 días. Falla = 0 posts; sospechosa =
    menos de la mitad de la semana anterior.
-2. **Cola** (`agent -- status`): pendientes de `extract`/`cluster`/`assess` hoy frente a los de la
-   semana anterior (están en el comentario de la auditoría previa) y días sin corrida del analista.
+2. **Cola** (`agent -- status`: `extract`, `cluster`; `/activity`: actividad por día del analista):
+   pendientes de `extract` y `cluster` hoy frente a los de la semana anterior (están en el comentario
+   de la auditoría previa) y días sin corrida del analista (días sin actividad en `/activity`).
    Alerta si la cola crece dos semanas seguidas o hay 2 o más días sin corrida.
 3. **Descarte** (`/activity`): % de descarte por fuente. Alerta si una fuente supera el 90 % o sube
    más de 20 puntos.
-4. **Sesgo** (`/activity`): % de dolores concretos de devtools. Alerta si supera el 60 % (o el umbral
-   vigente en ADR-0009).
-5. **Evaluación** (`agent -- status`): oportunidades evaluadas frente a pendientes. Alerta si las
+4. **Sesgo** (`/activity`): % de dolores concretos de devtools. Alerta si supera el 60 % (umbral propio de
+   esta auditoría; el indicador está descrito en ADR-0012).
+5. **Evaluación** (`/opportunities` y `/activity`: evaluadas; `agent -- status`: `assess` son las
+   pendientes, con tope de 20, así que si marca 20 el real puede ser mayor): alerta si las
    pendientes superan 2 veces las evaluadas.
 
 **Registro:** el issue fijo `H21 Auditoría del radar (registro)` (`tipo:mejora`, `estado:en-espera`,

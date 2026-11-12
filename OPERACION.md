@@ -35,7 +35,7 @@ pueda tomar ni algo que Felipe deba decidir. Se revisa en el PO semanal.
 
 | Rol (marco) | Agente de Seedbox | Qué hace | Sale con |
 |---|---|---|---|
-| Analista / PO | `product-owner` | Junta mejoras (estado del radar, evaluaciones, comentarios, ADRs con condiciones abiertas) y abre issues `propuesta` como historias con criterios de aceptación | Issues + tarjetas ✅/❌ |
+| Analista / PO | `product-owner` | Junta mejoras (estado del radar, evaluaciones, comentarios, ADRs con condiciones abiertas) y abre issues `propuesta` como historias con criterios de aceptación; los domingos empieza con la auditoría de salud del radar (H21) | Issues + tarjetas ✅/❌ |
 | Diseñador (+ pedidos) | `architect` | Para cada issue `aprobada`: plan corto en el issue; ADR si hay una decisión técnica nueva; responde preguntas; deriva lo delicado | `estado:diseñada` + tarjeta |
 | Desarrollador | `developer` | UNA tarea `en-curso` por corrida: código + tests, PR con `Closes #N` | PR + `estado:en-revision` |
 | Revisor (contexto limpio) | `qa-tester` | Lo invoca el desarrollador: verifica cada criterio de aceptación y el plan, busca casos borde. No es quien escribió | `ok` / `cambios` en el PR |
@@ -82,7 +82,7 @@ Felipe aprobó el día anterior.
 |---|---|---|
 | 01:13 diario | Diseñador + pedidos (`architect`) | hay un issue `aprobada` sin plan |
 | 01:47 lun–vie | Desarrollador + revisor (`developer`, `qa-tester`) | hay un issue `en-curso` y nada en `en-revision` |
-| 01:13 domingo | PO (`product-owner`), antes del diseñador | — |
+| 01:13 domingo | PO (`product-owner`), antes del diseñador; empieza con la auditoría semanal del radar (H21) | — |
 | 03:00 domingo | Evaluador (`seedbox-evaluator`, sonnet, búsqueda web) | hay oportunidades evaluadas sin ficha |
 | 08:23 diario | Analista (ya existe) | — |
 | 21:00 | Cierre (el operador, sin tokens) | hubo movimiento o hay decisiones pendientes |

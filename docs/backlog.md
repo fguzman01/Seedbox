@@ -537,3 +537,9 @@ a su perfil y licencia con link. H14 desglosa por sitio (`feedOf`: `subreddit` o
 probó contra la API real (bloqueada desde la sesión): tests con respuestas simuladas. Falta, en
 operación: C1–C3, el criterio de 7 días activa y, si hace falta, el filtro propio mínimo para la
 revisión de borrados (hoy usa el filtro `default`).
+
+### H21. Auditor semanal del radar · S · issue #12
+Sin código: el `product-owner` del domingo empieza con una auditoría de cinco chequeos (fuentes, cola,
+descarte, sesgo, evaluación) con umbrales fijos, definida en `.claude/agents/product-owner.md`. El
+rastro queda en el issue de registro «H21 Auditoría del radar»; sólo un problema genera un comentario
+`<!-- telegram -->`. Detalle y estado en el issue.

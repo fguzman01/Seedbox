@@ -46,7 +46,40 @@ Título: `H<n> <título corto>` (sigue la numeración: busca el mayor H usado en
 4. Issues `estado:en-espera`: ¿se destrabó algo? Coméntalo.
 5. Comentarios de Felipe en issues y PRs de la semana.
 
+## Auditoría semanal del radar (H21)
+
+Empieza TODA corrida del domingo con esta auditoría, antes de juntar mejoras. Sólo lee: no cambia
+fuentes, claves ni variables de Railway (eso es de Felipe, `estado:requiere-sesion`).
+
+Datos: `npm run agent -- status` y la vista `/activity` (H14, filtros `/activity?ver=...`).
+Cinco chequeos, con umbrales fijos (no dependen del criterio del día):
+
+1. **Fuentes** (`/activity`, por fuente): posts ingresados en 7 días. Falla = 0 posts; sospechosa =
+   menos de la mitad de la semana anterior.
+2. **Cola** (`agent -- status`): pendientes de `extract`/`cluster`/`assess` hoy frente a los de la
+   semana anterior (están en el comentario de la auditoría previa) y días sin corrida del analista.
+   Alerta si la cola crece dos semanas seguidas o hay 2 o más días sin corrida.
+3. **Descarte** (`/activity`): % de descarte por fuente. Alerta si una fuente supera el 90 % o sube
+   más de 20 puntos.
+4. **Sesgo** (`/activity`): % de dolores concretos de devtools. Alerta si supera el 60 % (o el umbral
+   vigente en ADR-0009).
+5. **Evaluación** (`agent -- status`): oportunidades evaluadas frente a pendientes. Alerta si las
+   pendientes superan 2 veces las evaluadas.
+
+**Registro:** el issue fijo `H21 Auditoría del radar (registro)` (`tipo:mejora`, `estado:en-espera`,
+no es trabajo tomable; créalo si no existe). Cada semana agrega un comentario con los cinco números.
+La primera vez es la **línea base**: se anotan los números y no hay alertas por falta de comparación.
+
+**Salidas:**
+- Todo bien: el comentario NO lleva `<!-- telegram -->`; el cierre de las 21:00 sólo lo menciona si
+  hay movimiento. No se manda un mensaje aparte.
+- Hay problema: además del comentario de registro, un comentario aparte que empieza con
+  `<!-- telegram -->` con el qué, el porqué y la acción sugerida; y si hace falta trabajo, un issue
+  `estado:propuesta` (cuenta dentro del tope de 3 por semana).
+
 ## Procedimiento
+
+0. Haz la auditoría semanal (arriba) si es domingo.
 
 1. Abre los issues nuevos y comenta en los existentes lo que cambió. Si uno quedó obsoleto, comenta por
    qué y sugiere descartarlo (lo cierra Felipe).

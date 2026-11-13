@@ -41,7 +41,7 @@ cada post, `CLAUDE.md`); términos leídos **sólo en la fuente oficial** y con 
 - **Público:** mixto: finanzas personales, trabajo y vida académica, además de software.
 - **Volumen aproximado:** ~115 preguntas al mes en los 5 sitios activos (medido el 2026-11-04; mínimo de 10 preguntas en 30 días por sitio).
 - **Acceso:** API pública con clave gratuita registrada (10.000 consultas por día con clave).
-- **Términos de uso:** leídos por Felipe el 2026-11-04 (API Terms of Use y Acceptable Use Policy); detalle y riesgo aceptado en ADR-0010. Cláusula amplia contra herramientas de ML: Stack Exchange puede cortar la clave sin aviso.
+- **Términos de uso:** leídos por Felipe el 2026-11-04: API Terms of Use (<https://stackoverflow.com/legal/api-terms-of-use>) y Acceptable Use Policy; detalle y riesgo aceptado en ADR-0010. Cláusula amplia contra herramientas de ML: Stack Exchange puede cortar la clave sin aviso.
 - **Evidencia trazable:** sí, link a la pregunta, con autor y licencia.
 - **Decisión / motivo:** primera fuente no técnica. Sitios medidos y no activados: expatriates, parenting, freelancing (poca actividad); `pm` sin medir.
 
@@ -52,7 +52,7 @@ cada post, `CLAUDE.md`); términos leídos **sólo en la fuente oficial** y con 
 - **Público:** pymes, freelancers, profesionales (r/smallbusiness, r/freelance…): el público que se busca.
 - **Volumen aproximado:** alto (no medido: nunca se obtuvo acceso).
 - **Acceso:** Data API con aprobación previa para uso no comercial; Reddit rechazó el pedido de Felipe.
-- **Términos de uso:** Términos de la Data API; el artículo oficial lo leyó Felipe el 2026-11-04 (ver ADR-0009). Reportes de terceros sobre el cierre del Data API, no verificados en fuente oficial.
+- **Términos de uso:** Términos de la Data API; el artículo oficial (<https://support.reddithelp.com/hc/es-es/articles/14945211791892>) lo leyó Felipe el 2026-11-04 (ver ADR-0009). Reportes de terceros sobre el cierre del Data API, no verificados en fuente oficial.
 - **Evidencia trazable:** sí, cada post tiene permalink.
 - **Decisión / motivo:** acceso rechazado. Sólo se reabre con un dato nuevo (Reddit cambia la política o ofrece otra vía de acceso).
 

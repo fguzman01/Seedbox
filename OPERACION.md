@@ -89,8 +89,8 @@ Felipe aprobó el día anterior.
 | 01:13 diario | Diseñador + pedidos (`architect`) | hay un issue `aprobada` sin plan |
 | 01:47 lun–vie | Desarrollador + revisor (`developer`, `qa-tester`) | hay un issue `en-curso` y nada en `en-revision` |
 | 01:13 domingo | PO (`product-owner`), antes del diseñador; empieza con la auditoría semanal del radar (H21) | — |
+| 02:00 domingo | Explorador de fuentes (`source-scout`, sonnet, búsqueda web; entorno del evaluador) | — (después del PO: su propuesta pasa por ✅ de Felipe y luego por el architect, no por el PO de esa semana) |
 | 03:00 domingo | Evaluador (`seedbox-evaluator`, sonnet, búsqueda web) | hay oportunidades evaluadas sin ficha |
-| 02:00 domingo | Explorador de fuentes (`source-scout`, sonnet, búsqueda web; entorno del evaluador) | — |
 | 08:23 diario | Analista (ya existe) | — |
 | 21:00 | Cierre (el operador, sin tokens) | hubo movimiento o hay decisiones pendientes |
 

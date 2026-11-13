@@ -52,6 +52,12 @@ El evaluador tiene memoria (H20): lee cuáles fichas aprobó o descartó Felipe,
 `docs/preferencias.md` (por PR, con ✅), no repite lo descartado sin evidencia nueva y sólo *propone*
 ajustes de pesos por issue.
 
+**Rol propio:** el **explorador de fuentes** (`source-scout`, H24, `docs/fuentes.md`) investiga cada
+semana fuentes nuevas de público masivo y no técnico, mantiene el catálogo y propone como mucho 1 fuente
+como issue `estado:propuesta` (historia lista para el `architect`). No escribe adaptadores, no acepta
+términos, no paga ni crea cuentas (`requiere-sesion`). Necesita el entorno con internet completo del
+evaluador. El architect, el developer y el PO no tocan el catálogo.
+
 ## 4. Qué pasa solo y qué pide ✅
 
 Railway despliega `main` directo a producción: **todo merge es un despliegue**. Por eso, por ahora,
@@ -84,6 +90,7 @@ Felipe aprobó el día anterior.
 | 01:47 lun–vie | Desarrollador + revisor (`developer`, `qa-tester`) | hay un issue `en-curso` y nada en `en-revision` |
 | 01:13 domingo | PO (`product-owner`), antes del diseñador; empieza con la auditoría semanal del radar (H21) | — |
 | 03:00 domingo | Evaluador (`seedbox-evaluator`, sonnet, búsqueda web) | hay oportunidades evaluadas sin ficha |
+| 02:00 domingo | Explorador de fuentes (`source-scout`, sonnet, búsqueda web; entorno del evaluador) | — |
 | 08:23 diario | Analista (ya existe) | — |
 | 21:00 | Cierre (el operador, sin tokens) | hubo movimiento o hay decisiones pendientes |
 

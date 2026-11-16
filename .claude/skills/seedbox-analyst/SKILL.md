@@ -15,7 +15,7 @@ Requirements: `npm install` done, and `SEEDBOX_URL` set (the site's URL). The to
 
 Work in this order, because each step feeds the next. Stop a step when it reports 0 items.
 
-1. `npm run agent -- status` to see how much work is pending.
+1. `npm run agent -- status` to see how much work is pending. To back any diagnosis of the radar with numbers (per source, per vertical, devtools/AI share), use `npm run agent -- stats` (writes `.agent/stats.work.json`; counts only).
 2. **Extract** (up to 2 rounds): `npm run agent -- work extract`, analyze, submit.
 3. **Cluster** (repeat while there are pains, up to 3 rounds): `npm run agent -- work cluster`,
    analyze, submit.

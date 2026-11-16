@@ -71,6 +71,7 @@ Para medir la calidad de la extracción, ver [`evals/extraction/README.md`](eval
 | `npm run db:migrate:deploy` | Igual, sin herramientas de desarrollo (lo usa Railway antes de cada despliegue) |
 | `npm run pipeline` | `ingest → extract → cluster → assess` con la API de Claude (modo de pago por uso) |
 | `npm run agent -- status` | Trabajo pendiente para el analista de Claude Code (`work` y `submit`: ver el skill) |
+| `npm run agent -- stats [--days N]` | Números del radar por fuente y vertical, sólo conteos, en `.agent/stats.work.json` (H25) |
 
 ## Estructura
 

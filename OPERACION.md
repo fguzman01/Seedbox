@@ -48,6 +48,13 @@ toca código ni issues; su resultado se ve en el sitio (`/activity`). El PO usa 
 **Rol propio:** el **evaluador** (`seedbox-evaluator`, H19, ADR-0013) toma cada semana las mejores
 oportunidades evaluadas y abre una ficha de viabilidad como issue `tipo:oportunidad` + `estado:propuesta`
 (✅ = explorarla como proyecto aparte). No toca código; el architect, el developer y el PO ignoran esos issues.
+**Etapas y cola (H26):** cada ficha abre con un resumen de 3 líneas (qué es, para quién, etapa y siguiente
+paso, con viabilidad y factibilidad de desarrollo 0–10). Las etapas son 🔎 Explorar / 🧪 Validar /
+🚀 Construir, o proponer descartar con motivo. Una ficha que Felipe marca para explorar (`tipo:oportunidad` +
+`estado:aprobada`) entra a una cola: el evaluador profundiza **como mucho 2 por corrida semanal**, la de mayor
+viabilidad primero, y deja un `## Brief de exploración` en el issue; luego pasa la ficha a `estado:propuesta`
+para que reciba la tarjeta 🧪 Validar / ❌ Descartar. El architect, el developer y el PO siguen ignorando los
+`tipo:oportunidad`, también los `aprobada`.
 El evaluador tiene memoria (H20): lee cuáles fichas aprobó o descartó Felipe, las resume en
 `docs/preferencias.md` (por PR, con ✅), no repite lo descartado sin evidencia nueva y sólo *propone*
 ajustes de pesos por issue.
@@ -90,7 +97,7 @@ Felipe aprobó el día anterior.
 | 01:47 lun–vie | Desarrollador + revisor (`developer`, `qa-tester`) | hay un issue `en-curso` y nada en `en-revision` |
 | 01:13 domingo | PO (`product-owner`), antes del diseñador; empieza con la auditoría semanal del radar (H21) | — |
 | 02:00 domingo | Explorador de fuentes (`source-scout`, sonnet, búsqueda web; entorno del evaluador) | — (después del PO: su propuesta pasa por ✅ de Felipe y luego por el architect, no por el PO de esa semana) |
-| 03:00 domingo | Evaluador (`seedbox-evaluator`, sonnet, búsqueda web) | hay oportunidades evaluadas sin ficha |
+| 03:00 domingo | Evaluador (`seedbox-evaluator`, sonnet, búsqueda web) | hay oportunidades evaluadas sin ficha **o** fichas en la cola de exploración (H26) |
 | 08:23 diario | Analista (ya existe) | — |
 | 21:00 | Cierre (el operador, sin tokens) | hubo movimiento o hay decisiones pendientes |
 

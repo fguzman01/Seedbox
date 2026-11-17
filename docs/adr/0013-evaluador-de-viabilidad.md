@@ -40,10 +40,21 @@ una en el tablero.
 
 - Una lectura nueva en el API del agente; ningún cambio de datos ni de puntajes.
 - Las fichas pueden traer precios o tamaños mal leídos: cada dato lleva su link y lo no encontrado se
-  declara. El veredicto «construir» está prohibido sin precios reales de competidores.
+  declara. El veredicto «construir» (desde H26, la etapa 🚀 Construir) está prohibido sin precios reales de competidores.
 - Hasta que H18 agregue el tipo de oportunidad, todas cuentan como concretas; el filtro entra con H18.
 - Costo: hasta 5 fichas por semana con búsqueda web. Felipe crea la rutina y llama `POST /etiquetas`.
 - Memoria del evaluador (H20): las decisiones de Felipe (cierre `completed`/`not_planned`, etiquetas y
   motivo en comentarios de los issues `tipo:oportunidad`) se resumen en `docs/preferencias.md`, que el
   evaluador actualiza por PR. No repite ideas descartadas salvo evidencia nueva declarada en la ficha, y
   los cambios a `DEFAULT_WEIGHTS` sólo se proponen por issue (`riesgo:alto`), nunca se editan.
+
+## Cambios (H26)
+
+- El veredicto «construir / investigar más / descartar» pasa a **etapa**: 🔎 Explorar, 🧪 Validar,
+  🚀 Construir (o proponer descartar con motivo). «Construir» conserva la regla: tres criterios ≥ 6 y precios
+  reales con link. «Validar» exige precios reales y un hueco claro.
+- Cada ficha y cada brief abren con un resumen de 3 líneas, con viabilidad y factibilidad de desarrollo (0–10).
+- Cola de exploración: las fichas `tipo:oportunidad` + `estado:aprobada` (Felipe eligió 🔎 Explorar) se
+  profundizan como mucho 2 por corrida, por viabilidad; el evaluador deja un `## Brief de exploración` y pasa
+  la ficha a `estado:propuesta` para la tarjeta 🧪 Validar / ❌ Descartar.
+- No cambia la arquitectura: sólo el skill y `OPERACION.md`.

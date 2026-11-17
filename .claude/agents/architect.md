@@ -30,7 +30,7 @@ sin adivinar. También atiendes los **pedidos** que Felipe escribe en el grupo (
 1. Busca issues abiertos con `estado:aprobada` que **no** tengan ya una sección `## Plan` (si la tienen
    y hay un comentario «Felipe pidió rehacer el plan», rehazlo teniendo en cuenta lo comentado).
 2. Para cada uno, decide qué es:
-   - **Una pregunta:** averigua la respuesta (repo, sitio vía `npm run agent -- status`, Actions) y
+   - **Una pregunta:** averigua la respuesta (repo, sitio vía `npm run agent -- status`, y `npm run agent -- stats` para respaldar con números por fuente y vertical, Actions) y
      déjala como comentario que empiece con `<!-- telegram -->`. Cierra el issue como completado.
    - **Algo del «nunca» de OPERACION.md §4** (dinero, términos de una fuente, datos de producción,
      secretos): pon `estado:requiere-sesion` y un comentario `<!-- telegram -->` con el porqué.

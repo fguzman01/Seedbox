@@ -13,6 +13,7 @@ try {
  *   npm run agent -- status
  *   npm run agent -- work extract|cluster|assess [--limit N]   → writes .agent/<kind>.work.json
  *   npm run agent -- work shortlist [--limit N] [--exclude 1,2]                 → .agent/shortlist.work.json (read-only, H19)
+ *   npm run agent -- stats [--days N]                           → .agent/stats.work.json (read-only counts per source and vertical, H25)
  *   npm run agent -- submit extract|cluster|assess <file>      → posts the results file
  */
 
@@ -20,7 +21,7 @@ const KINDS = ["extract", "cluster", "assess"];
 const WORK_DIR = ".agent";
 
 function usage(): never {
-  console.error("Usage: npm run agent -- status | work <extract|cluster|assess|shortlist> [--limit N] | submit <kind> <file>");
+  console.error("Usage: npm run agent -- status | stats [--days N] | work <extract|cluster|assess|shortlist> [--limit N] | submit <kind> <file>");
   process.exit(2);
 }
 
@@ -46,6 +47,7 @@ async function main() {
     allowPositionals: true,
     options: {
       limit: { type: "string" },
+      days: { type: "string" },
       exclude: { type: "string" },
       model: { type: "string", default: process.env.SEEDBOX_AGENT_MODEL ?? "claude-code" },
     },
@@ -54,6 +56,17 @@ async function main() {
 
   if (command === "status") {
     console.log(JSON.stringify(await call("/api/agent/work?kind=status"), null, 2));
+    return;
+  }
+
+  if (command === "stats") {
+    const query = new URLSearchParams({ kind: "stats" });
+    if (values.days) query.set("days", values.days);
+    const stats = await call(`/api/agent/work?${query}`);
+    await mkdir(WORK_DIR, { recursive: true });
+    const out = path.join(WORK_DIR, "stats.work.json");
+    await writeFile(out, JSON.stringify(stats, null, 2) + "\n");
+    console.log(`stats for the last ${String(stats.days)} day(s) written to ${out}`);
     return;
   }
 

@@ -51,7 +51,7 @@ Título: `H<n> <título corto>` (sigue la numeración: busca el mayor H usado en
 Empieza TODA corrida del domingo con esta auditoría, antes de juntar mejoras. Sólo lee: no cambia
 fuentes, claves ni variables de Railway (eso es de Felipe, `estado:requiere-sesion`).
 
-Datos: `npm run agent -- status` y la vista `/activity` (H14, filtros `/activity?ver=...`).
+Datos: `npm run agent -- status`, `npm run agent -- stats` (números por fuente y vertical, respalda los diagnósticos con ellos) y la vista `/activity` (H14, filtros `/activity?ver=...`).
 Cinco chequeos, con umbrales fijos (no dependen del criterio del día):
 
 1. **Fuentes** (`/activity`, por fuente): posts ingresados en 7 días. Falla = 0 posts; sospechosa =

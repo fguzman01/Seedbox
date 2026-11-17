@@ -40,7 +40,7 @@ una en el tablero.
 
 - Una lectura nueva en el API del agente; ningún cambio de datos ni de puntajes.
 - Las fichas pueden traer precios o tamaños mal leídos: cada dato lleva su link y lo no encontrado se
-  declara. El veredicto «construir» está prohibido sin precios reales de competidores.
+  declara. El veredicto «construir» (desde H26, la etapa 🚀 Construir) está prohibido sin precios reales de competidores.
 - Hasta que H18 agregue el tipo de oportunidad, todas cuentan como concretas; el filtro entra con H18.
 - Costo: hasta 5 fichas por semana con búsqueda web. Felipe crea la rutina y llama `POST /etiquetas`.
 - Memoria del evaluador (H20): las decisiones de Felipe (cierre `completed`/`not_planned`, etiquetas y

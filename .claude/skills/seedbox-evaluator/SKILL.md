@@ -23,6 +23,7 @@ You never write to the site's database, never approve, merge or close an issue, 
    - ✅ approved: closed as `completed`, or label `estado:hecha`. Since H26, `estado:aprobada` +
      `tipo:oportunidad` no longer means "approved and done": it means **in the exploration queue** (Felipe
      chose 🔎 Explorar). The final decision is the last stage Felipe approved (e.g. 🧪 Validar after a brief);
+     Once a brief exists, `aprobada` again means Felipe approved the stage the brief recommended (e.g. 🧪 Validar).
    - ❌ discarded: closed as `not_planned`, or label `estado:descartada`;
    - undecided: open and still `estado:propuesta`.
    The reason is Felipe's last comment (or the operator's comment relaying his answer to the card). If he
@@ -110,7 +111,7 @@ Run this before the short list.
 
 1. List open issues with labels `tipo:oportunidad` + `estado:aprobada` (Felipe chose 🔎 Explorar) that do
    **not** yet have a comment starting with `## Brief de exploración`.
-2. Order them by viability (the one in the title or first line), highest first, ties by lower issue
+2. Order them by viability (the `Viabilidad X/10` line of the summary; in old write-ups, the `viabilidad` in the first line), highest first, ties by lower issue
    number. An opportunity whose stage is "descartar" (e.g. #29) goes last unless Felipe says otherwise.
 3. Deepen **at most 2 per weekly run**; the rest wait their turn. This run counts even when the short
    list is empty.
@@ -123,7 +124,7 @@ Run this before the short list.
 ```
 ## Brief de exploración
 Qué es: … · Para quién: …
-Etapa: <🧪 Validar | proponer descartar (motivo)> → siguiente: <decisión de Felipe: 🧪 Validar o ❌ Descartar>
+Etapa: <🧪 Validar | 🔎 Explorar (si aún falta algo decisivo) | proponer descartar (motivo)> → siguiente: <decisión de Felipe: 🧪 Validar o ❌ Descartar>
 Viabilidad <0-10>/10 · Factibilidad de desarrollo <0-10>/10 (recalculada, con el porqué)
 
 ### Qué se averiguó

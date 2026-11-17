@@ -47,3 +47,14 @@ una en el tablero.
   motivo en comentarios de los issues `tipo:oportunidad`) se resumen en `docs/preferencias.md`, que el
   evaluador actualiza por PR. No repite ideas descartadas salvo evidencia nueva declarada en la ficha, y
   los cambios a `DEFAULT_WEIGHTS` sólo se proponen por issue (`riesgo:alto`), nunca se editan.
+
+## Cambios (H26)
+
+- El veredicto «construir / investigar más / descartar» pasa a **etapa**: 🔎 Explorar, 🧪 Validar,
+  🚀 Construir (o proponer descartar con motivo). «Construir» conserva la regla: tres criterios ≥ 6 y precios
+  reales con link. «Validar» exige precios reales y un hueco claro.
+- Cada ficha y cada brief abren con un resumen de 3 líneas, con viabilidad y factibilidad de desarrollo (0–10).
+- Cola de exploración: las fichas `tipo:oportunidad` + `estado:aprobada` (Felipe eligió 🔎 Explorar) se
+  profundizan como mucho 2 por corrida, por viabilidad; el evaluador deja un `## Brief de exploración` y pasa
+  la ficha a `estado:propuesta` para la tarjeta 🧪 Validar / ❌ Descartar.
+- No cambia la arquitectura: sólo el skill y `OPERACION.md`.

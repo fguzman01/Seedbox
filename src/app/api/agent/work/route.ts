@@ -1,6 +1,7 @@
 import { connection } from "next/server";
 import {
   clampLimit,
+  clampMinNonTech,
   clampShortlistLimit,
   getAgentStatus,
   getAgentWork,
@@ -14,7 +15,7 @@ import { clampStatsDays, getAgentStats } from "@/lib/agent-stats";
 import { getDb } from "@/lib/db/client";
 import { rejectUnauthorized } from "../guard";
 
-/** GET /api/agent/work?kind=status|extract|cluster|assess|shortlist|stats&limit=N&exclude=1,2 (shortlist only)&days=N (stats only, read-only) (ADR-0008). */
+/** GET /api/agent/work?kind=status|extract|cluster|assess|shortlist|stats&limit=N&exclude=1,2&minNonTech=N (shortlist only)&days=N (stats only, read-only) (ADR-0008). */
 export async function GET(request: Request) {
   await connection();
   const rejected = rejectUnauthorized(request);
@@ -25,7 +26,7 @@ export async function GET(request: Request) {
   if (kind === "status") return Response.json(await getAgentStatus(getDb()));
   if (kind === "stats") return Response.json(await getAgentStats(getDb(), clampStatsDays(params.get("days"))));
   if (kind === SHORTLIST_KIND) {
-    return Response.json(await getShortlistWork(getDb(), clampShortlistLimit(params.get("limit")), parseExcludeIds(params.get("exclude"))));
+    return Response.json(await getShortlistWork(getDb(), clampShortlistLimit(params.get("limit")), parseExcludeIds(params.get("exclude")), clampMinNonTech(params.get("minNonTech"))));
   }
   if (!(WORK_KINDS as readonly string[]).includes(kind)) {
     return Response.json({ error: `kind must be status, ${WORK_KINDS.join(", ")}, ${SHORTLIST_KIND}, stats` }, { status: 400 });

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   agentResultsSchema,
   clampLimit,
+  clampMinNonTech,
   clampShortlistLimit,
   getAgentStatus,
   getAssessWork,
@@ -49,6 +50,15 @@ describe("clampLimit and the results schema", () => {
   it("parses the exclude ids, ignoring junk", () => {
     expect(parseExcludeIds(null)).toEqual([]);
     expect(parseExcludeIds("3, 7,x,-1,2.5,0,9")).toEqual([3, 7, 9]);
+  });
+
+  it("parses minNonTech: default 2, clamped to 0..5, garbage falls back (H27)", () => {
+    expect(clampMinNonTech(null)).toBe(2);
+    expect(clampMinNonTech("0")).toBe(0);
+    expect(clampMinNonTech("3")).toBe(3);
+    expect(clampMinNonTech("99")).toBe(5);
+    expect(clampMinNonTech("-1")).toBe(2);
+    expect(clampMinNonTech("x")).toBe(2);
   });
 
   it("caps the shortlist at 5 (H19)", () => {
@@ -233,6 +243,7 @@ describe.skipIf(!testDatabaseUrl)("getShortlistWork (database)", () => {
     const work = await getShortlistWork(db, 5);
 
     expect(work.kind).toBe("shortlist");
+    expect(work.quota).toEqual({ minNonTech: 2, nonTechCount: 1, shortfall: 1 });
     expect(work.items.map((i) => i.id)).toEqual([o.id]);
     expect(work.items[0].pains.map((p) => p.url).sort()).toEqual(["https://news.example/a", "https://news.example/b"]);
   });

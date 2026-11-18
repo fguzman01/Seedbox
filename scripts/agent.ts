@@ -12,7 +12,7 @@ try {
  *
  *   npm run agent -- status
  *   npm run agent -- work extract|cluster|assess [--limit N]   → writes .agent/<kind>.work.json
- *   npm run agent -- work shortlist [--limit N] [--exclude 1,2]                 → .agent/shortlist.work.json (read-only, H19)
+ *   npm run agent -- work shortlist [--limit N] [--exclude 1,2] [--minNonTech N]                 → .agent/shortlist.work.json (read-only, H19)
  *   npm run agent -- stats [--days N]                           → .agent/stats.work.json (read-only counts per source and vertical, H25)
  *   npm run agent -- submit extract|cluster|assess <file>      → posts the results file
  */
@@ -49,6 +49,7 @@ async function main() {
       limit: { type: "string" },
       days: { type: "string" },
       exclude: { type: "string" },
+      minNonTech: { type: "string" },
       model: { type: "string", default: process.env.SEEDBOX_AGENT_MODEL ?? "claude-code" },
     },
   });
@@ -75,12 +76,15 @@ async function main() {
     const query = new URLSearchParams({ kind });
     if (values.limit) query.set("limit", values.limit);
     if (values.exclude && kind === "shortlist") query.set("exclude", values.exclude);
+    if (values.minNonTech && kind === "shortlist") query.set("minNonTech", values.minNonTech);
     const work = await call(`/api/agent/work?${query}`);
     await mkdir(WORK_DIR, { recursive: true });
     const out = path.join(WORK_DIR, `${kind}.work.json`);
     await writeFile(out, JSON.stringify(work, null, 2) + "\n");
     const items = (work.items ?? work.pains ?? []) as unknown[];
     console.log(`${items.length} ${kind} item(s) written to ${out}`);
+    const shortfall = Number((work.quota as { shortfall?: number } | undefined)?.shortfall ?? 0);
+    if (shortfall > 0) console.log(`non-tech quota short by ${shortfall}: the input is still biased toward devtools`);
     return;
   }
 

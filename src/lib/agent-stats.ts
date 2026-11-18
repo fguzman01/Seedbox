@@ -44,7 +44,7 @@ export async function getAgentStats(db: Database, days = MIX_DAYS, now = new Dat
       .innerJoin(opportunities, eq(pains.opportunityId, opportunities.id))
       .where(gte(opportunities.createdAt, since))
       .groupBy(pains.vertical),
-    getShortlist(db),
+    getShortlist(db).then((result) => result.items),
   ]);
   const mix = buildSourceMix({ knownSources: SOURCE_IDS, signalRows, painRows, lastRuns, days });
 

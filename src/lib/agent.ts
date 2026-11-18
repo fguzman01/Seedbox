@@ -9,7 +9,7 @@ import { agentDeliveries, opportunities, pains, signals } from "./db/schema";
 import { EXTRACTION_RULES, keepVerifiedPains } from "./extraction";
 import { extractedPainSchema } from "./pains";
 import { getPendingSignals, saveExtraction } from "./process";
-import { getShortlist, SHORTLIST_MAX } from "./shortlist";
+import { DEFAULT_MIN_NON_TECH, getShortlist, SHORTLIST_MAX } from "./shortlist";
 import { DOMAINS } from "./sources/types";
 
 /**
@@ -90,8 +90,17 @@ export function parseExcludeIds(param: string | null): number[] {
     .slice(0, 500);
 }
 
-export async function getShortlistWork(db: Database, limit: number, exclude: number[] = []) {
-  return { kind: SHORTLIST_KIND, items: await getShortlist(db, limit, exclude) };
+/** `minNonTech` from the URL: a non-negative integer up to SHORTLIST_MAX; anything else uses the default (H27). */
+export function clampMinNonTech(requested: unknown): number {
+  if (requested === null || requested === undefined || requested === "") return DEFAULT_MIN_NON_TECH;
+  const n = Number(requested);
+  if (!Number.isInteger(n) || n < 0) return DEFAULT_MIN_NON_TECH;
+  return Math.min(n, SHORTLIST_MAX);
+}
+
+export async function getShortlistWork(db: Database, limit: number, exclude: number[] = [], minNonTech = DEFAULT_MIN_NON_TECH) {
+  const { items, quota } = await getShortlist(db, limit, exclude, minNonTech);
+  return { kind: SHORTLIST_KIND, items, quota };
 }
 
 export function getAgentWork(db: Database, kind: WorkKind, limit: number) {

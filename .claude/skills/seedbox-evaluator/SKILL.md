@@ -36,7 +36,9 @@ You never write to the site's database, never approve, merge or close an issue, 
 5. `npm run agent -- work shortlist --exclude <ids comma-separated>` (omit `--exclude` if none) writes
    `.agent/shortlist.work.json`: up to 5 opportunities, not in your list, that are assessed (competition
    and buildability) and have non-weak evidence (H12), ordered by total score. Each has its pains with
-   quote, source and link. Empty list → say so and stop (nothing new to write up this week).
+   quote, source and link. The file also has `quota` (H27): at least `quota.minNonTech` slots go to
+   opportunities outside devtools; if `quota.shortfall` > 0, say in your summary how many non-tech ones
+   were missing (the input is still biased) instead of padding the list. Empty list → say so and stop (nothing new to write up this week).
 6. **Do not repeat discarded ideas:** compare each candidate by vertical, problem and affected group
    against the ❌ rows of the table. If it matches and there are no new pains since the discard date,
    skip it (and say so in the summary). If there is new evidence, write it up and open the write-up with

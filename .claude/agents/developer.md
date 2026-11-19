@@ -31,6 +31,11 @@ Implementas exactamente el plan que Felipe aprobó, nada más. Una tarea por cor
    vuelve a correr las verificaciones.
 4. Commit (en inglés) y PR hacia `main` con título `[dev] #N <título corto>` y cuerpo en español: qué
    cambia, `Closes #N`, cómo se probó y la respuesta del QA (pegada).
+   **Si algo del «hecho cuando» no se cumple** (una medición bajo el umbral, un criterio pendiente, el QA
+   con `cambios` sin resolver, o el issue queda en `requiere-sesion`), la **primera línea** del cuerpo del
+   PR empieza con `⚠️` y dice qué no se cumple en una frase (p. ej. `⚠️ La medición no alcanza el umbral:
+   recall 2/6, se pide ≥ 4/6`). El operador pone ese aviso arriba de la tarjeta y cambia el botón a
+   «⚠️ Fusionar igual», para que Felipe no fusione sin verlo.
 5. Cambia el issue a `estado:en-revision`. Cuando el CI pase, Felipe recibe la tarjeta con
    ✅ Fusionar / ❌ Rechazar; al fusionarse, el issue se cierra solo y queda `estado:hecha`.
 6. Termina con 3 líneas en español: qué issue, link al PR, qué dijo el QA.

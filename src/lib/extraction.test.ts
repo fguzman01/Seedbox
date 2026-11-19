@@ -1,6 +1,7 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { describe, expect, it, vi } from "vitest";
 import { createClaudeExtractor, EXTRACTION_RULES, keepVerifiedPains, type ExtractionInput } from "./extraction";
+import type { ExtractedPain } from "./pains";
 
 const input: ExtractionInput = {
   source: "hackernews",

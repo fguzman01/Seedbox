@@ -419,6 +419,23 @@ Línea base v1 con Claude Code, extracción ciega: concretos con precisión 40 %
 dolores "de más", 4 son esos posts que Felipe dejó sin dolor. Resultados en
 `evals/extraction/results/2026-11-05T18-39-21-630Z-claude-code.json`.
 
+Medición H18a (2026-11-19, issue #14), reglas de ADR-0012 §2, dataset v1, extracción ciega con
+Claude Code (un subagente de contexto limpio por corrida, sin etiquetas). **No alcanza el umbral**
+de ADR-0012 §8 (recall de concretos con tipo correcto ≥ 4/6): quedó en 2/6 las dos veces, por lo
+que la parte queda en `requiere-sesion` para ajustar reglas.
+
+| Corrida | Concretos precisión | Concretos recall | Recall con tipo correcto | Latentes precisión / recall | `typeAccuracy` |
+|---|---|---|---|---|---|
+| 1 | 43 % (3/7) | 50 % (3/6) | 33 % (2/6) | 50 % (1/2) / 17 % (1/6) | 75 % |
+| 2 | 43 % (3/7) | 50 % (3/6) | 33 % (2/6) | 67 % (2/3) / 33 % (2/6) | 80 % |
+
+La precisión cumple (≥ 35 %); falla el recall. Los concretos que se pierden son preguntas
+tipo «Ask HN» sin una persona afectada explícita (alternativas a modelos, modelos de
+autocompletado). Ojo: cada corrida fue rápida (~25 s), a menor esfuerzo que el análisis diario;
+conviene repetir la medición en una sesión de Felipe antes de tocar las reglas. Resultados en
+`evals/extraction/results/2026-11-19T04-51-43-912Z-claude-code.json` y
+`…T04-52-21-660Z-claude-code.json`.
+
 ### H18. Extraer necesidades latentes y mostrarlas aparte · M · ⬜ pendiente
 **Como** usuario **quiero** que el radar capte también las necesidades latentes que se repiten
 (p. ej. la desorientación laboral frente a la IA) y me las muestre separadas de los dolores

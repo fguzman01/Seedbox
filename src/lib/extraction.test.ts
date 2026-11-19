@@ -1,7 +1,6 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { describe, expect, it, vi } from "vitest";
-import { createClaudeExtractor, keepVerifiedPains, type ExtractionInput } from "./extraction";
-import type { ExtractedPain } from "./pains";
+import { createClaudeExtractor, EXTRACTION_RULES, keepVerifiedPains, type ExtractionInput } from "./extraction";
 
 const input: ExtractionInput = {
   source: "hackernews",
@@ -10,6 +9,7 @@ const input: ExtractionInput = {
 };
 
 const pain: ExtractedPain = {
+  type: "concrete",
   description: "Las agencias pequeñas no encuentran una herramienta de facturación simple y barata.",
   persona: "dueños de agencias pequeñas",
   quote: "Every tool I tried is either too expensive or built for accountants.",
@@ -39,6 +39,22 @@ function fakeClient(response: { stop_reason?: string; parsed_output?: unknown })
   const parse = vi.fn(async (_params: ParseParams) => ({ usage, ...response }));
   return { client: { beta: { messages: { parse } } } as unknown as Anthropic, parse };
 }
+
+describe("EXTRACTION_RULES (ADR-0012)", () => {
+  it("defines both pain types, excludes topic-only posts and no longer asks for recurrence", () => {
+    expect(EXTRACTION_RULES).toContain('"concrete"');
+    expect(EXTRACTION_RULES).toContain('"latent"');
+    expect(EXTRACTION_RULES).toContain("is a topic, not a latent pain");
+    expect(EXTRACTION_RULES).toContain("calls to action");
+    expect(EXTRACTION_RULES).not.toMatch(/recurring problem/);
+    expect(EXTRACTION_RULES).toContain("Do not judge how common the pain is");
+  });
+
+  it("keeps the verbatim-quote check for latent pains too", () => {
+    const latent: ExtractedPain = { ...pain, type: "latent" };
+    expect(keepVerifiedPains(input, [latent, { ...latent, quote: "invented" }])).toEqual([latent]);
+  });
+});
 
 describe("keepVerifiedPains", () => {
   it("keeps pains whose quote appears in the post, ignoring case, spacing and quote style", () => {

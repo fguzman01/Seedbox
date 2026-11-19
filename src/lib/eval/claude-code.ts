@@ -1,7 +1,8 @@
 import { z } from "zod";
 import { EXTRACTION_RULES, keepVerifiedPains } from "../extraction";
-import { extractedPainSchema, type ExtractedPain } from "../pains";
+import { PAIN_TYPES, extractedPainSchema } from "../pains";
 import type { EvalItem, LabeledEvalItem } from "./dataset";
+import type { ScoredPain } from "./metrics";
 import type { EvalExtractor } from "./run";
 
 /**
@@ -41,7 +42,8 @@ export const evalResultsSchema = z.object({
   results: z.array(
     z.object({
       signalId: z.string().min(1),
-      pains: z.array(extractedPainSchema).max(20),
+      // The type is optional here so result files from before H18 still read (ADR-0012 §2).
+      pains: z.array(extractedPainSchema.extend({ type: z.enum(PAIN_TYPES).optional() })).max(20),
     }),
   ),
 });
@@ -49,7 +51,7 @@ export const evalResultsSchema = z.object({
 export class EvalResultsError extends Error {}
 
 /** Parses a results file into a map by dataset id, rejecting invalid or duplicated entries. */
-export function parseEvalResults(content: string): Map<string, ExtractedPain[]> {
+export function parseEvalResults(content: string): Map<string, ScoredPain[]> {
   let json: unknown;
   try {
     json = JSON.parse(content);
@@ -61,7 +63,7 @@ export function parseEvalResults(content: string): Map<string, ExtractedPain[]> 
     const issues = parsed.error.issues.map((i) => `${i.path.join(".") || "(root)"}: ${i.message}`);
     throw new EvalResultsError(`Invalid results:\n  ${issues.join("\n  ")}`);
   }
-  const byId = new Map<string, ExtractedPain[]>();
+  const byId = new Map<string, ScoredPain[]>();
   for (const { signalId, pains } of parsed.data.results) {
     if (byId.has(signalId)) throw new EvalResultsError(`Duplicated result for ${signalId}`);
     byId.set(signalId, pains);
@@ -71,7 +73,7 @@ export function parseEvalResults(content: string): Map<string, ExtractedPain[]> 
 
 export interface ResultsExtractor extends EvalExtractor {
   /** Pains dropped because their quote is not verbatim in the post, by dataset id. */
-  unverified: Record<string, ExtractedPain[]>;
+  unverified: Record<string, ScoredPain[]>;
 }
 
 /**
@@ -79,10 +81,10 @@ export interface ResultsExtractor extends EvalExtractor {
  * production (verbatim quotes). Posts without a result fail, so they count as failed.
  */
 export function createResultsExtractor(
-  results: Map<string, ExtractedPain[]>,
+  results: Map<string, ScoredPain[]>,
   model = CLAUDE_CODE_MODEL,
 ): ResultsExtractor {
-  const unverified: Record<string, ExtractedPain[]> = {};
+  const unverified: Record<string, ScoredPain[]> = {};
   return {
     model,
     unverified,

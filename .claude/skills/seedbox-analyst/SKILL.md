@@ -60,12 +60,22 @@ marked as discarded and not handed out again.
       "signalId": 12,
       "pains": [
         {
+          "type": "concrete",
           "description": "Las agencias pequeñas facturan con planillas porque las herramientas son caras.",
           "persona": "dueños de agencias de 2 a 10 personas",
           "quote": "Every tool I tried is either too expensive or built for accountants.",
           "vertical": "freelance",
           "intensity": "medium",
           "willingness_to_pay": "explicit"
+        },
+        {
+          "type": "latent",
+          "description": "Los diseñadores con años de oficio no saben qué habilidades invertir para seguir vigentes.",
+          "persona": "diseñadores gráficos con más de 10 años de experiencia",
+          "quote": "I keep wondering which of my skills will still matter in three years.",
+          "vertical": "career",
+          "intensity": "medium",
+          "willingness_to_pay": "none"
         }
       ]
     },
@@ -74,6 +84,8 @@ marked as discarded and not handed out again.
 }
 ```
 
+- `type` is **required** (`concrete` or `latent`); the `rules` field defines both. Without it the
+  API answers 400 and names the field. When a post has no pain of either type, send `"pains": []`.
 - `quote` must be copied **verbatim** from the post's title or body; anything else is dropped.
 - `vertical`: smb, freelance, devtools, productivity, finance, health, education, marketing,
   ecommerce, hr, career, legal, real_estate, logistics, consumer, other. `career` is for
@@ -96,7 +108,7 @@ marked as discarded and not handed out again.
 }
 ```
 
-Assign **every** pain of the batch exactly once: `o<id>` for an opportunity of the `catalog`,
+Assign **every** pain of the batch exactly once (the batch is concrete pains only for now; latent pains wait unclustered until H18b): `o<id>` for an opportunity of the `catalog`,
 `n<k>` for a new one you define in `new_opportunities`.
 
 ### assess

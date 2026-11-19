@@ -38,7 +38,7 @@ export function clampLimit(kind: WorkKind, requested: unknown): number {
 export async function getAgentStatus(db: Database) {
   const [[pending], [unclustered], due] = await Promise.all([
     db.select({ n: count() }).from(signals).where(eq(signals.status, "pending")),
-    db.select({ n: count() }).from(pains).where(isNull(pains.opportunityId)),
+    db.select({ n: count() }).from(pains).where(and(isNull(pains.opportunityId), eq(pains.type, "concrete"))),
     getDueOpportunities(db, WORK_LIMITS.assess.max),
   ]);
   return {

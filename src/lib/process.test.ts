@@ -7,6 +7,7 @@ import { getPendingSignals, processPendingSignals } from "./process";
 import { testDatabaseUrl, useTestDb } from "./test-db";
 
 const pain: ExtractedPain = {
+  type: "concrete",
   description: "Facturar es lento",
   persona: "agencias",
   quote: "invoices",
@@ -63,6 +64,7 @@ describe.skipIf(!testDatabaseUrl)("processPendingSignals (database)", () => {
     const stored = await db.select().from(pains).where(eq(pains.signalId, rows[0].id));
     expect(stored).toHaveLength(2);
     expect(stored[0]).toMatchObject({
+      type: "concrete",
       description: "Facturar es lento",
       persona: "agencias",
       quote: "invoices",

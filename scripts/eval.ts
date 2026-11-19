@@ -92,10 +92,11 @@ Posts evaluated     ${summary.items} (failed: ${summary.failed})
 Labels              ${labels || "—"}
 Has pain? precision ${pct(summary.post.precision)}   recall ${pct(summary.post.recall)}   accuracy ${pct(summary.post.accuracy)} (concrete pains)
 Concrete  precision ${pct(concrete.precision)} (${concrete.matched}/${concrete.extracted})   recall ${pct(concrete.recall)} (${concrete.matched}/${concrete.expected})
+Concrete  recall with the right type ${pct(concrete.recallSameType)} (${concrete.matchedSameType}/${concrete.expected})
 Latent    precision ${pct(latent.precision)} (${latent.matched}/${latent.extracted})   recall ${pct(latent.recall)} (${latent.matched}/${latent.expected})
 All pains precision ${pct(summary.pain.precision)}   recall ${pct(summary.pain.recall)}
 Vertical  accuracy  ${pct(summary.verticalAccuracy)} (of matched pains)
-Type      accuracy  ${summary.typeAccuracy === null ? "— (the extraction gives no type)" : `${pct(summary.typeAccuracy)} (of matched pains with a type)`}
+Type      accuracy  ${summary.typeAccuracy === null ? "— (no matched pain has a type)" : `${pct(summary.typeAccuracy)} (of matched pains with a type)`}
 Cost                ${run.costUsd === null ? (fromResults ? "— (subscription)" : "unknown model price") : `$${run.costUsd.toFixed(4)}`} (${run.usage.inputTokens} in / ${run.usage.outputTokens} out / ${run.usage.cacheReadTokens} cached)
 Avg latency         ${run.avgLatencyMs === null ? "—" : `${(run.avgLatencyMs / 1000).toFixed(1)}s`}`);
 

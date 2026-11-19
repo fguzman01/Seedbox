@@ -25,7 +25,7 @@ export const VERTICALS = Object.keys(VERTICAL_LABELS) as [Vertical, ...Vertical[
 
 /**
  * Kinds of pain (H17): a concrete task or situation that fails, or a latent, sustained need
- * without a failing task. The extraction does not produce a type yet (H18); evaluation labels do.
+ * without a failing task. The extraction produces a type for every pain (H18, ADR-0012).
  */
 export const PAIN_TYPES = ["concrete", "latent"] as const;
 export type PainType = (typeof PAIN_TYPES)[number];
@@ -43,6 +43,9 @@ export const INTENSITY_LABELS = { low: "Leve", medium: "Moderado", high: "Fuerte
 export const WTP_LABELS = { none: null, implied: "Pago implícito", explicit: "Pagaría" } as const;
 
 export const extractedPainSchema = z.object({
+  type: z
+    .enum(PAIN_TYPES)
+    .describe("concrete: a task or situation that fails; latent: a sustained state or need without a failing task."),
   description: z
     .string()
     .describe("The problem in one or two sentences, written in Spanish, without proposing a solution."),

@@ -55,6 +55,7 @@ export async function saveExtraction(
       await tx.insert(pains).values(
         extracted.map((p) => ({
           signalId,
+          type: p.type,
           description: p.description,
           persona: p.persona,
           quote: p.quote,

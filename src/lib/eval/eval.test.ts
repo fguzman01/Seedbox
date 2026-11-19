@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { PainExtractor } from "../extraction";
-import { painType, VERTICALS, type ExtractedPain } from "../pains";
+import { painType, VERTICALS } from "../pains";
 import { estimateCost, sumUsage } from "./cost";
 import {
   countLabelVersions,
@@ -26,7 +26,7 @@ const item: LabeledEvalItem = {
   ],
 };
 
-function extracted(quote: string, vertical: ExtractedPain["vertical"] = "freelance"): ExtractedPain {
+function extracted(quote: string, vertical: ScoredPain["vertical"] = "freelance"): ScoredPain {
   return {
     description: "d",
     persona: "p",
@@ -87,16 +87,30 @@ describe("scoreItem by pain type", () => {
       extracted("chasing late payments eats my Fridays", "finance"),
     ]);
     expect(score.byType).toEqual({
-      concrete: { expected: 1, extracted: 1, matched: 1 },
-      latent: { expected: 1, extracted: 1, matched: 1 },
+      concrete: { expected: 1, extracted: 1, matched: 1, matchedSameType: 1 },
+      // Untyped counts as concrete, so it is not a latent hit with the right type.
+      latent: { expected: 1, extracted: 1, matched: 1, matchedSameType: 0 },
     });
     expect(score).toMatchObject({ matched: 2, typed: 0, typeCorrect: 0 });
   });
 
+  it("counts a concrete pain typed as latent as found but with the wrong type", () => {
+    const score = scoreItem(mixed, [
+      { ...extracted("Every tool I tried is too expensive"), type: "latent" },
+      { ...extracted("chasing late payments eats my Fridays", "finance"), type: "latent" },
+    ]);
+    expect(score.byType.concrete).toEqual({ expected: 1, extracted: 1, matched: 1, matchedSameType: 0 });
+    expect(score.byType.latent).toEqual({ expected: 1, extracted: 1, matched: 1, matchedSameType: 1 });
+    expect(score).toMatchObject({ typed: 2, typeCorrect: 1 });
+    const summary = summarize([score]);
+    expect(summary.byType.concrete).toMatchObject({ recall: 1, recallSameType: 0 });
+    expect(summary.typeAccuracy).toBe(0.5);
+  });
+
   it("does not count unmatched latent labels against concrete pains", () => {
     const score = scoreItem(mixed, [extracted("Every tool I tried is too expensive")]);
-    expect(score.byType.concrete).toEqual({ expected: 1, extracted: 1, matched: 1 });
-    expect(score.byType.latent).toEqual({ expected: 1, extracted: 0, matched: 0 });
+    expect(score.byType.concrete).toEqual({ expected: 1, extracted: 1, matched: 1, matchedSameType: 1 });
+    expect(score.byType.latent).toEqual({ expected: 1, extracted: 0, matched: 0, matchedSameType: 0 });
     expect(score.missed).toEqual([mixed.expected[1]]);
   });
 
@@ -153,15 +167,19 @@ describe("summarize", () => {
       expected: 2,
       extracted: 1,
       matched: 1,
+      matchedSameType: 1,
       precision: 1,
       recall: 0.5,
+      recallSameType: 0.5,
     });
     expect(summary.byType.latent).toEqual({
       expected: 2,
       extracted: 1,
       matched: 1,
+      matchedSameType: 0,
       precision: 1,
       recall: 0.5,
+      recallSameType: 0,
     });
     expect(summary.post).toEqual({ precision: 1, recall: 1, accuracy: 1 });
     expect(summary.pain).toEqual({ precision: 1, recall: 0.5 });
@@ -277,7 +295,7 @@ describe("runEval", () => {
       async extract(input) {
         if ((input as LabeledEvalItem).id === "boom") throw new Error("API down");
         return {
-          pains: [extracted("Every tool I tried is too expensive")],
+          pains: [{ ...extracted("Every tool I tried is too expensive"), type: "concrete" as const }],
           usage: { inputTokens: 1000, outputTokens: 100, cacheReadTokens: 0, cacheWriteTokens: 0 },
         };
       },

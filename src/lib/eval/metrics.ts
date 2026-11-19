@@ -20,10 +20,10 @@ export function quotesMatch(a: string, b: string, minOverlap = 0.6): boolean {
 }
 
 /**
- * An extracted pain as scored. The extraction does not produce a type yet (H18): a pain without
- * a type counts as concrete.
+ * An extracted pain as scored. Production extraction always has a type (H18); result files from
+ * before that may not, and such a pain counts as concrete.
  */
-export type ScoredPain = ExtractedPain & { type?: PainType };
+export type ScoredPain = Omit<ExtractedPain, "type"> & { type?: PainType };
 
 export interface TypeCounts {
   /** Labeled pains of this type. */
@@ -32,6 +32,8 @@ export interface TypeCounts {
   extracted: number;
   /** Labeled pains of this type found by the extractor. */
   matched: number;
+  /** Labeled pains of this type found and typed with the same type by the extractor (untyped counts as concrete). */
+  matchedSameType: number;
 }
 
 export interface ItemScore {
@@ -42,7 +44,7 @@ export interface ItemScore {
   matched: number;
   /** Matched pains whose vertical is also right. */
   verticalCorrect: number;
-  /** Matched pains whose extracted pain has a type of its own (none until H18). */
+  /** Matched pains whose extracted pain has a type of its own. */
   typed: number;
   /** Typed matched pains whose type is also right. */
   typeCorrect: number;
@@ -52,8 +54,8 @@ export interface ItemScore {
 }
 
 const emptyCounts = (): Record<PainType, TypeCounts> => ({
-  concrete: { expected: 0, extracted: 0, matched: 0 },
-  latent: { expected: 0, extracted: 0, matched: 0 },
+  concrete: { expected: 0, extracted: 0, matched: 0, matchedSameType: 0 },
+  latent: { expected: 0, extracted: 0, matched: 0, matchedSameType: 0 },
 });
 
 /**
@@ -86,6 +88,7 @@ export function scoreItem(item: LabeledEvalItem, extracted: ScoredPain[]): ItemS
     matched++;
     byType[type].matched++;
     byType[type].extracted++;
+    if (painType(found) === type) byType[type].matchedSameType++;
     if (found.vertical === expected.vertical) verticalCorrect++;
     if (found.type) {
       typed++;
@@ -124,9 +127,9 @@ export interface EvalSummary {
   /** Pain level, all types together (the metric before H17). */
   pain: PrecisionRecall;
   /** Pain level, by type of the label (see TypeCounts for what counts as extracted). */
-  byType: Record<PainType, PrecisionRecall & TypeCounts>;
+  byType: Record<PainType, PrecisionRecall & TypeCounts & { recallSameType: number | null }>;
   verticalAccuracy: number | null;
-  /** Of matched pains with an extracted type, how many have the right one; null until H18. */
+  /** Of matched pains with an extracted type, how many have the right one; null when none is typed. */
   typeAccuracy: number | null;
 }
 
@@ -162,6 +165,7 @@ export function summarize(scores: ItemScore[], failed = 0): EvalSummary {
       totals[type].expected += s.byType[type].expected;
       totals[type].extracted += s.byType[type].extracted;
       totals[type].matched += s.byType[type].matched;
+      totals[type].matchedSameType += s.byType[type].matchedSameType;
     }
   }
 
@@ -169,6 +173,8 @@ export function summarize(scores: ItemScore[], failed = 0): EvalSummary {
     ...totals[type],
     precision: ratio(totals[type].matched, totals[type].extracted),
     recall: ratio(totals[type].matched, totals[type].expected),
+    /** Recall counting only hits whose extracted type is also right (what H18 is measured on). */
+    recallSameType: ratio(totals[type].matchedSameType, totals[type].expected),
   });
 
   return {

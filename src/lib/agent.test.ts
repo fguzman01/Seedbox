@@ -19,6 +19,7 @@ import type { ExtractedPain } from "./pains";
 import { testDatabaseUrl, useTestDb } from "./test-db";
 
 const pain = (quote: string): ExtractedPain => ({
+  type: "concrete",
   description: "Facturar es lento",
   persona: "agencias",
   quote,
@@ -81,6 +82,18 @@ describe("clampLimit and the results schema", () => {
     expect(agentResultsSchema.safeParse({ kind: "extract", model: "bad model!", results: [] }).success).toBe(false);
     expect(agentResultsSchema.safeParse({ kind: "assess", results: [] }).success).toBe(true);
   });
+
+  it("requires the pain type in extract results and names the field (H18)", () => {
+    const untyped: Record<string, unknown> = { ...pain("q") };
+    delete untyped.type;
+    const parsed = agentResultsSchema.safeParse({
+      kind: "extract",
+      results: [{ signalId: 1, pains: [untyped] }],
+    });
+    expect(parsed.success).toBe(false);
+    expect(parsed.error?.issues.map((i) => i.path.join("."))).toContain("results.0.pains.0.type");
+    expect(agentResultsSchema.safeParse({ kind: "extract", results: [{ signalId: 1, pains: [{ ...untyped, type: "latent" }] }] }).success).toBe(true);
+  });
 });
 
 describe.skipIf(!testDatabaseUrl)("agent work exchange (database)", () => {
@@ -128,6 +141,31 @@ describe.skipIf(!testDatabaseUrl)("agent work exchange (database)", () => {
     expect(stored).toHaveLength(1);
     expect(stored[0]).toMatchObject({ signalId: a.id, quote: "too expensive for us", model: "claude-code" });
     expect(await getAgentStatus(db)).toMatchObject({ extract: 0, cluster: 1 });
+  });
+
+  it("stores the type and keeps latent pains out of clustering until H18b", async () => {
+    const a = await seedSignal("a", "Every invoicing tool is too expensive for us.");
+    await submitAgentResults(db, {
+      kind: "extract",
+      results: [
+        {
+          signalId: a.id,
+          pains: [
+            pain("too expensive for us"),
+            { ...pain("invoicing tool"), type: "latent" },
+            { ...pain("an invented quote"), type: "latent" },
+          ],
+        },
+      ],
+    });
+    const stored = await db.select().from(pains).orderBy(pains.id);
+    expect(stored.map((p) => [p.quote, p.type])).toEqual([
+      ["too expensive for us", "concrete"],
+      ["invoicing tool", "latent"],
+    ]);
+    expect(await getAgentStatus(db)).toMatchObject({ cluster: 1 });
+    const work = await getClusterWork(db, 10);
+    expect(work.pains.map((p) => p.quote)).toEqual(["too expensive for us"]);
   });
 
   it("clusters with the same validation as the API pipeline", async () => {

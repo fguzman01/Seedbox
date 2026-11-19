@@ -1,12 +1,11 @@
-import type { ExtractionInput, ExtractionResult, TokenUsage } from "../extraction";
-import type { ExtractedPain } from "../pains";
+import type { ExtractionInput, TokenUsage } from "../extraction";
 import { estimateCost, sumUsage } from "./cost";
 import { countLabelVersions, type LabeledEvalItem, type LabelVersion } from "./dataset";
-import { scoreItem, summarize, type EvalSummary, type ItemScore } from "./metrics";
+import { scoreItem, summarize, type EvalSummary, type ItemScore, type ScoredPain } from "./metrics";
 
 export interface ItemRun {
   score: ItemScore | null;
-  extracted: ExtractedPain[];
+  extracted: ScoredPain[];
   error: string | null;
   /** null when the extractor does not run live (e.g. results produced offline by Claude Code). */
   latencyMs: number | null;
@@ -30,7 +29,7 @@ export interface EvalRun {
  */
 export interface EvalExtractor {
   model: string;
-  extract(input: ExtractionInput & { id: string }): Promise<ExtractionResult>;
+  extract(input: ExtractionInput & { id: string }): Promise<{ pains: ScoredPain[]; usage?: TokenUsage }>;
 }
 
 export async function runEval(

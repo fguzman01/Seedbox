@@ -1,6 +1,6 @@
+import type { ScoredPain } from "./metrics";
 import { describe, expect, it } from "vitest";
 import { EXTRACTION_RULES } from "../extraction";
-import type { ExtractedPain } from "../pains";
 import {
   buildEvalWork,
   CLAUDE_CODE_MODEL,
@@ -43,7 +43,7 @@ const unanswered: LabeledEvalItem = {
   expected: [{ quote: "double-books rooms every week", vertical: "smb" }],
 };
 
-function pain(quote: string, vertical: ExtractedPain["vertical"] = "freelance"): ExtractedPain {
+function pain(quote: string, vertical: ScoredPain["vertical"] = "freelance"): ScoredPain {
   return { description: "d", persona: "p", quote, vertical, intensity: "medium", willingness_to_pay: "none" };
 }
 
@@ -74,6 +74,17 @@ describe("parseEvalResults", () => {
     );
     expect([...results.keys()]).toEqual(["hackernews:1", "hackernews:2"]);
     expect(results.get("hackernews:1")![0].quote).toBe("Every tool I tried is too expensive");
+  });
+
+  it("reads results without a pain type, as files from before H18 have none", () => {
+    const results = parseEvalResults(
+      JSON.stringify({ results: [{ signalId: "a", pains: [pain("q")] }, { signalId: "b", pains: [{ ...pain("q"), type: "latent" }] }] }),
+    );
+    expect(results.get("a")![0].type).toBeUndefined();
+    expect(results.get("b")![0].type).toBe("latent");
+    expect(() =>
+      parseEvalResults(JSON.stringify({ results: [{ signalId: "a", pains: [{ ...pain("q"), type: "bogus" }] }] })),
+    ).toThrow(EvalResultsError);
   });
 
   it("rejects invalid JSON, invalid pains and duplicated ids", () => {
@@ -121,7 +132,7 @@ describe("createResultsExtractor", () => {
 
 describe("runEval with Claude Code results", () => {
   it("scores the results, counts missing posts as failed and reports no cost or latency", async () => {
-    const results = new Map<string, ExtractedPain[]>([
+    const results = new Map<string, ScoredPain[]>([
       [
         "hackernews:1",
         [

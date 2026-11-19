@@ -27,7 +27,7 @@ medir esa extracción, sin `ANTHROPIC_API_KEY`, el flujo tiene dos pasos:
 npm run eval -- --export                       # escribe .agent/eval.work.json
 npm run eval -- --export --out otro.json --limit 10
 
-# 2. En Claude Code: extrae los dolores de .agent/eval.work.json siguiendo su campo `rules`
+# 2. En Claude Code: extrae los dolores (cada uno con `type`: `concrete` o `latent`) de .agent/eval.work.json siguiendo su campo `rules`
 #    y escribe los resultados en el formato de extract.results.json del skill seedbox-analyst,
 #    con signalId = id del post en el dataset (texto, p. ej. "hackernews:50328896").
 #    Ejemplo: .agent/eval.results.json
@@ -38,7 +38,7 @@ npm run eval -- --from-results .agent/eval.results.json
 
 ```json
 { "results": [
-  { "signalId": "hackernews:50328896", "pains": [ { "description": "…", "persona": "…",
+  { "signalId": "hackernews:50328896", "pains": [ { "type": "concrete", "description": "…", "persona": "…",
     "quote": "…", "vertical": "devtools", "intensity": "medium", "willingness_to_pay": "none" } ] },
   { "signalId": "hackernews:50330001", "pains": [] }
 ] }
@@ -130,7 +130,8 @@ Una línea JSON por post:
 | Latentes precisión / recall | Lo mismo, para dolores latentes |
 | Todos precisión / recall | Las métricas de dolores anteriores a H17, sin distinguir tipo |
 | Vertical | De los dolores encontrados, ¿cuántos tienen la vertical correcta? |
-| Tipo | De los dolores encontrados que la extracción tipificó, ¿cuántos tienen el tipo correcto? (`—` hasta H18) |
+| Concretos recall con tipo correcto | De los concretos etiquetados, ¿cuántos encontró **y** tipificó como concretos? Es el que cuenta para el criterio de H18 (`matchedSameType`) |
+| Tipo | De los dolores encontrados que la extracción tipificó, ¿cuántos tienen el tipo correcto? (`—` si ninguno trae tipo) |
 | Costo | Costo estimado en USD de la corrida (sólo modo API) |
 
 Un dolor extraído coincide con uno etiquetado cuando sus citas se superponen (una contiene a la
@@ -140,16 +141,15 @@ Cómo se cuenta cada tipo:
 
 - Una coincidencia cuenta para el **tipo de la etiqueta**: un dolor extraído que coincide con un
   latente etiquetado es un acierto de latente, no un falso positivo de concreto.
-- Un dolor extraído que no coincide con ninguno cuenta para su propio tipo. La extracción de hoy
-  no produce tipo, así que esos dolores cuentan como **concretos** (falsos positivos de
-  concretos). Cuando la extracción traiga `type` (H18), se usa ese.
+- Un dolor extraído que no coincide con ninguno cuenta para su propio tipo (el `type` que trae
+  desde H18; sin `type`, como en archivos anteriores, cuenta como **concreto**).
 - Los latentes etiquetados que no se encontraron bajan el recall de latentes, **no** son falsos
   negativos de concretos.
 - "¿Tiene dolor?" se calcula sobre concretos: un post tiene dolor si tiene al menos un concreto
   etiquetado, y la IA lo encontró si al menos un dolor extraído cuenta como concreto. Un post con
   sólo latentes etiquetados y sin extracciones es un verdadero negativo.
-- Mientras la extracción no tipifique, la precisión de latentes sólo cuenta coincidencias (es
-  100 % si hay alguna); el dato útil es el recall de latentes.
+- Con resultados sin `type` (archivos anteriores a H18), la precisión de latentes sólo cuenta
+  coincidencias; el dato útil es el recall de latentes.
 - Con etiquetas v0 (sin tipos) concretos y "Todos" dan lo mismo, y "¿Tiene dolor?" coincide con
   la métrica anterior.
 

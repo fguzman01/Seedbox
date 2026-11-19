@@ -9,7 +9,7 @@ import {
   timestamp,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
-import { INTENSITIES, VERTICALS, WILLINGNESS_TO_PAY } from "../pains";
+import { INTENSITIES, PAIN_TYPES, VERTICALS, WILLINGNESS_TO_PAY } from "../pains";
 
 /** Raw items collected from external sources, before AI extraction. */
 export const signals = pgTable(
@@ -44,6 +44,8 @@ export type Signal = typeof signals.$inferSelect;
 export const opportunities = pgTable("opportunities", {
   id: serial("id").primaryKey(),
   domain: text("domain").notNull().default("software"),
+  /** Fixed when the opportunity is created: its pains all share this type (ADR-0012). */
+  type: text("type", { enum: PAIN_TYPES }).notNull().default("concrete"),
   title: text("title").notNull(),
   summary: text("summary").notNull(),
   model: text("model").notNull(),
@@ -79,6 +81,7 @@ export const pains = pgTable(
     signalId: integer("signal_id")
       .notNull()
       .references(() => signals.id, { onDelete: "cascade" }),
+    type: text("type", { enum: PAIN_TYPES }).notNull().default("concrete"),
     description: text("description").notNull(),
     persona: text("persona").notNull(),
     quote: text("quote").notNull(),

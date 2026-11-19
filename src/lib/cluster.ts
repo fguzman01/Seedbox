@@ -7,6 +7,7 @@ import { DOMAINS, type Domain } from "./sources/types";
 
 /** Unclustered pains of a domain, oldest first. Shared with the Claude Code analyst (H9). */
 export async function getUnclusteredPains(db: Database, domain: Domain, limit: number, skip: number[] = []) {
+  // Until pains are clustered by type (H18b), latent pains wait unclustered (ADR-0012).
   return db
     .select({
       id: pains.id,
@@ -20,6 +21,7 @@ export async function getUnclusteredPains(db: Database, domain: Domain, limit: n
     .where(
       and(
         isNull(pains.opportunityId),
+        eq(pains.type, "concrete"),
         eq(signals.domain, domain),
         skip.length ? notInArray(pains.id, skip) : undefined,
       ),

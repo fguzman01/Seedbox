@@ -56,19 +56,47 @@ cada post, `CLAUDE.md`); términos leídos **sólo en la fuente oficial** y con 
 - **Evidencia trazable:** sí, cada post tiene permalink.
 - **Decisión / motivo:** acceso rechazado. Sólo se reabre con un dato nuevo (Reddit cambia la política o ofrece otra vía de acceso).
 
+### Reseñas de apps: Apple App Store
+- **Estado:** descartada (explorador, 2026-11-22)
+- **Público:** usuarios comunes de apps de todo tipo (salud, finanzas, trabajo, hogar).
+- **Volumen aproximado:** no medido (no se llegó a probar el acceso).
+- **Acceso:** sin API oficial de reseñas de apps ajenas; sólo feeds RSS no documentados o scraping.
+- **Términos de uso:** Apple Media Services Terms (<https://www.apple.com/legal/internet-services/itunes/>, leído el 2026-11-22), sección F: prohíbe «scrape, copy, or perform measurement, analysis, or monitoring of, any portion of the Content or Services» con procesos automatizados. Los feeds RSS no se mencionan, pero el análisis automatizado cae en esa cláusula.
+- **Evidencia trazable:** parcial (link estable por reseña no verificado).
+- **Decisión / motivo:** los términos oficiales prohíben el análisis automatizado. Se reabre si Apple ofrece una vía oficial o Felipe acepta el riesgo.
+
+### Reseñas de apps: Google Play
+- **Estado:** descartada (explorador, 2026-11-22)
+- **Público:** usuarios comunes de apps de todo tipo.
+- **Volumen aproximado:** no medido.
+- **Acceso:** la API oficial (Play Developer API) sólo da reseñas de las apps propias; para las ajenas sólo hay scraping.
+- **Términos de uso:** Google Play Terms of Service (<https://play.google.com/about/play-terms/>, leído el 2026-11-22): contenido «for your personal, non-commercial use only», prohíbe redistribuirlo y recolectar datos personales de usuarios. La política de reseñas está en una página aparte que no se leyó.
+- **Evidencia trazable:** parcial (link por reseña no verificado).
+- **Decisión / motivo:** sin acceso oficial a reseñas ajenas y con términos restrictivos. Misma condición de reapertura que Apple.
+
+### CFPB Consumer Complaint Database (quejas financieras, EE. UU.)
+- **Estado:** descartada (explorador, 2026-11-22)
+- **Público:** consumidores de EE. UU. con quejas de tarjetas, créditos, cobranzas, cuentas bancarias, hipotecas.
+- **Volumen aproximado:** la API pública respondió sin clave el 2026-11-22; la base tiene 19,3 millones de quejas (`total_record_count`) y se actualiza a diario. No se pudo medir el volumen de las últimas semanas: los filtros de fecha devolvieron totales inconsistentes.
+- **Acceso:** API pública y descarga CSV (<https://files.consumerfinance.gov/ccdb/complaints.csv.zip>), sin clave ni costo. La respuesta de la API declara licencia CC0.
+- **Términos de uso:** «All complaint data we publish is freely available for anyone to use, analyze, and build on» (<https://www.consumerfinance.gov/data-research/consumer-complaints/>, leído el 2026-11-22). El contenido del CFPB es de dominio público (<https://www.consumerfinance.gov/privacy/website-privacy-policy/>, leído el 2026-11-22).
+- **Evidencia trazable:** sí en la clasificación (cada queja tiene `complaint_id`), pero **sin texto libre**: la referencia oficial de campos (<https://cfpb.github.io/api/ccdb/fields.html>) no lista ningún campo de narrativa y las respuestas de la API (con `has_narrative=true`) no traen ninguno. Sólo trae producto, tipo de problema, empresa y estado.
+- **Decisión / motivo:** la licencia es la mejor de todas las fuentes revisadas, pero sin la historia de la persona el radar no puede extraer dolores (sólo categorías). Se reabre si la API publica las narrativas (o si Felipe quiere usar sólo las categorías como señal de volumen).
+
 ## Candidatas
 
-Primera tanda, **sin investigar**: son ideas del issue H24 que el explorador debe verificar en su
-primera corrida. Ningún campo de términos ni volumen está leído todavía.
+Quedan sin investigar a fondo las ideas del issue H24 que siguen (el explorador las revisa en las
+próximas corridas). Última corrida: 2026-11-22.
 
-### Reseñas de apps (tiendas de aplicaciones)
-- **Estado:** candidata
-- **Público:** usuarios comunes de apps de todo tipo (salud, finanzas, trabajo, hogar).
-- **Volumen aproximado:** por medir.
-- **Acceso:** por investigar (las tiendas suelen exigir cuenta o aprobación; eso lo decide Felipe).
-- **Términos de uso:** no verificado.
-- **Evidencia trazable:** por verificar (¿link estable a cada reseña?).
-- **Decisión / motivo:** una queja de una app es un dolor concreto de gente no técnica.
+### Bluesky (publicaciones públicas)
+- **Estado:** candidata (explorador, 2026-11-22)
+- **Público:** general y mixto (el grueso en inglés, también español); no hay comunidades por tema de dolor, así que la señal por post es baja.
+- **Volumen aproximado:** no medido.
+- **Acceso:** `app.bsky.feed.searchPosts`; no se pudo comprobar si exige cuenta (el host público respondió 403 desde esta sesión).
+- **Términos de uso:** Terms of Service (<https://bsky.social/about/support/tos>, leídos el 2026-11-22): no mencionan scraping, acceso automatizado ni uso para IA; remiten a las Community Guidelines y la Privacy Policy, que no se leyeron. No verificado el resto.
+- **Evidencia trazable:** sí (cada post tiene `at://` URI y link en bsky.app).
+- **Decisión / motivo:** se deja sin proponer: falta saber si la búsqueda exige cuenta (decisión de Felipe) y el público no es claramente masivo para dolores. Revisar de nuevo con acceso a docs.bsky.app.
+
 
 ### Otros sitios de Stack Exchange no técnicos
 - **Estado:** candidata

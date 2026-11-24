@@ -53,7 +53,8 @@ paso, con viabilidad y factibilidad de desarrollo 0–10). Las etapas son 🔎 E
 🚀 Construir, o proponer descartar con motivo. Una ficha que Felipe marca para explorar (`tipo:oportunidad` +
 `estado:aprobada`) entra a una cola: el evaluador profundiza **como mucho 2 por corrida semanal**, la de mayor
 viabilidad primero, y deja un `## Brief de exploración` en el issue; luego pasa la ficha a `estado:propuesta`
-para que reciba la tarjeta 🧪 Validar / ❌ Descartar. El architect, el developer y el PO siguen ignorando los
+para que reciba la tarjeta 🧪 Validar / ❌ Descartar. Con ✅ la ficha pasa a `estado:en-curso` (en validación:
+el experimento lo ejecuta Felipe) y sale de la cola. El architect, el developer y el PO siguen ignorando los
 `tipo:oportunidad`, también los `aprobada`.
 El evaluador tiene memoria (H20): lee cuáles fichas aprobó o descartó Felipe, las resume en
 `docs/preferencias.md` (por PR, con ✅), no repite lo descartado sin evidencia nueva y sólo *propone*

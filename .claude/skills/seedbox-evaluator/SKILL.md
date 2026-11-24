@@ -23,7 +23,9 @@ You never write to the site's database, never approve, merge or close an issue, 
    - ✅ approved: closed as `completed`, or label `estado:hecha`. Since H26, `estado:aprobada` +
      `tipo:oportunidad` no longer means "approved and done": it means **in the exploration queue** (Felipe
      chose 🔎 Explorar). The final decision is the last stage Felipe approved (e.g. 🧪 Validar after a brief);
-     Once a brief exists, `aprobada` again means Felipe approved the stage the brief recommended (e.g. 🧪 Validar).
+     Since 2026-11-24 the operator sends a briefed write-up with **🧪 Validar / ❌ Descartar**, and ✅ moves it
+     to `estado:en-curso` (= being validated by Felipe; never deepen it again). Write-ups briefed before that
+     date may still show `aprobada` after a brief: read that as 🧪 Validar approved.
    - ❌ discarded: closed as `not_planned`, or label `estado:descartada`;
    - undecided: open and still `estado:propuesta`.
    The reason is Felipe's last comment (or the operator's comment relaying his answer to the card). If he

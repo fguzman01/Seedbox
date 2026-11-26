@@ -45,7 +45,12 @@ could provide: information, learning, guidance, support, community or planning. 
 show that state as someone lives it, not just the topic.
 
 If a specific task fails, the pain is concrete, even if the author also feels anxious about it. A \
-post can contain pains of both types; return each one separately.
+person who asks for a tool, a model or an alternative to get their own task done, because the \
+current options are expensive, limited or not good enough, has a concrete pain (no adequate tool), \
+even when the post is phrased as a question. When the author describes a state and also a specific \
+task they are failing to carry out (for example, not managing to do something they need to do), \
+return that task as a concrete pain and the state as a separate latent one. A post can contain \
+pains of both types; return each one separately.
 
 Return an empty list when the post has no pain of either type. These are not pains: opinions about \
 the market or about companies, calls to action, announcements, reports of incidents that happened \

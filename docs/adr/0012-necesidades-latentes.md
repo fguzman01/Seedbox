@@ -247,6 +247,15 @@ hace falta, se resuelve con la historia en espera de fusionar o relacionar oport
 - La extracción de Claude Code varía entre corridas. Si una corrida queda justo bajo el umbral,
   se repite una vez y se registran las dos; con 40 posts el costo es parte de una corrida diaria.
 
+**Ajuste de reglas (2026-11-26, H18a, issue #14).** La medición con el texto de arriba dio recall
+de concretos con tipo correcto 2/6 (umbral ≥ 4/6). Se agregaron dos frases a `EXTRACTION_RULES`,
+después de «If a specific task fails…»: (1) quien pide una herramienta, un modelo o una alternativa
+para hacer su propia tarea porque las opciones actuales son caras, limitadas o insuficientes tiene un
+dolor concreto (no hay herramienta adecuada), aunque el post sea una pregunta; (2) si el autor
+describe un estado y además una tarea concreta que no logra hacer, esa tarea se devuelve como
+concreta y el estado como latente aparte. Resultado: 5/6 y 4/6 en dos corridas, precisión de concretos
+50 %. Detalle en `docs/backlog.md` (H18a). El texto vigente es el de `src/lib/extraction.ts`.
+
 ### 9. Reproceso de descartados: no
 
 **No se marcan para reproceso los descartados de los últimos 30 días.** ADR-0003 sigue igual: lo

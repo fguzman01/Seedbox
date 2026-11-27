@@ -436,6 +436,24 @@ conviene repetir la medición en una sesión de Felipe antes de tocar las reglas
 `evals/extraction/results/2026-11-19T04-51-43-912Z-claude-code.json` y
 `…T04-52-21-660Z-claude-code.json`.
 
+Ajuste de reglas H18a (2026-11-26, issue #14, sesión de Felipe). Mismo dataset v1 y mismo
+umbral; extracción ciega con Claude Code (un subagente de contexto limpio por corrida, sin etiquetas,
+con el esfuerzo del análisis diario). Un cambio por vez, midiendo después de cada uno:
+
+| Paso | Cambio en `EXTRACTION_RULES` | Concretos precisión | Recall con tipo correcto | Latentes precisión / recall | `typeAccuracy` |
+|---|---|---|---|---|---|
+| 0 | Línea base (reglas de ADR-0012 §2, repetida) | 36 % (4/11) | 3/6 | 67 % (2/3) / 33 % (2/6) | 83 % |
+| 1 | Pedir una herramienta, modelo o alternativa para una tarea propia es dolor concreto aunque sea pregunta | 44 % (4/9) | 3/6 | 67 % (2/3) / 33 % (2/6) | — |
+| 2 | Si el autor describe un estado y además una tarea que no logra hacer, esa tarea es concreta y el estado, latente aparte | 50 % (5/10) | **5/6** | 50 % (2/4) / 33 % (2/6) | — |
+| 2 (repetida) | Mismas reglas | 50 % (5/10) | **4/6** | 67 % (2/3) / 33 % (2/6) | — |
+
+Con las reglas finales las dos corridas pasan el umbral (≥ 4/6 y precisión ≥ 35 %). El recall de
+concretos sin mirar el tipo es 5/6; sigue sin extraerse un «Ask HN» sobre modelos de autocompletado
+(sin necesidad personal expresa). La varianza entre corridas existe (un concreto mal tipificado
+cambia entre las corridas), por eso se registran las dos. Los ajustes son generales: no citan posts del
+dataset. Salvedad: se iteró y se midió sobre las mismas 40 posts, así que hay riesgo de sobreajuste indirecto; la
+segunda corrida (4/6) queda justo en el umbral. Dataset y umbral no se tocaron. Resultados en `evals/extraction/results/2026-11-26T00-2*`.
+
 ### H18. Extraer necesidades latentes y mostrarlas aparte · M · ⬜ pendiente
 **Como** usuario **quiero** que el radar capte también las necesidades latentes que se repiten
 (p. ej. la desorientación laboral frente a la IA) y me las muestre separadas de los dolores
